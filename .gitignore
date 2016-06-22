@@ -101,3 +101,5 @@ examples/*/*lmdb
 
 
 models
+
+*.ipynb
