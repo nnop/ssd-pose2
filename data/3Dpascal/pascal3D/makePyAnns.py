@@ -16,7 +16,6 @@ This script preprocesses the annotations
 
 
 def main(args):
-
     if not osp.exists('all_anns.json'):
         makeAllAnns()
 
@@ -26,88 +25,48 @@ def main(args):
         createLabelMap(data)
     
     # make a train/val/test directory
-    #shutil.rmtree('./cache/')
-    train_dir = 'train_bins=%d_diff=%r_numPascal=%d' % (args['num_bins'], args['difficult'], args['num_pascal'])
-    val_dir = 'val_bins=%d' % (args['num_bins'])
-    tes_dir = 'test_bins=%d' % (args['num_bins'])
-    
-    splits = [train_dir, val_dir, tes_dir]
-    if not osp.exists('./cache/'):
-        os.mkdir('./cache/')
+    shutil.rmtree('./cache/')
+    splits = ['train', 'val', 'test']
+    #if not osp.exists('./cache/'):
+    os.mkdir('./cache/')
     
     for split in splits:
         if not osp.exists(osp.join('./cache', split)):
             os.mkdir(osp.join('./cache', split))
 
-    tr = False
-    val = False
-    test = False
-
-    print train_dir
-
-    if not osp.exists(osp.join('./cache', train_dir, 'train.txt')):
-        trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
-        tr = True
-        if not args['difficult']:
-            print 'here'
-            filterDifficult(data)
-
-    if not osp.exists(osp.join('./cache', val_dir, 'val.txt')):
-        valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
-        val = True
-    
-    if not osp.exists(osp.join('./cache', tes_dir, 'test.txt')):
-        teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
-        test = True
+    trWriter = open(osp.join('./cache', 'train', 'train.txt'), 'w')
+    valWriter = open(osp.join('./cache', 'val', 'val.txt'), 'w')
+    teWriter = open(osp.join('./cache', 'test', 'test.txt'), 'w')
 
     #cur_dir = os.getcwd()
 
     for idx, ann in data.iteritems():
-        annLoc = osp.join(getAnnPath(ann, train_dir, val_dir, tes_dir), idx + '.json')
+        annLoc = osp.join(getAnnPath(ann), idx + '.json')
         output = getImPath(ann) + ' ' + annLoc + '\n'
         binAngles(ann, args['num_bins'])
         json.dump(ann, open(annLoc, 'w'))
 
-        if ann['split'] == 'train' and tr:
+        if ann['split'] == 'train':
             # use train file writer
-            if ann['database'] == 'ImageNet':
+            #trWriter.write(output)
+            if ann['database'] != 'ImageNet':
                 trWriter.write(output)
-            else:
-                for _ in xrange(args['num_pascal']):
-                    trWriter.write(output)
+                #trWriter.write(output)
+                #trWriter.write(output)
+                #trWriter.write(output)
+                #trWriter.write(output)
+                #trWriter.write(output)
             
-        elif ann['split'] == 'val' and val:
+        elif ann['split'] == 'val':
             # use val file writer
             valWriter.write(output)
-        elif ann['split'] == 'test' and test:
+        else:
             # use test file writer
             teWriter.write(output)
     
-    if tr:
-        trWriter.close()
-    if val:
-        valWriter.close()
-    if test:
-        teWriter.close()
-
-
-def filterDifficult(data):
-    keysToRemove = []
-    count = 0
-    for key, ann in data.iteritems():
-        if ann['split'] != 'train':
-            continue
-        newList = []
-        for obj in ann['annotation']:
-            if not obj['difficult']:
-                newList.append(obj)
-            else:
-                count += 1
-        if len(newList) == 0: keysToRemove.append(key)
-        ann['annotation'] = newList
-    
-    for rem in keysToRemove:
-        del data[rem]
+    trWriter.close()
+    valWriter.close()
+    teWriter.close()
 
 
 def createLabelMap(data):
@@ -126,14 +85,8 @@ def getImPath(ann):
         path = osp.join('images/pascal/', ann['filename'])
     return path
 
-def getAnnPath(ann, train_dir, val_dir, tes_dir):
-    if ann['split'] == 'train':
-        path = osp.join('cache', train_dir)
-    elif ann['split'] == 'val':
-        path = osp.join('cache', val_dir)
-    elif ann['split'] == 'test':
-        path = osp.join('cache', tes_dir)
-
+def getAnnPath(ann):
+    path = osp.join('cache', ann['split'])
     return path
 
 
@@ -337,7 +290,7 @@ def parseMat(matfile, finame):
     img_annotation['image']['height'] = int(sz[1])
 
     list_obj = []
-    attrs = ['bbox', 'class', 'viewpoint', 'difficult']
+    attrs = ['bbox', 'class', 'viewpoint']
     
     # get objects in the image
     tempAttr = getattr(matfile['record'], 'objects')
@@ -375,12 +328,6 @@ def parseMat(matfile, finame):
                 objects[field] = views
             elif field == 'bbox':
                 objects[field] = getattr(the_obj, field).tolist()
-            elif field == 'difficult':
-                diff_int = getattr(the_obj, field)
-                if diff_int == 0:
-                    objects[field] = False
-                else:
-                    objects[field] = True
             else:
                 cat_id = getattr(the_obj, field)
                 #if cat_id == 'bottle': 
@@ -403,8 +350,6 @@ def parseMat(matfile, finame):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_bins', default='8', type=int, help='number of bins to divide angles into')
-    parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims')
-    parser.add_argument('--difficult', action='store_false', help='include difficult examples in training')
 
     args = parser.parse_args()
     params = vars(args) # turn into a dict
