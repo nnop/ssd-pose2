@@ -3,7 +3,8 @@ import os
 import shutil
 import subprocess
 import sys
-sys.path.append("/playpen2/poirson/ssd-pose/python")
+import os.path as osp
+sys.path.append(osp.join(os.getcwd(), "python"))
 import caffe
 
 from caffe.proto import caffe_pb2

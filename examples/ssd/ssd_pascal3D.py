@@ -706,7 +706,7 @@ def main(args):
       f.write('--solver="{}" \\\n'.format(train_solver_file))
       f.write(train_src_param)
       if train_solver_param['solver_mode'] == P.Solver.GPU:
-        f.write('--gpu {} 2>&1 | tee -a {}/{}.log\n'.format(gpus, './jobs/', model_name))
+        f.write('--gpu {} 2>&1 | tee -a {}/{}.log\n'.format(gpus, '/home/poirson/pose-exp', model_name))
       else:
         f.write('2>&1 | tee {}/{}.log\n'.format('./jobs/', model_name))
 
