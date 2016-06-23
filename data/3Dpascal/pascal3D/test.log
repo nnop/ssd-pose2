@@ -1,9 +1,9 @@
-I0616 16:29:24.509016 15129 convert_annoset.cpp:119] Shuffling data
-I0616 16:29:24.777981 15129 convert_annoset.cpp:122] A total of 3133 images.
-I0616 16:29:24.778270 15129 db_lmdb.cpp:35] Opened lmdb /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/lmdb/pascal3D_test_lmdb
-I0616 16:29:39.808089 15129 convert_annoset.cpp:195] Processed 1000 files.
-I0616 16:29:54.502617 15129 convert_annoset.cpp:195] Processed 2000 files.
-I0616 16:30:09.564009 15129 convert_annoset.cpp:195] Processed 3000 files.
-I0616 16:30:11.630749 15129 convert_annoset.cpp:201] Processed 3133 files.
+I0617 01:12:55.385195 23537 convert_annoset.cpp:119] Shuffling data
+I0617 01:12:55.655637 23537 convert_annoset.cpp:122] A total of 3133 images.
+I0617 01:12:55.655870 23537 db_lmdb.cpp:35] Opened lmdb /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/lmdb/pascal3D_test_lmdb
+I0617 01:13:18.490489 23537 convert_annoset.cpp:195] Processed 1000 files.
+I0617 01:13:40.836344 23537 convert_annoset.cpp:195] Processed 2000 files.
+I0617 01:14:03.565978 23537 convert_annoset.cpp:195] Processed 3000 files.
+I0617 01:14:06.774674 23537 convert_annoset.cpp:201] Processed 3133 files.
 /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D
 /playpen/poirson/ssd-pose/build/tools/convert_annoset --anno_type=detection --label_type=json --label_map_file=/playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/labelmap_3D.prototxt --check_label=True --min_dim=0 --max_dim=0 --resize_height=0 --resize_width=0 --backend=lmdb --shuffle=True --check_size=False --encode_type=jpg --encoded=True --gray=False /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/ /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/cache/test/test.txt /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/lmdb/pascal3D_test_lmdb
