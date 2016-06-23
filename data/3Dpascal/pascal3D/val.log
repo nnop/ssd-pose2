@@ -1,0 +1,6 @@
+I0616 16:28:35.539283 15093 convert_annoset.cpp:119] Shuffling data
+I0616 16:28:35.771602 15093 convert_annoset.cpp:122] A total of 500 images.
+I0616 16:28:35.771831 15093 db_lmdb.cpp:35] Opened lmdb /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/lmdb/pascal3D_val_lmdb
+I0616 16:28:43.125867 15093 convert_annoset.cpp:201] Processed 500 files.
+/playpen/poirson/ssd-pose/data/3Dpascal/pascal3D
+/playpen/poirson/ssd-pose/build/tools/convert_annoset --anno_type=detection --label_type=json --label_map_file=/playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/labelmap_3D.prototxt --check_label=True --min_dim=0 --max_dim=0 --resize_height=0 --resize_width=0 --backend=lmdb --shuffle=True --check_size=False --encode_type=jpg --encoded=True --gray=False /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/ /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/cache/val/val.txt /playpen/poirson/ssd-pose/data/3Dpascal/pascal3D/lmdb/pascal3D_val_lmdb

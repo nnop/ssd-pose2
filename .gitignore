@@ -58,7 +58,7 @@ Makefile.config
 # Data and models are either
 # 1. reference, and not casually committed
 # 2. custom, and live on their own unless they're deliberated contributed
-data/*
+#data/*
 models/*
 *.caffemodel
 *.caffemodel.h5
@@ -101,5 +101,21 @@ examples/*/*lmdb
 
 
 models
-
 *.ipynb
+
+*.jpg
+*.json
+*.JPEG
+*.png
+*.off
+*.xml
+*.mat
+*.inf
+*.txt
+*.m
+*.vty
+data/3Dpascal/pascal3D/PASCAL/VOCdevkit/*
+data/3Dpascal/pascal3D/VDPM/
+data/3Dpascal/pascal3D/Annotation_tools/
+data/3Dpascal/pascal3D/Anchor/
+data/3Dpascal/pascal3D/Segmentation/
