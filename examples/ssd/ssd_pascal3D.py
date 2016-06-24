@@ -11,6 +11,7 @@ import shutil
 import stat
 import argparse
 import subprocess
+import os.path as osp
 
 # Add extra layers on top of a "base" network (e.g. VGGNet or Inception).
 def AddExtraLayers(net, use_batchnorm=True):
@@ -700,13 +701,17 @@ def main(args):
             os.remove("{}/{}".format(snapshot_dir, file))
 
     # Create job file.
+    # figure out where to tee
+    opt = ''
+    if osp.isfile(osp.join('/net/bvisionserver1/playpen2/poirson/logs/', model_name + '.log')):
+        opt = '-a'
     with open(job_file, 'w') as f:
       f.write('cd {}\n'.format(caffe_root))
       f.write('./build/tools/caffe train \\\n')
       f.write('--solver="{}" \\\n'.format(train_solver_file))
       f.write(train_src_param)
       if train_solver_param['solver_mode'] == P.Solver.GPU:
-        f.write('--gpu {} 2>&1 | tee -a {}/{}.log\n'.format(gpus, '/home/poirson/pose-exp', model_name))
+        f.write('--gpu {} 2>&1 | tee {} {}/{}.log\n'.format(gpus, opt, '/net/bvisionserver1/playpen2/poirson/logs', model_name))
       else:
         f.write('2>&1 | tee {}/{}.log\n'.format('./jobs/', model_name))
 
