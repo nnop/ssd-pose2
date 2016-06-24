@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 // TODO REmove
-//#include <iostream>
+#include <iostream>
 
 #include "boost/iterator/counting_iterator.hpp"
 
@@ -688,6 +688,7 @@ template void GetLocPredictions(const double* loc_data, const int num,
 
 
 // Understand
+// correct
 template <typename Dtype>
 void GetPosePredictions(const Dtype* pose_data, const int num, const int num_poses, 
       const int num_preds_per_class, const int num_pose_classes,

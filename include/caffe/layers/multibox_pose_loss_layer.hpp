@@ -118,6 +118,7 @@ class MultiBoxPoseLossLayer : public LossLayer<Dtype> {
   int num_conf_;
   vector<map<int, vector<int> > > all_match_indices_;
   vector<vector<int> > all_neg_indices_;
+  map<int, vector<NormalizedBBox> > all_gt_bboxes;
 
   // How to normalize the loss.
   LossParameter_NormalizationMode normalization_;

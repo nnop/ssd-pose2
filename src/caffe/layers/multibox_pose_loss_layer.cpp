@@ -5,6 +5,7 @@
 
 #include "caffe/layers/multibox_pose_loss_layer.hpp"
 #include "caffe/util/math_functions.hpp"
+#include <iostream>
 
 namespace caffe {
 
@@ -197,7 +198,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
   const Dtype* gt_data = bottom[4]->cpu_data();
 
   // Retrieve all ground truth.
-  map<int, vector<NormalizedBBox> > all_gt_bboxes;
+  //map<int, vector<NormalizedBBox> > all_gt_bboxes;
   GetGroundTruthPose(gt_data, num_gt_, background_label_id_, use_difficult_gt_,
                  &all_gt_bboxes);
 
@@ -401,11 +402,19 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
               loc_gt_data[count * 4 + k] /= prior_variances[j][k];
             }
           }
-           
+          
+          const int ricLabel = all_gt_bboxes[i][gt_idx].label();
           // Store pose ground truth.
           pose_gt_data[count] = gt_bbox.azilabel();
           int offset = num_poses_ * pose_classes_;
-          const int label_off = share_pose_? 0 : label;
+          const int label_off = share_pose_? 0 : ricLabel;
+
+          //LOG(INFO) << "label off " << label_off;
+          //LOG(INFO) << "offset is " << offset;
+          //LOG(INFO) << "gt pose is " << gt_bbox.azilabel();
+          //LOG(INFO) << "ric label is " << ricLabel;
+          //LOG(INFO) << "count is " << count;
+          //std::cin.ignore();
 
           caffe_copy<Dtype>(num_poses_, pose_data + j * offset + label_off*num_poses_,
                                 pose_pred_data + count * num_poses_);
@@ -682,12 +691,16 @@ void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
         for (map<int, vector<int> >::iterator it =
              all_match_indices_[i].begin();
              it != all_match_indices_[i].end(); ++it) {
-          const int label = share_pose_ ? 0 : it->first;
+          
           const vector<int>& match_index = it->second;
           for (int j = 0; j < match_index.size(); ++j) {
             if (match_index[j] == -1) {
               continue;
             }
+
+            const int gt_idx = match_index[j];
+            const int ricLabel = all_gt_bboxes[i][gt_idx].label();
+            const int label = share_pose_ ? 0 : ricLabel;
 
             // Copy the diff to the right place.
             int start_idx = pose_classes_ * num_poses_ * j + label * num_poses_;
