@@ -686,6 +686,7 @@ def main(args):
       if max_iter > 0:
         train_src_param = '--snapshot="{}_iter_{}.solverstate" \\\n'.format(snapshot_prefix, max_iter)
 
+    '''
     if remove_old_models:
       # Remove any snapshots smaller than max_iter.
       for file in os.listdir(snapshot_dir):
@@ -699,11 +700,12 @@ def main(args):
           iter = int(basename.split("{}_iter_".format(model_name))[1])
           if max_iter > iter:
             os.remove("{}/{}".format(snapshot_dir, file))
+    '''
 
     # Create job file.
     # figure out where to tee
     opt = ''
-    if osp.isfile(osp.join('/net/bvisionserver1/playpen2/poirson/logs/', model_name + '.log')):
+    if osp.isfile(osp.join('/home/poirson/logs/', model_name + '.log')):
         opt = '-a'
     with open(job_file, 'w') as f:
       f.write('cd {}\n'.format(caffe_root))
@@ -711,7 +713,7 @@ def main(args):
       f.write('--solver="{}" \\\n'.format(train_solver_file))
       f.write(train_src_param)
       if train_solver_param['solver_mode'] == P.Solver.GPU:
-        f.write('--gpu {} 2>&1 | tee {} {}/{}.log\n'.format(gpus, opt, '/net/bvisionserver1/playpen2/poirson/logs', model_name))
+        f.write('--gpu {} 2>&1 | tee {} {}/{}.log\n'.format(gpus, opt, '/home/poirson/logs', model_name))
       else:
         f.write('2>&1 | tee {}/{}.log\n'.format('./jobs/', model_name))
 

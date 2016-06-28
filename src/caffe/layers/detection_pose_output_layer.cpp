@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "boost/filesystem.hpp"
 
@@ -351,6 +352,12 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
         result = max_element(target_pose.begin(), target_pose.end());
         top_data[count * 9 + 7] = distance(target_pose.begin(), result);
         top_data[count * 9 + 8] = *(result);
+
+        //LOG(INFO) << "label is " << label;
+        //LOG(INFO) << "label confidence is " << top_data[count * 9 + 2];
+        //LOG(INFO) << "pose label is " << top_data[count * 9 + 7];
+        //LOG(INFO) << "pose confidence is " << top_data[count * 9 + 8];
+        //std::cin.ignore(); 
         
         if (need_save_) {
           NormalizedBBox scale_bbox;

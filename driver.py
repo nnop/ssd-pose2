@@ -12,6 +12,10 @@ def main(args):
     if not args['difficult']:
         diff = '--difficult'
 
+    imgnet = ''
+    if not args['imagenet']:
+        imgnet = '--imagenet'
+
     samp = ""
     if args['sampler']:
         samp = '--sampler'
@@ -21,8 +25,8 @@ def main(args):
         pose = '--share_pose'
     
     os.chdir('data/3Dpascal/pascal3D')
-    pyAnnsCmd = 'python makePyAnns.py --num_bins=%d --num_pascal=%d %s' % \
-    (args['num_bins'], args['num_pascal'], diff)
+    pyAnnsCmd = 'python makePyAnns.py --num_bins=%d --num_pascal=%d %s %s' % \
+    (args['num_bins'], args['num_pascal'], diff, imgnet)
     print pyAnnsCmd
     subprocess.call(pyAnnsCmd, shell=True)
     #print sys.exit()
@@ -35,14 +39,20 @@ def main(args):
     anno_type='detection'
     label_type='json'
     #db='lmdb'
-    
-    splits = []
-    valdb = ('val_lmdb_bins_%d_%d' % (args['num_bins'], args['size']), 'val_bins=%d' % (args['num_bins']), 'val.txt')
-    testdb = ('test_lmdb_bins_%d_%d' % (args['num_bins'], args['size']), 'test_bins=%d' % (args['num_bins']), 'test.txt')
 
-    trstem ='train_bins=%d_diff=%r_numPascal=%d' % (args['num_bins'], args['difficult'], args['num_pascal']) 
+    trstem ='train_bins=%d_diff=%r_imgnet=%r_numPascal=%d' \
+    % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal']) 
+    
     trdb = ('%s_lmdb_%d' % (trstem, args['size']), trstem, 'train.txt')
     
+    valstem = 'val_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
+    valdb = ('%s_lmdb_%d' % (valstem, args['size']), valstem, 'val.txt')
+    
+    testem = 'test_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
+    testdb = ('%s_lmdb_%d' % (testem, args['size']), testem, 'test.txt')
+
+    
+    splits = []
     splits.append(valdb)
     splits.append(testdb)
     splits.append(trdb)
@@ -59,15 +69,15 @@ def main(args):
         print cmd
         subprocess.call(cmd, shell=True)
         
-    idx = 'bins=%d_diff=%r_numPascal=%d_size=%d_lr=%f_samp=%r' % (args['num_bins'], args['difficult'], \
-        args['num_pascal'], args['size'], args['base_lr'], args['sampler'])
+    idx = 'bins=%d_diff=%r_imgnet=%r_numPascal=%d_size=%d_lr=%f_samp=%r' % (args['num_bins'], args['difficult'], \
+        args['imagenet'], args['num_pascal'], args['size'], args['base_lr'], args['sampler'])
 
 
     ssdCmd = 'python examples/ssd/ssd_pascal3D.py --train_lmdb=%s --val_lmdb=%s --test_lmdb=%s --idx=%s \
     --gpu1=%d --gpu2=%d --num_bins=%d %s --size=%d --max_iter=%d --base_lr=%f --resume=%r --remove=%r %s' % \
-    (osp.join(data_root_dir, 'lmdb', trdb[0]), osp.join(data_root_dir, 'lmdb', valdb[0]), osp.join(data_root_dir, 'lmdb', testdb[0]), idx, args['gpu1'], args['gpu2'], \
-        args['num_bins'], pose, args['size'], args['max_iter'], args['base_lr'], args['resume'], \
-         args['remove'], samp)
+        (osp.join(data_root_dir, 'lmdb', trdb[0]), osp.join(data_root_dir, 'lmdb', valdb[0]), \
+        osp.join(data_root_dir, 'lmdb', testdb[0]), idx, args['gpu1'], args['gpu2'], args['num_bins'], \
+        pose, args['size'], args['max_iter'], args['base_lr'], args['resume'], args['remove'], samp)
     print ssdCmd
     subprocess.call(ssdCmd, shell=True)
 
@@ -80,10 +90,11 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Driver for SSD w/ Pose experiments")
     parser.add_argument('--num_bins', default='8', type=int, help='number of bins to divide angles into')
-    parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims')
-    parser.add_argument('--difficult', action='store_false', help='include difficult examples in training')
+    parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims 7 or 8 recommended')
+    parser.add_argument('--difficult', action='store_false', help='filter difficult examples from the dataset')
     parser.add_argument('--sampler', action='store_true', help='include full sampler')
     parser.add_argument('--seperate_pose', action='store_true', help='share pose = class agnostic pose estimation')
+    parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
 
     parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
     parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')

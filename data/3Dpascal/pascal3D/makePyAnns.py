@@ -7,6 +7,7 @@ import json
 import random
 import argparse
 import shutil
+from random import shuffle
 
 
 
@@ -27,14 +28,14 @@ def main(args):
     
     # make a train/val/test directory
     #shutil.rmtree('./cache/')
-    train_dir = 'train_bins=%d_diff=%r_numPascal=%d' % (args['num_bins'], args['difficult'], args['num_pascal'])
-    val_dir = 'val_bins=%d' % (args['num_bins'])
-    tes_dir = 'test_bins=%d' % (args['num_bins'])
+    train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'])
+    val_dir = 'val_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
+    tes_dir = 'test_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
     
-    splits = [train_dir, val_dir, tes_dir]
     if not osp.exists('./cache/'):
         os.mkdir('./cache/')
     
+    splits = [train_dir, val_dir, tes_dir]
     for split in splits:
         if not osp.exists(osp.join('./cache', split)):
             os.mkdir(osp.join('./cache', split))
@@ -45,19 +46,25 @@ def main(args):
 
     print train_dir
 
+    # always filter difficult ?
+    if not args['difficult']:
+        filterDifficult(data)
+
     if not osp.exists(osp.join('./cache', train_dir, 'train.txt')):
-        trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
+        #trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
         tr = True
-        if not args['difficult']:
-            print 'here'
-            filterDifficult(data)
+        trList = []
+        #if not args['difficult']:
+        #    filterDifficult(data)
 
     if not osp.exists(osp.join('./cache', val_dir, 'val.txt')):
-        valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
+        #valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
+        vaList = []
         val = True
     
     if not osp.exists(osp.join('./cache', tes_dir, 'test.txt')):
-        teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
+        #teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
+        teList = []
         test = True
 
     #cur_dir = os.getcwd()
@@ -71,32 +78,49 @@ def main(args):
         if ann['split'] == 'train' and tr:
             # use train file writer
             if ann['database'] == 'ImageNet':
-                trWriter.write(output)
+                #print 'stop it '
+                if args['imagenet']:
+                    trList.append(output)
+                    #trWriter.write(output)
+                #yo = 'do nothing '
             else:
                 for _ in xrange(args['num_pascal']):
-                    trWriter.write(output)
+                    trList.append(output)
+                    #trWriter.write(output)
             
         elif ann['split'] == 'val' and val:
             # use val file writer
-            valWriter.write(output)
+            vaList.append(output)
+            #valWriter.write(output)
         elif ann['split'] == 'test' and test:
             # use test file writer
-            teWriter.write(output)
+            teList.append(output)
+            #teWriter.write(output)
     
     if tr:
-        trWriter.close()
+        with open(osp.join('./cache', train_dir, 'train.txt'), 'w') as outfile:
+            shuffle(trList)
+            for line in trList:
+                outfile.write(line)
+        #trWriter.close()
     if val:
-        valWriter.close()
+        with open(osp.join('./cache', val_dir, 'val.txt'), 'w') as outfile:
+            shuffle(vaList)
+            for line in vaList:
+                outfile.write(line)
+        #valWriter.close()
     if test:
-        teWriter.close()
+        with open(osp.join('./cache', tes_dir, 'test.txt'), 'w') as outfile:
+            shuffle(teList)
+            for line in teList:
+                outfile.write(line)
+        #teWriter.close()
 
 
 def filterDifficult(data):
     keysToRemove = []
     count = 0
     for key, ann in data.iteritems():
-        if ann['split'] != 'train':
-            continue
         newList = []
         for obj in ann['annotation']:
             if not obj['difficult']:
@@ -404,7 +428,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--num_bins', default='8', type=int, help='number of bins to divide angles into')
     parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims')
-    parser.add_argument('--difficult', action='store_false', help='include difficult examples in training')
+    parser.add_argument('--difficult', action='store_false', help='filter difficult images from the dataset')
+    parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
 
     args = parser.parse_args()
     params = vars(args) # turn into a dict
