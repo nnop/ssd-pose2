@@ -1268,6 +1268,8 @@ message MultiBoxPoseLossParameter {
   // If true, map all object classes to agnostic class. It is useful for learning
   // objectness detector.
   optional bool map_object_to_agnostic = 17 [default = false];
+  // Weight for pose loss.
+  optional float pose_weight = 20 [default = 1.0];
 }
 
 // Message that store parameters used by MultiBoxLossLayer

@@ -311,6 +311,8 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
         continue;
       }
       int pose_label = share_pose_ ? -1 : label;
+      //LOG(INFO) << "Pose label is " << pose_label;
+      // Check this label 
       if (pose_preds.find(pose_label) == pose_preds.end()) {
         // Something bad happened if there are no predictions for current label.
         LOG(FATAL) << "Could not find Pose predictions for " << pose_label;

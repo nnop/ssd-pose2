@@ -152,11 +152,12 @@ void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom
   pose_bottom_vec_.push_back(&pose_gt_);
   pose_loss_.Reshape(loss_shape);
   pose_top_vec_.push_back(&pose_loss_);
+  pose_weight_ = multibox_pose_loss_param.pose_weight();
   if (1) {
     LayerParameter layer_param;
     layer_param.set_name(this->layer_param_.name() + "_softmax_pose");
     layer_param.set_type("SoftmaxWithLoss");
-    layer_param.add_loss_weight(Dtype(1.));
+    layer_param.add_loss_weight(pose_weight_);
     layer_param.mutable_loss_param()->set_normalization(
         LossParameter_NormalizationMode_NONE);
     SoftmaxParameter* softmax_param = layer_param.mutable_softmax_param();
@@ -550,7 +551,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
   if (this->layer_param_.propagate_down(2)) {
     Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
         normalization_, num_, num_priors_, num_matches_);
-    Dtype temp = pose_loss_.cpu_data()[0] / normalizer;
+    Dtype temp = pose_weight_ * pose_loss_.cpu_data()[0] / normalizer;
     top[0]->mutable_cpu_data()[0] += temp;
     LOG(INFO) << "Multibox Loss ( Pose loss ): " << temp;
   }

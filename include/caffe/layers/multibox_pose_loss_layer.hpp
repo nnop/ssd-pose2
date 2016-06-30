@@ -91,7 +91,7 @@ class MultiBoxPoseLossLayer : public LossLayer<Dtype> {
 
 
 
-
+  float pose_weight_;
   int num_classes_;
   int num_poses_;
   bool share_location_;

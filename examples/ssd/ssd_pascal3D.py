@@ -216,7 +216,8 @@ def main(args):
     train_data = args['train_lmdb']
     # The database file for testing data. Created by data/VOC0712/create_data.sh
     #test_data = "data/3Dpascal/pascal3D/lmdb/pascal3D_val_lmdb"
-    val_data = args['val_lmdb']
+    #val_data = args['val_lmdb']
+    val_data = args['test_lmdb']
 
     test_data = args['test_lmdb']
     # Specify the batch sampler.
@@ -325,6 +326,7 @@ def main(args):
         'loc_loss_type': caffe_pb2.LocLossType.Value('LocLossType_SMOOTH_L1'),
         'conf_loss_type':caffe_pb2.ConfLossType.Value('ConfLossType_SOFTMAX'),
         'loc_weight': loc_weight,
+        'pose_weight': args['pose_weight'],
         'num_classes': num_classes,
         'num_poses': num_poses,
         'share_location': share_location,
@@ -404,7 +406,8 @@ def main(args):
     freeze_layers = ['conv1_1', 'conv1_2', 'conv2_1', 'conv2_2']
 
     # Evaluate on whole test set.
-    num_test_image = 500
+    #num_test_image = args['num_val']
+    num_test_image = args['num_test']
     test_batch_size = 1
     test_iter = num_test_image / test_batch_size
 
@@ -413,7 +416,7 @@ def main(args):
         'base_lr': base_lr,
         'weight_decay': 0.0005,
         'lr_policy': "step",
-        'stepsize': 20000,
+        'stepsize': args['stepsize'],
         'gamma': 0.1,
         'momentum': 0.9,
         'iter_size': iter_size,
@@ -439,7 +442,7 @@ def main(args):
         'base_lr': base_lr,
         'weight_decay': 0.0005,
         'lr_policy': "step",
-        'stepsize': 20000,
+        'stepsize': args['stepsize'],
         'gamma': 0.1,
         'momentum': 0.9,
         'iter_size': iter_size,
@@ -453,7 +456,7 @@ def main(args):
         'debug_info': False,
         'snapshot_after_train': True,
         # Test parameters
-        'test_iter': [3133],
+        'test_iter': [args['num_test']],
         #'test_iter': ,
         'test_interval': 1,
         'eval_type': "detection",
@@ -731,6 +734,10 @@ if __name__ == "__main__":
     parser.add_argument('--train_lmdb', type=str, help='path to train lmdb')
     parser.add_argument('--val_lmdb', type=str, help='path to val lmdb')
     parser.add_argument('--test_lmdb', type=str, help='path to test lmdb')
+    parser.add_argument('--num_val', type=int, help='number of validation images')
+    parser.add_argument('--num_test', type=int, help='number of test images')
+    parser.add_argument('--pose_weight', default=1.0, type=float, help='weight the pose')
+    parser.add_argument('--stepsize', default=20000, type=int, help='step size ')
 
     parser.add_argument('--sampler', action='store_true', help='include full sampler')
     parser.add_argument('--share_pose', action='store_true', help='share pose = class agnostic pose estimation')

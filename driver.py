@@ -51,6 +51,11 @@ def main(args):
     testem = 'test_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
     testdb = ('%s_lmdb_%d' % (testem, args['size']), testem, 'test.txt')
 
+    with open(osp.join(data_root_dir, 'cache', valstem, 'val.txt'), 'r') as infile:
+        numVal = len([line for line in infile])
+
+    with open(osp.join(data_root_dir, 'cache', testem, 'test.txt'), 'r') as infile:
+        numTest = len([line for line in infile]) 
     
     splits = []
     splits.append(valdb)
@@ -69,15 +74,15 @@ def main(args):
         print cmd
         subprocess.call(cmd, shell=True)
         
-    idx = 'bins=%d_diff=%r_imgnet=%r_numPascal=%d_size=%d_lr=%f_samp=%r' % (args['num_bins'], args['difficult'], \
-        args['imagenet'], args['num_pascal'], args['size'], args['base_lr'], args['sampler'])
+    idx = 'bins=%d_diff=%r_imgnet=%r_numPascal=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d' % (args['num_bins'], args['difficult'], \
+        args['imagenet'], args['num_pascal'], args['size'], args['base_lr'], args['sampler'], args['pose_weight'], args['stepsize'])
 
 
     ssdCmd = 'python examples/ssd/ssd_pascal3D.py --train_lmdb=%s --val_lmdb=%s --test_lmdb=%s --idx=%s \
-    --gpu1=%d --gpu2=%d --num_bins=%d %s --size=%d --max_iter=%d --base_lr=%f --resume=%r --remove=%r %s' % \
+    --gpu1=%d --gpu2=%d --num_bins=%d %s --size=%d --max_iter=%d --base_lr=%f --resume=%r --remove=%r %s --num_val=%d --num_test=%d --pose_weight=%f --stepsize=%d' % \
         (osp.join(data_root_dir, 'lmdb', trdb[0]), osp.join(data_root_dir, 'lmdb', valdb[0]), \
         osp.join(data_root_dir, 'lmdb', testdb[0]), idx, args['gpu1'], args['gpu2'], args['num_bins'], \
-        pose, args['size'], args['max_iter'], args['base_lr'], args['resume'], args['remove'], samp)
+        pose, args['size'], args['max_iter'], args['base_lr'], args['resume'], args['remove'], samp, numVal, numTest, args['pose_weight'], args['stepsize']) 
     print ssdCmd
     subprocess.call(ssdCmd, shell=True)
 
@@ -95,6 +100,8 @@ if __name__ == "__main__":
     parser.add_argument('--sampler', action='store_true', help='include full sampler')
     parser.add_argument('--seperate_pose', action='store_true', help='share pose = class agnostic pose estimation')
     parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
+    parser.add_argument('--pose_weight', default=1.0, type=float, help='weight the pose')
+    parser.add_argument('--stepsize', default=20000, type=int, help='step size ')
 
     parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
     parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')

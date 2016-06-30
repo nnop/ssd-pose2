@@ -176,6 +176,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
   int num_kept = 0;
   vector<map<int, vector<int> > > all_indices;
   vector<LabelBBox> all_decode_bboxes;
+  // spot b 
   for (int i = 0; i < num; ++i) {
     // Decode predictions into bboxes.
     LabelBBox decode_bboxes;

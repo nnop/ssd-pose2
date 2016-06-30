@@ -12,16 +12,23 @@
 #include "boost/filesystem.hpp"
 #include "boost/foreach.hpp"
 
-#include "caffe/layers/detection_output_layer.hpp"
+#include "caffe/layers/detection_pose_output_layer.hpp"
 
 namespace caffe {
 
 template <typename Dtype>
-void DetectionOutputLayer<Dtype>::Forward_gpu(
+void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+  
   const Dtype* loc_data = bottom[0]->gpu_data();
-  const Dtype* prior_data = bottom[2]->gpu_data();
+  const Dtype* conf_data = bottom[1]->gpu_data();
+  const Dtype* pose_data = bottom[2]->cpu_data();
+  const Dtype* prior_data = bottom[3]->gpu_data();
   const int num = bottom[0]->num();
+
+  vector<map<int, vector<vector<float> > > > all_pose_preds;
+  GetPosePredictions(pose_data, num, num_poses_, num_priors_, num_pose_classes_, 
+                    share_pose_, &all_pose_preds);
 
   // Decode predictions.
   Blob<Dtype> bbox_preds;
@@ -31,6 +38,9 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
   DecodeBBoxesGPU<Dtype>(loc_count, loc_data, prior_data, code_type_,
       variance_encoded_in_target_, num_priors_, share_location_,
       num_loc_classes_, background_label_id_, bbox_data);
+
+
+
   if (!share_location_) {
     Blob<Dtype> bbox_permute;
     bbox_permute.ReshapeLike(*(bottom[0]));
@@ -45,7 +55,7 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
   Blob<Dtype> conf_permute;
   conf_permute.ReshapeLike(*(bottom[1]));
   Dtype* conf_permute_data = conf_permute.mutable_gpu_data();
-  PermuteDataGPU<Dtype>(conf_permute.count(), bottom[1]->gpu_data(),
+  PermuteDataGPU<Dtype>(conf_permute.count(), conf_data,
       num_classes_, num_priors_, 1, conf_permute_data);
   conf_cpu_data = conf_permute.cpu_data();
 
@@ -110,16 +120,20 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
     return;
   }
 
-
+  
   vector<int> top_shape(2, 1);
   top_shape.push_back(num_kept);
-  top_shape.push_back(7);
+  top_shape.push_back(9);
   top[0]->Reshape(top_shape);
   Dtype* top_data = top[0]->mutable_cpu_data();
+
+
   const Dtype* bbox_cpu_data = bbox_preds.cpu_data();
 
   boost::filesystem::path output_directory(output_directory_);
   for (int i = 0; i < num; ++i) {
+
+    map<int, vector<vector<float> > >& pose_preds = all_pose_preds[i];
     int start_idx = i * num_classes_ * num_priors_;
     for (int c = 0; c < num_classes_; ++c) {
       if (all_indices[i].find(c) == all_indices[i].end()) {
@@ -128,30 +142,44 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
         }
         continue;
       }
-      if (c == background_label_id_) {
-        if (!share_location_) {
-          bbox_cpu_data += num_priors_ * 4;
-        }
+
+      vector<int>& indices = all_indices[i].find(c)->second;
+
+      int label = c;
+
+      int pose_label = share_pose_ ? -1 : label;
+      if (pose_preds.find(pose_label) == pose_preds.end()) {
+        // Something bad happened if there are no predictions for current label.
+        LOG(FATAL) << "Could not find Pose predictions for " << pose_label;
         continue;
       }
-      vector<int>& indices = all_indices[i].find(c)->second;
+      const vector<vector<float> >& poses = pose_preds.find(pose_label)->second;
+      
       // Retrieve detection data.
       bool clip_bbox = true;
       for (int j = 0; j < indices.size(); ++j) {
-        top_data[j * 7] = i;
-        top_data[j * 7 + 1] = c;
         int idx = indices[j];
-        top_data[j * 7 + 2] = conf_cpu_data[start_idx + c * num_priors_ + idx];
+        top_data[j * 9] = i;
+        top_data[j * 9 + 1] = label;
+        top_data[j * 9 + 2] = conf_cpu_data[start_idx + label * num_priors_ + idx];
         if (clip_bbox) {
           for (int k = 0; k < 4; ++k) {
-            top_data[j * 7 + 3 + k] = std::max(
+          top_data[j * 9 + 3 + k] = std::max(
                 std::min(bbox_cpu_data[idx * 4 + k], Dtype(1)), Dtype(0));
           }
         } else {
           for (int k = 0; k < 4; ++k) {
-            top_data[j * 7 + 3 + k] = bbox_cpu_data[idx * 4 + k];
+            top_data[j * 9 + 3 + k] = bbox_cpu_data[idx * 4 + k];
           }
         }
+
+        vector<float> target_pose= poses[idx];
+        vector<float>::iterator result;
+        result = max_element(target_pose.begin(), target_pose.end());
+        // fix this 
+        top_data[j * 9 + 7] = distance(target_pose.begin(), result);
+        top_data[j * 9 + 8] = *(result);
+
       }
       if (!share_location_) {
         bbox_cpu_data += num_priors_ * 4;
@@ -196,7 +224,7 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
           detections_.push_back(std::make_pair("", cur_det));
         }
       }
-      top_data += indices.size() * 7;
+      top_data += indices.size() * 9;
     }
     if (share_location_) {
       bbox_cpu_data += num_priors_ * 4;
@@ -299,6 +327,8 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
   }
 }
 
-INSTANTIATE_LAYER_GPU_FUNCS(DetectionOutputLayer);
 
-}  // namespace caffe
+INSTANTIATE_LAYER_GPU_FUNCS(DetectionPoseOutputLayer);
+
+} // namespace caffe
+
