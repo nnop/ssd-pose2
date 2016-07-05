@@ -205,10 +205,10 @@ def main(args):
 
     # Solver parameters.
     # Defining which GPUs to use.
-    if args['gpu2'] == -1:
-        gpus = "%d" % (args['gpu1'])
-    else:
-        gpus = "%d,%d" % (args['gpu1'], args['gpu2'])
+    #if args['gpu2'] == -1:
+    #    gpus = "%d" % (args['gpu1'])
+    #else:
+    #    gpus = "%d,%d" % (args['gpu1'], args['gpu2'])
     gpulist = gpus.split(",")
     num_gpus = len(gpulist)
 
@@ -743,8 +743,9 @@ if __name__ == "__main__":
     parser.add_argument('--share_pose', action='store_true', help='share pose = class agnostic pose estimation')
 
     parser.add_argument('--idx', type=str, help='model id')
-    parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
-    parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')
+    parser.add_argument('--gpu', default='0', type=str, help='which gpus to use seperated by commas')
+    #parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
+    #parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')
     parser.add_argument('--num_bins', default=8, type=int, help='number of pose classes')
     parser.add_argument('--size', default=300, type=int, help='height and width of images')
     parser.add_argument('--max_iter', default=60000, type=int, help='maximum number of iterations')

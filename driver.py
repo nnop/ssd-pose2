@@ -85,9 +85,9 @@ def main(args):
 
 
     ssdCmd = 'python examples/ssd/ssd_pascal3D.py --train_lmdb=%s --val_lmdb=%s --test_lmdb=%s --idx=%s \
-    --gpu1=%d --gpu2=%d --num_bins=%d %s --size=%d --max_iter=%d --base_lr=%f --resume=%r --remove=%r %s --num_val=%d --num_test=%d --pose_weight=%f --stepsize=%d' % \
+    --gpu=%s --num_bins=%d %s --size=%d --max_iter=%d --base_lr=%f --resume=%r --remove=%r %s --num_val=%d --num_test=%d --pose_weight=%f --stepsize=%d' % \
         (osp.join(data_root_dir, 'lmdb', trdb[0]), osp.join(data_root_dir, 'lmdb', valdb[0]), \
-        osp.join(data_root_dir, 'lmdb', testdb[0]), idx, args['gpu1'], args['gpu2'], args['num_bins'], \
+        osp.join(data_root_dir, 'lmdb', testdb[0]), idx, args['gpu'], args['num_bins'], \
         pose, args['size'], args['max_iter'], args['base_lr'], args['resume'], args['remove'], samp, numVal, numTest, args['pose_weight'], args['stepsize']) 
     print ssdCmd
     subprocess.call(ssdCmd, shell=True)
@@ -108,8 +108,9 @@ if __name__ == "__main__":
     parser.add_argument('--stepsize', default=20000, type=int, help='step size ')
     parser.add_argument('--rotate', action='store_true', help='bin angles non standard way')
 
-    parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
-    parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')
+    #parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
+    #parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')
+    parser.add_argument('--gpu', default='0', type=str, help='which gpus to use seperated by commas')
     parser.add_argument('--size', default=300, type=int, help='height and width of images')
     parser.add_argument('--max_iter', default=60000, type=int, help='maximum number of iterations')
     parser.add_argument('--base_lr', default=0.00004, type=float, help='base learning rate')
