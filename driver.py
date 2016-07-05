@@ -23,10 +23,14 @@ def main(args):
     pose = ""
     if not args['seperate_pose']:
         pose = '--share_pose'
+
+    rot = ''
+    if args['rotate']:
+        rot = '--rotate'
     
     os.chdir('data/3Dpascal/pascal3D')
-    pyAnnsCmd = 'python makePyAnns.py --num_bins=%d --num_pascal=%d %s %s' % \
-    (args['num_bins'], args['num_pascal'], diff, imgnet)
+    pyAnnsCmd = 'python makePyAnns.py --num_bins=%d --num_pascal=%d %s %s %s' % \
+    (args['num_bins'], args['num_pascal'], diff, imgnet, rot)
     print pyAnnsCmd
     subprocess.call(pyAnnsCmd, shell=True)
     #print sys.exit()
@@ -40,15 +44,15 @@ def main(args):
     label_type='json'
     #db='lmdb'
 
-    trstem ='train_bins=%d_diff=%r_imgnet=%r_numPascal=%d' \
-    % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal']) 
+    trstem ='train_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' \
+    % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'], args['rotate']) 
     
     trdb = ('%s_lmdb_%d' % (trstem, args['size']), trstem, 'train.txt')
     
-    valstem = 'val_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
+    valstem = 'val_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
     valdb = ('%s_lmdb_%d' % (valstem, args['size']), valstem, 'val.txt')
     
-    testem = 'test_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
+    testem = 'test_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
     testdb = ('%s_lmdb_%d' % (testem, args['size']), testem, 'test.txt')
 
     with open(osp.join(data_root_dir, 'cache', valstem, 'val.txt'), 'r') as infile:
@@ -61,6 +65,8 @@ def main(args):
     splits.append(valdb)
     splits.append(testdb)
     splits.append(trdb)
+    #print splits
+
 
     for split in splits:
         listFile = osp.join(data_root_dir, 'cache', split[1], split[2])
@@ -74,8 +80,8 @@ def main(args):
         print cmd
         subprocess.call(cmd, shell=True)
         
-    idx = 'bins=%d_diff=%r_imgnet=%r_numPascal=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d' % (args['num_bins'], args['difficult'], \
-        args['imagenet'], args['num_pascal'], args['size'], args['base_lr'], args['sampler'], args['pose_weight'], args['stepsize'])
+    idx = 'bins=%d_diff=%r_imgnet=%r_numPascal=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d_rotate=%r' % (args['num_bins'], args['difficult'], \
+        args['imagenet'], args['num_pascal'], args['size'], args['base_lr'], args['sampler'], args['pose_weight'], args['stepsize'], args['rotate'])
 
 
     ssdCmd = 'python examples/ssd/ssd_pascal3D.py --train_lmdb=%s --val_lmdb=%s --test_lmdb=%s --idx=%s \
@@ -85,8 +91,6 @@ def main(args):
         pose, args['size'], args['max_iter'], args['base_lr'], args['resume'], args['remove'], samp, numVal, numTest, args['pose_weight'], args['stepsize']) 
     print ssdCmd
     subprocess.call(ssdCmd, shell=True)
-
-
 
 
 
@@ -102,6 +106,7 @@ if __name__ == "__main__":
     parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
     parser.add_argument('--pose_weight', default=1.0, type=float, help='weight the pose')
     parser.add_argument('--stepsize', default=20000, type=int, help='step size ')
+    parser.add_argument('--rotate', action='store_true', help='bin angles non standard way')
 
     parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
     parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')

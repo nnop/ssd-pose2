@@ -28,9 +28,9 @@ def main(args):
     
     # make a train/val/test directory
     #shutil.rmtree('./cache/')
-    train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'])
-    val_dir = 'val_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
-    tes_dir = 'test_bins=%d_diff=%r' % (args['num_bins'], args['difficult'])
+    train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'], args['rotate'])
+    val_dir = 'val_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
+    tes_dir = 'test_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
     
     if not osp.exists('./cache/'):
         os.mkdir('./cache/')
@@ -72,7 +72,7 @@ def main(args):
     for idx, ann in data.iteritems():
         annLoc = osp.join(getAnnPath(ann, train_dir, val_dir, tes_dir), idx + '.json')
         output = getImPath(ann) + ' ' + annLoc + '\n'
-        binAngles(ann, args['num_bins'])
+        binAngles(ann, args['num_bins'], args['rotate'])
         json.dump(ann, open(annLoc, 'w'))
 
         if ann['split'] == 'train' and tr:
@@ -162,7 +162,10 @@ def getAnnPath(ann, train_dir, val_dir, tes_dir):
 
 
 
-def binAngles(ann, bins):
+def binAngles(ann, bins, rotate=False):
+    offset = 0
+    if rotate:
+        offset = 360 / (bins * 2)
     for obj in ann['annotation']:
         if 'viewpoint' in obj:
             azi = obj['viewpoint']['azimuth_coarse']
@@ -170,10 +173,13 @@ def binAngles(ann, bins):
             if 'azimuth' in obj['viewpoint']:
                 azi = obj['viewpoint']['azimuth']
 
-            bin = int(azi / (360/bins))
+            # bin = int(azi / (360/bins))
+            bin = int(((azi + offset) % 360) / (360/bins))
+            #print "Azi: %f  bin: %d" %(azi, bin) 
             obj['aziLabel'] = bin
             flipAzi = 360 - azi
-            obj['aziLabelFlip'] = int(flipAzi / (360/bins))
+            # obj['aziLabelFlip'] = int(flipAzi / (360/bins))
+            obj['aziLabelFlip'] = int(((flipAzi + offset) % 360) / (360/bins))
         else:
             print 'woah where yo angle'
 
@@ -430,6 +436,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims')
     parser.add_argument('--difficult', action='store_false', help='filter difficult images from the dataset')
     parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
+    parser.add_argument('--rotate', action='store_true', help='bin angles non standard way')
 
     args = parser.parse_args()
     params = vars(args) # turn into a dict
