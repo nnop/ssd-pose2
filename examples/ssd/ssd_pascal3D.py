@@ -209,6 +209,7 @@ def main(args):
     #    gpus = "%d" % (args['gpu1'])
     #else:
     #    gpus = "%d,%d" % (args['gpu1'], args['gpu2'])
+    gpus = args['gpu']
     gpulist = gpus.split(",")
     num_gpus = len(gpulist)
 
