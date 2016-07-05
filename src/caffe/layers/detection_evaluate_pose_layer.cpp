@@ -205,7 +205,7 @@ void DetectionEvaluatePoseLayer<Dtype>::Forward_cpu(
               if (evaluate_difficult_gt_ ||
                   (!evaluate_difficult_gt_ && !gt_bboxes[jmax].difficult())) {
                 if (!visited[jmax]) {
-                  if(gt_bboxes[jmax].azilabel() == bboxes[i].azilabel()) {
+                  //if(gt_bboxes[jmax].azilabel() == bboxes[i].azilabel()) {
                     // true positive.
                     top_data[num_det * 5 + 3] = 1;
                     top_data[num_det * 5 + 4] = 0;
@@ -213,11 +213,11 @@ void DetectionEvaluatePoseLayer<Dtype>::Forward_cpu(
                     //LOG(INFO) << "yo made it in " << gt_bboxes[jmax].azilabel()
                     //<< bboxes[i].azilabel();
                     //std::cin.ignore();
-                  }
-                  else {
-                    top_data[num_det * 5 + 3] = 0;
-                    top_data[num_det * 5 + 4] = 1;
-                  }
+                  //}
+                  //else {
+                  //  top_data[num_det * 5 + 3] = 0;
+                  //  top_data[num_det * 5 + 4] = 1;
+                  //}
                 } else {
                   // false positive (multiple detection).
                   top_data[num_det * 5 + 3] = 0;
