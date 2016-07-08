@@ -170,8 +170,10 @@ def binAngles(ann, bins, rotate=False):
         if 'viewpoint' in obj:
             azi = obj['viewpoint']['azimuth_coarse']
             
-            if 'azimuth' in obj['viewpoint']:
+            if 'azimuth' in obj['viewpoint'] and obj['viewpoint']['distance'] != 0.0:
                 azi = obj['viewpoint']['azimuth']
+
+            #if obj['viewpoint']['distance'] == 0:
 
             # bin = int(azi / (360/bins))
             bin = int(((azi + offset) % 360) / (360/bins))
