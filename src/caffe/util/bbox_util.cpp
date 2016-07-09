@@ -697,7 +697,12 @@ void GetPosePredictions(const Dtype* pose_data, const int num, const int num_pos
   if (share_pose) {
     CHECK_EQ(num_pose_classes, 1);
   }
+  // for each image 
   for (int i = 0; i < num; ++i) {
+    // all pose preds is a vector of pose_preds
+    // pose_preds is 
+    // The map[int] -> is map[label] -> vector of  pose preds for that label
+    // all pose 
     map< int, vector< vector<float> > > pose_preds;
     for (int p = 0; p < num_preds_per_class; ++p) { // what is num_preds_per_class it's num_priors
       int start_idx = p * num_pose_classes * num_poses;

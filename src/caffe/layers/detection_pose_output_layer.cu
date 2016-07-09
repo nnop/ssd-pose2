@@ -23,12 +23,29 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
   const Dtype* loc_data = bottom[0]->gpu_data();
   const Dtype* conf_data = bottom[1]->gpu_data();
   const Dtype* pose_data = bottom[2]->cpu_data();
+  //const Dtype* pose_data = bottom[2]->gpu_data();
   const Dtype* prior_data = bottom[3]->gpu_data();
   const int num = bottom[0]->num();
 
-  vector<map<int, vector<vector<float> > > > all_pose_preds;
+  //LOG(INFO) << "pose data num " << bottom[2]->num();
+  //LOG(INFO) << "pose data channels " << bottom[2]->channels();
+  //LOG(INFO) << "pose data height " << bottom[2]->height();
+  //LOG(INFO) << "pose data width " << bottom[2]->width();
+  //LOG(INFO) << "pose data count " << bottom[2]->count();
+  //LOG(INFO) << "num poses " << num_poses_;
+  //LOG(INFO) << "num priors " << num_priors_;
+  //LOG(INFO) << "num pose classes " << num_pose_classes_;
+
+
+  //map<int, map<int, vector<vector<float> > > > all_pose_preds;
+  vector< map<int, vector<vector<float> > > > all_pose_preds;
   GetPosePredictions(pose_data, num, num_poses_, num_priors_, num_pose_classes_, 
                     share_pose_, &all_pose_preds);
+  
+  //const int pose_count = pose_data.count();
+  //GetPoseGPU<Dtype>(pose_count, pose_data, num, num_poses_, num_priors_, num_pose_classes_, 
+  //  share_pose_, &all_pose_preds);
+
 
   // Decode predictions.
   Blob<Dtype> bbox_preds;
@@ -132,7 +149,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
 
   boost::filesystem::path output_directory(output_directory_);
   for (int i = 0; i < num; ++i) {
-
+    //map<int, vector<vector<float> > >& pose_preds = all_pose_preds.find(i)->second;
     map<int, vector<vector<float> > >& pose_preds = all_pose_preds[i];
     int start_idx = i * num_classes_ * num_priors_;
     for (int c = 0; c < num_classes_; ++c) {

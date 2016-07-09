@@ -82,6 +82,31 @@ __device__ void ClipBBoxGPU(const Dtype* bbox, Dtype* clip_bbox) {
 template __device__ void ClipBBoxGPU(const float* bbox, float* clip_bbox);
 template __device__ void ClipBBoxGPU(const double* bbox, double* clip_bbox);
 
+
+template <typename Dtype>
+void GetPoseGPU(const int nthreads,
+          const Dtype* pose_data, const int num, const int num_poses, 
+          const int num_priors, const int num_pose_classes, const bool share_pose, 
+          map<int,  map<int, vector< vector<float> > > >* all_pose_preds ) {
+  //GetPoseKernel<Dtype><<<CAFFE_GET_BLOCKS(nthreads),
+  //    CAFFE_CUDA_NUM_THREADS>>>(nthreads, pose_data, num, num_poses, num_priors,
+  //      num_pose_classes, share_pose, all_pose_preds);
+  //CUDA_POST_KERNEL_CHECK;
+}
+
+template void GetPoseGPU(const int nthreads,
+          const double* pose_data, const int num, const int num_poses, 
+          const int num_priors, const int num_pose_classes, const bool share_pose, 
+          map<int,  map<int, vector< vector<float> > > >* all_pose_preds );
+
+template void GetPoseGPU(const int nthreads,
+          const float* pose_data, const int num, const int num_poses, 
+          const int num_priors, const int num_pose_classes, const bool share_pose, 
+          map<int,  map<int, vector< vector<float> > > >* all_pose_preds );
+
+
+
+
 template <typename Dtype>
 __global__ void DecodeBBoxesKernel(const int nthreads,
           const Dtype* loc_data, const Dtype* prior_data,
@@ -361,6 +386,7 @@ template
 void ApplyNMSGPU(const double* bbox_data, const double* conf_data,
           const int num_bboxes, const float confidence_threshold,
           const int top_k, const float nms_threshold, vector<int>* indices);
+
 
 template <typename Dtype>
 __global__ void GetDetectionsKernel(const int nthreads,
