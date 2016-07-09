@@ -32,7 +32,7 @@ def main(args):
     label_type='json'
     #db='lmdb'
 
-    trstem ='train_bins=%d_rotate=%r' % (args['num_bins'], args['rotate']) 
+    trstem ='train_bins=%d_rotate=%r_excl=%d' % (args['num_bins'], args['rotate'], args['test_scene_id']) 
     
     trdb = ('%s_lmdb' % (trstem), trstem, 'train.txt')
     

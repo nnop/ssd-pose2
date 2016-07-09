@@ -436,7 +436,7 @@ def main(args):
         'test_interval': 1000,
         'eval_type': "detection",
         'ap_version': "11point",
-        'test_initialization': False,
+        'test_initialization': True,
         }
     test_solver_param = {
         # Train parameters

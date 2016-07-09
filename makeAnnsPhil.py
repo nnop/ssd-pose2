@@ -35,7 +35,7 @@ def main(args):
     
     # make a train/val/test directory
     #shutil.rmtree('./cache/')
-    train_dir = 'train_bins=%d_rotate=%r' % (args['num_bins'], args['rotate'])
+    train_dir = 'train_bins=%d_rotate=%r_excl=%d' % (args['num_bins'], args['rotate'], args['test_scene_id'])
     val_dir = 'val_bins=%d_rotate=%r' % (args['num_bins'], args['rotate'])
     tes_dir = 'test_bins=%d_rotate=%r_scene=%d' % (args['num_bins'], args['rotate'], args['test_scene_id'])
     
