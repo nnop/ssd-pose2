@@ -44,7 +44,7 @@ item {
   display_name: "sofa"
 }
 item {
-  name: "monitor"
+  name: "tvmonitor"
   label: 9
   display_name: "tvmonitor"
 }
