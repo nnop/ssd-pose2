@@ -366,8 +366,8 @@ def splitData(data):
 def parseMat(matfile):
     img_annotation = {}
     img_annotation['image'] = {}
-    img_annotation['image']['width'] = int(1920)
-    img_annotation['image']['height'] = int(1080)
+    img_annotation['image']['width'] = int(600)
+    img_annotation['image']['height'] = int(338)
 
     mat_ann = matfile['objects']
     list_obj = []
@@ -384,7 +384,19 @@ def parseMat(matfile):
             pose = mat_ann[ind, 5]
             objects['viewpoint'] = {}
             objects['viewpoint']['azimuth'] = float(pose)
-            bbox = mat_ann[ind, 1:5].tolist()
+            
+            bbox = mat_ann[ind, 1:5]
+            bbox[0] /= 1920.0
+            bbox[0] *= 600.0
+            bbox[2] /= 1920.0
+            bbox[2] *= 600.0
+
+            bbox[1] /= 1080.0
+            bbox[1] *= 338.0
+            bbox[3] /= 1080.0
+            bbox[3] *= 338.0
+
+            bbox = bbox.tolist()
             objects['bbox'] = bbox
             list_obj.append(objects)
 
