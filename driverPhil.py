@@ -67,7 +67,7 @@ def main(args):
         print cmd
         subprocess.call(cmd, shell=True)
         
-    idx = 'bins=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d_rotate=%r' % (args['num_bins'], \
+    idx = 'test=%d_bins=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d_rotate=%r' % (args['test_scene_id'], args['num_bins'], \
         args['size'], args['base_lr'], args['sampler'], args['pose_weight'], args['stepsize'], args['rotate'])
 
 
