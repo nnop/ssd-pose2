@@ -67,7 +67,7 @@ def main(args):
         print cmd
         subprocess.call(cmd, shell=True)
         
-    idx = 'test=%d_bins=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d_rotate=%r' % (args['test_scene_id'], args['num_bins'], \
+    idx = 'test=%d_finetune=%r_bins=%d_size=%d_lr=%f_samp=%r_weight=%f_step=%d_rotate=%r' % (args['test_scene_id'], args['finetune'], args['num_bins'], \
         args['size'], args['base_lr'], args['sampler'], args['pose_weight'], args['stepsize'], args['rotate'])
 
 
@@ -85,21 +85,20 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Driver for SSD w/ Pose experiments")
     parser.add_argument('--num_bins', default='8', type=int, help='number of bins to divide angles into')
-    parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims 7 or 8 recommended')
     parser.add_argument('--sampler', action='store_true', help='include full sampler')
     parser.add_argument('--seperate_pose', action='store_true', help='share pose = class agnostic pose estimation')
-    parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
     parser.add_argument('--pose_weight', default=1.0, type=float, help='weight the pose')
-    parser.add_argument('--stepsize', default=20000, type=int, help='step size ')
+    parser.add_argument('--stepsize', default=4000, type=int, help='step size ')
     parser.add_argument('--rotate', action='store_true', help='bin angles non standard way')
     parser.add_argument('--test_scene_id', type=int, help='int id of the scene to use for testing')
+    parser.add_argument('--finetune', action='store_true', help='is this model being finetuned')
 
 
     #parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
     #parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')
     parser.add_argument('--gpu', default='0', type=str, help='which gpus to use seperated by commas')
     parser.add_argument('--size', default=300, type=int, help='height and width of images')
-    parser.add_argument('--max_iter', default=60000, type=int, help='maximum number of iterations')
+    parser.add_argument('--max_iter', default=15000, type=int, help='maximum number of iterations')
     parser.add_argument('--base_lr', default=0.00004, type=float, help='base learning rate')
     parser.add_argument('--resume', default=True, type=bool, help='resume training')
     parser.add_argument('--remove', default=False, type=bool, help='remove old models')
