@@ -26,7 +26,7 @@ def main(args):
 
 
 	model_def = '/playpen/poirson/ssd-pose/models/VGGNet/philData/SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False/deploy.prototxt'
-	model_weights = '/playpen/poirson/ssd-pose/models/VGGNet/philData/SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False/VGG_Pascal3D_SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False_iter_24000.caffemodel'
+	model_weights = '/playpen/poirson/ssd-pose/models/VGGNet/philData/SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False/VGG_Pascal3D_SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False_iter_11.caffemodel'
 
 	net = caffe.Net(model_def, model_weights, caffe.TEST)
 
