@@ -24,11 +24,16 @@ def main(args):
 	voc_labelmap = caffe_pb2.LabelMap()
 	text_format.Merge(str(file.read()), voc_labelmap)
 
+	mod_base = '/playpen/poirson/ssd-pose/models/VGGNet/philData/'
+	mod_idx = args['model']
+	iterx = args['iter']
 
-	model_def = '/playpen/poirson/ssd-pose/models/VGGNet/philData/SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False/deploy.prototxt'
-	model_weights = '/playpen/poirson/ssd-pose/models/VGGNet/philData/SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False/VGG_Pascal3D_SSD_share_pose_bins=8_size=300_lr=0.000040_samp=False_weight=1.250000_step=6000_rotate=False_iter_11.caffemodel'
+	model_def = osp.join(mod_base, mod_idx, 'deploy.prototxt')
+	model_weights = 'VGG_Rohit_%s_iter_%d.caffemodel' % (mod_idx, iterx)
+	#model_weights = 'VGG_Pascal3D_%s_iter_%d.caffemodel' % (mod_idx, iterx)
+	mod_file = osp.join(mod_base, mod_idx, model_weights)
 
-	net = caffe.Net(model_def, model_weights, caffe.TEST)
+	net = caffe.Net(model_def, mod_file, caffe.TEST)
 
 	transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
 	transformer.set_transpose('data', (2, 0, 1))
@@ -36,10 +41,11 @@ def main(args):
 	transformer.set_raw_scale('data', 255)  # the reference model operates on images in [0,255] range instead of [0,1]
 	transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
 
+	scene_out = 'video_sequence_%d_%s' % (args['vid_seq_id'], mod_idx)
 	scene = 'video_sequence_%d' % args['vid_seq_id']
 
 	basePath = 'data/vid/'
-	outDir = osp.join(basePath,'vidOutput', scene)
+	outDir = osp.join(basePath,'vidOutput', scene_out)
 
 	if not osp.exists(outDir):
 		os.makedirs(outDir)
@@ -149,6 +155,8 @@ def get_labelname(labelmap, labels):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--vid_seq_id', default=1, type=int, help='int id of vid sequence')
+	parser.add_argument('--model', type=str, help='model folder')
+	parser.add_argument('--iter', type=int, help='iteration to use ')
 
 	args = parser.parse_args()
 	params = vars(args)
