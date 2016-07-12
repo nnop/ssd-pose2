@@ -24,7 +24,7 @@ def main(args):
 	voc_labelmap = caffe_pb2.LabelMap()
 	text_format.Merge(str(file.read()), voc_labelmap)
 
-	mod_base = '/playpen/poirson/ssd-pose/models/VGGNet/philData/'
+	mod_base = 'models/VGGNet/philData/'
 	mod_idx = args['model']
 	iterx = args['iter']
 
