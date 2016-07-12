@@ -280,7 +280,7 @@ def main(args):
         #job_name = "SSD_seperate_pose_{}_{}_bins_{}".format(resize, num_poses, idx)
         job_name = "SSD_seperate_pose_{}".format(idx)
     # The name of the model. Modify it if you want.
-    model_name = "VGG_Pascal3D_{}".format(job_name)
+    model_name = "VGG_Rohit_{}".format(job_name)
 
 
 

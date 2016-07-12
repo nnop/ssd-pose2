@@ -12,7 +12,7 @@ def main(args):
     file_name = args['model']
 
     test_solver_file = osp.join(base_dir, file_name, 'test_solver.prototxt')
-    snapshot_file = 'VGG_Pascal3D_%s_iter_%d.solverstate' % (file_name, args['iter'])
+    snapshot_file = 'VGG_Rohit_%s_iter_%d.solverstate' % (file_name, args['iter'])
     snapshot = osp.join(base_dir, file_name, snapshot_file)
 
     testcmd =   './build/tools/caffe train --solver=%s --snapshot=%s --gpu=%s' % (test_solver_file, snapshot, args['gpu'])
