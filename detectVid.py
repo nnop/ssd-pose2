@@ -5,6 +5,8 @@ import argparse
 #import timeit
 #import json
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 import os.path as osp
 sys.path.insert(0, 'python')
 
