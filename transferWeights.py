@@ -62,6 +62,7 @@ def main(args):
 
 	rohit_dir = args['rohit_model']
 
+	num_poses = args['num_poses']
 
 	pas_deploy = osp.join('models/VGGNet/Pascal3D/', p3d_dir, 'deploy.prototxt')
 	phil_deploy = osp.join('models/VGGNet/philData/', rohit_dir,'deploy.prototxt')
@@ -82,8 +83,7 @@ def main(args):
 
 	rohit_model = '%s_iter_%d.caffemodel' % (model_name, max_iter)
 
-
-
+ 
 	new_voc_model_dir = osp.join(caffe_root, 'models/VGGNet/philData/', rohit_dir)
 
 	pas_net = caffe.Net(caffe_root + pas_deploy, osp.join(caffe_root, 'models/VGGNet/Pascal3D/', p3d_dir , p3d_model), caffe.TEST)
@@ -149,7 +149,6 @@ def main(args):
 	assert len(mbox_source_layers) == len(num_bboxes)
 	num_voc_classes = 5
 	num_coco_classes = 12
-	num_poses = 8
 
 	for i in xrange(0, len(mbox_source_layers)):
 		mbox_source_layer = mbox_source_layers[i]
@@ -212,6 +211,7 @@ if __name__ == "__main__":
 	parser.add_argument('--p3d_model', type=str, help='pascal 3d direcotry ')
 	parser.add_argument('--rohit_model', type=str, help='rohit model direcotry ')
 	parser.add_argument('--p3d_iter', type=int, help='pascal 3d iteration ')
+	parser.add_argument('--num_poses', type=int, help='number of poses')
 	#parser.add_argument('--rohit_iter', type=int, help='rohit iteration ')
 
 	args = parser.parse_args()
