@@ -89,7 +89,7 @@ def main(args):
 	pas_net = caffe.Net(caffe_root + pas_deploy, osp.join(caffe_root, 'models/VGGNet/Pascal3D/', p3d_dir , p3d_model), caffe.TEST)
 
 	#phil_net = caffe.Net(caffe_root + phil_deploy, osp.join(caffe_root, 'models/VGGNet/philData/', rohit_dir, rohit_model), caffe.TEST)
-	phil_net = caffe.Net(caffe_root + phil_deploy, caffe.TEST)
+	#phil_net = caffe.Net(caffe_root + phil_deploy, caffe.TEST)
 
 
 	# load MS COCO model specs
