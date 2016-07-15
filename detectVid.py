@@ -219,7 +219,7 @@ def main(args):
 		kept_boxes = np.empty((0,9)) 
 		for i in range(prev_boxes.shape[0]):
 			cur_box = prev_boxes[i]
-			if(float(cur_box[DET_SCORE]) > .7 and float(cur_box[POSE_SCORE]) > .7):
+			if(float(cur_box[DET_SCORE]) > .7 and float(cur_box[POSE_SCORE]) > .7 and cur_box[MATCHING_BOX_ID] == -1):
 				cur_box[DET_SCORE] = float(cur_box[DET_SCORE]) - .1
 				cur_box[POSE_SCORE] = float(cur_box[POSE_SCORE]) - .1
 				cur_box[MATCHING_BOX_ID] = -1
