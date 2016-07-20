@@ -122,3 +122,7 @@ data/3Dpascal/pascal3D/Segmentation/
 data/philData/
 data/philData
 data/vid
+notebooks
+structure.txt
+data/scenes
+data/pascal3D

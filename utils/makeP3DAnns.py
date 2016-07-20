@@ -15,106 +15,124 @@ from random import shuffle
 This script preprocesses the annotations 
 ''' 
 
+class MakeAnns:
 
-def main(args):
+    def __init__(self, opt):
+        self.opt = opt
 
-    if not osp.exists('all_anns.json'):
-        makeAllAnns()
+    def run_main(self):
 
-    # something with args
-    data = json.load(open('all_anns.json', 'r'))
-    if not osp.exists('map.txt'):
-        createLabelMap(data)
-    
-    # make a train/val/test directory
-    #shutil.rmtree('./cache/')
-    train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'], args['rotate'])
-    val_dir = 'val_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
-    tes_dir = 'test_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
-    
-    if not osp.exists('./cache/'):
-        os.mkdir('./cache/')
-    
-    splits = [train_dir, val_dir, tes_dir]
-    for split in splits:
-        if not osp.exists(osp.join('./cache', split)):
-            os.mkdir(osp.join('./cache', split))
+        base_path = 'data/pascal3D/'
 
-    tr = False
-    val = False
-    test = False
+        if not osp.exists(osp.join(base_path, 'all_anns.json')):
+            makeAllAnns()
 
-    print train_dir
+        # something with args
+        data = json.load(open('data/pascal3D/all_anns.json', 'r'))
+        if not osp.exists('data/pascal3D/map.txt'):
+            createLabelMap(data)
+        
+        # make a train/val/test directory
+        #shutil.rmtree('./cache/')
+        #train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'], args['rotate'])
+        #val_dir = 'val_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
+        #tes_dir = 'test_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
 
-    # always filter difficult ?
-    if not args['difficult']:
-        filterDifficult(data)
+        train_dir = self.opt.get_db_name_stem('train')
+        val_dir = self.opt.get_db_name_stem('val')
+        tes_dir = self.opt.get_db_name_stem('test')
+        
+        if not osp.exists(osp.join(base_path, 'cache/')):
+            os.mkdir(osp.join(base_path, 'cache/'))
+        
+        splits = [train_dir, val_dir, tes_dir]
+        for split in splits:
+            if not osp.exists(osp.join(base_path, 'cache', split)):
+                os.mkdir(osp.join(base_path, 'cache', split))
 
-    if not osp.exists(osp.join('./cache', train_dir, 'train.txt')):
-        #trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
-        tr = True
-        trList = []
-        #if not args['difficult']:
-        #    filterDifficult(data)
+        tr = False
+        val = False
+        test = False
 
-    if not osp.exists(osp.join('./cache', val_dir, 'val.txt')):
-        #valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
-        vaList = []
-        val = True
-    
-    if not osp.exists(osp.join('./cache', tes_dir, 'test.txt')):
-        #teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
-        teList = []
-        test = True
+        print train_dir
 
-    #cur_dir = os.getcwd()
+        # always filter difficult ?
+        if not self.opt.get_opts('difficult'):
+            filterDifficult(data)
 
-    for idx, ann in data.iteritems():
-        annLoc = osp.join(getAnnPath(ann, train_dir, val_dir, tes_dir), idx + '.json')
-        output = getImPath(ann) + ' ' + annLoc + '\n'
-        binAngles(ann, args['num_bins'], args['rotate'])
-        json.dump(ann, open(annLoc, 'w'))
+        if not osp.exists(osp.join(base_path, 'cache', train_dir, 'train.txt')):
+            #trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
+            tr = True
+            trList = []
+            #if not args['difficult']:
+            #    filterDifficult(data)
 
-        if ann['split'] == 'train' and tr:
-            # use train file writer
-            if ann['database'] == 'ImageNet':
-                #print 'stop it '
-                if args['imagenet']:
-                    trList.append(output)
-                    #trWriter.write(output)
-                #yo = 'do nothing '
-            else:
-                for _ in xrange(args['num_pascal']):
-                    trList.append(output)
-                    #trWriter.write(output)
-            
-        elif ann['split'] == 'val' and val:
-            # use val file writer
-            vaList.append(output)
-            #valWriter.write(output)
-        elif ann['split'] == 'test' and test:
-            # use test file writer
-            teList.append(output)
-            #teWriter.write(output)
-    
-    if tr:
-        with open(osp.join('./cache', train_dir, 'train.txt'), 'w') as outfile:
-            shuffle(trList)
-            for line in trList:
-                outfile.write(line)
-        #trWriter.close()
-    if val:
-        with open(osp.join('./cache', val_dir, 'val.txt'), 'w') as outfile:
-            shuffle(vaList)
-            for line in vaList:
-                outfile.write(line)
-        #valWriter.close()
-    if test:
-        with open(osp.join('./cache', tes_dir, 'test.txt'), 'w') as outfile:
-            shuffle(teList)
-            for line in teList:
-                outfile.write(line)
-        #teWriter.close()
+        if not osp.exists(osp.join(base_path, 'cache', val_dir, 'val.txt')):
+            #valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
+            vaList = []
+            val = True
+        
+        if not osp.exists(osp.join(base_path, 'cache', tes_dir, 'test.txt')):
+            #teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
+            teList = []
+            test = True
+
+        #cur_dir = os.getcwd()
+
+        rot = self.opt.get_opts('rotate')
+        bins = self.opt.get_opts('num_bins')
+        imnet = self.opt.get_opts('imagenet')
+        npascal = self.opt.get_opts('num_pascal')
+        
+        for idx, ann in data.iteritems():
+            annLoc = osp.join(getAnnPath(ann, train_dir, val_dir, tes_dir), idx + '.json')
+            output = getImPath(ann) + ' ' + annLoc + '\n'
+
+
+            binAngles(ann, bins, rot)
+
+            json.dump(ann, open(annLoc, 'w'))
+
+            if ann['split'] == 'train' and tr:
+                # use train file writer
+                if ann['database'] == 'ImageNet':
+                    #print 'stop it '
+                    if imnet:
+                        trList.append(output)
+                        #trWriter.write(output)
+                    #yo = 'do nothing '
+                else:
+                    for _ in xrange(npascal):
+                        trList.append(output)
+                        #trWriter.write(output)
+                
+            elif ann['split'] == 'val' and val:
+                # use val file writer
+                vaList.append(output)
+                #valWriter.write(output)
+            elif ann['split'] == 'test' and test:
+                # use test file writer
+                teList.append(output)
+                #teWriter.write(output)
+        
+        if tr:
+            with open(osp.join(base_path, 'cache', train_dir, 'train.txt'), 'w') as outfile:
+                shuffle(trList)
+                for line in trList:
+                    outfile.write(line)
+            #trWriter.close()
+        if val:
+            with open(osp.join(base_path, 'cache', val_dir, 'val.txt'), 'w') as outfile:
+                shuffle(vaList)
+                for line in vaList:
+                    outfile.write(line)
+            #valWriter.close()
+        if test:
+            with open(osp.join(base_path, 'cache', tes_dir, 'test.txt'), 'w') as outfile:
+                shuffle(teList)
+                for line in teList:
+                    outfile.write(line)
+            #teWriter.close()
 
 
 def filterDifficult(data):
@@ -137,7 +155,7 @@ def filterDifficult(data):
 def createLabelMap(data):
     objClasses = set([obj['category_id'] for ann in data.itervalues() for obj in ann['annotation'] if 'viewpoint' in obj and obj['category_id'] != 'bottle' ])
     labelToCls = dict((idx+1, cls) for idx, cls in enumerate(objClasses))
-    f = open('map.txt', 'w')
+    f = open('data/pascal3D/map.txt', 'w')
     for label, name in labelToCls.iteritems():
         f.write(name + ' ' + str(label) + ' ' + name + '\n')
     f.close()
@@ -145,18 +163,18 @@ def createLabelMap(data):
 
 def getImPath(ann):
     if ann['database'] == 'ImageNet':
-        path = osp.join('images/imagenet/', ann['filename'])
+        path = osp.join('data/pascal3D/images/imagenet/', ann['filename'])
     else:
-        path = osp.join('images/pascal/', ann['filename'])
+        path = osp.join('data/pascal3D/images/pascal/', ann['filename'])
     return path
 
 def getAnnPath(ann, train_dir, val_dir, tes_dir):
     if ann['split'] == 'train':
-        path = osp.join('cache', train_dir)
+        path = osp.join('data/pascal3D/cache', train_dir)
     elif ann['split'] == 'val':
-        path = osp.join('cache', val_dir)
+        path = osp.join('data/pascal3D/cache', val_dir)
     elif ann['split'] == 'test':
-        path = osp.join('cache', tes_dir)
+        path = osp.join('data/pascal3D/cache', tes_dir)
 
     return path
 
@@ -188,30 +206,22 @@ def binAngles(ann, bins, rotate=False):
 
 
 def makeAllAnns():
-    #matfile = sio.loadmat('./Annotations/chair_pascal/2008_007827.mat', squeeze_me=True, struct_as_record=False)
-    #parseMat(matfile, 'fuck you')
+    base_path = 'data/pascal3D'
 
     all_anns = {}
     #myFiles = []
-    anns = os.listdir('./Annotations/')
+    anns = os.listdir(osp.join(base_path, 'Annotations'))
     for ann in anns:
-    #ann = 'bottle_pascal'
-    #if True:
-        #if 'pascal' in ann:
-        #print ann
-        files = os.listdir(osp.join('./Annotations', ann))
+        files = os.listdir(osp.join(base_path, 'Annotations', ann))
         for idx, fi in enumerate(files):
             #if idx % 100 == 0: print 'processing file %d in %s' %(idx, ann)
-            matfile = sio.loadmat(osp.join('./Annotations', ann, fi), squeeze_me=True, struct_as_record=False)
+            matfile = sio.loadmat(osp.join(base_path, 'Annotations', ann, fi), squeeze_me=True, struct_as_record=False)
             #all_anns[fi[:-4]] = parseMat(matfile)
-            temp = parseMat(matfile, osp.join('./Annotations', ann, fi))
+            temp = parseMat(matfile)
             if fi[:-4] in all_anns:
                 all_anns[fi[:-4]]['annotation'] += temp['annotation']
             else:
                 all_anns[fi[:-4]] = temp
-
-                #myFiles.append(fi[:-4])
-    #print "Total: " + str(len(myFiles))
 
     all_anns = removeBottle(all_anns)
 
@@ -227,7 +237,7 @@ def makeAllAnns():
     del all_anns['n03790512_11192']
     del all_anns['n02690373_190'] 
 
-    json.dump(all_anns, open('all_anns.json', 'w'))
+    json.dump(all_anns, open('data/pascal3D/all_anns.json', 'w'))
     print 'json dumped'
 
 # def checkDB(data):
@@ -308,7 +318,7 @@ def convertBbox(data):
 
 
 def splitData(data):
-    f = open('./PASCAL/VOCdevkit/VOC2012/ImageSets/Main/train.txt', 'r')
+    f = open('data/pascal3D/PASCAL/VOCdevkit/VOC2012/ImageSets/Main/train.txt', 'r')
     train = [line.strip('\n') for line in f ]
     print 'training data %d' % len(train)
     count = 0
@@ -320,7 +330,7 @@ def splitData(data):
             #print tr
     print 'actual training %d' % count
 
-    f = open('./PASCAL/VOCdevkit/VOC2012/ImageSets/Main/val.txt', 'r')
+    f = open('data/pascal3D/PASCAL/VOCdevkit/VOC2012/ImageSets/Main/val.txt', 'r')
     val = [line.strip('\n') for line in f ]
     i = 0
     print 'testing data %d' % len(val)
@@ -353,7 +363,7 @@ def splitData(data):
 
 
 
-def parseMat(matfile, finame):
+def parseMat(matfile):
     img_annotation = {}
     attrs = ['filename', 'database']
     for attr in attrs:
@@ -384,21 +394,6 @@ def parseMat(matfile, finame):
             if field == 'viewpoint':    
                 view_obj = getattr(the_obj, 'viewpoint')
                 if isinstance(view_obj, np.asarray([]).__class__):
-                    #print finame
-                    # if view_obj.shape[0] == 0:
-                        #print 'skipping'
-                        # temp = getattr(objects_obj[2], 'viewpoint')
-                        # print "temp is: " + str(temp)
-                        # views = {}
-                        # for view_field in temp._fieldnames:
-                        #     views[view_field] = getattr(temp, view_field)
-                        # print views
-
-                        # if isinstance(temp, np.asarray([]).__class__):
-                        #     if temp.shape[0] == 0:
-                        #         print "fail"
-                        # sys.exit()
-                        # continue
                     continue
                 views = {}
                 #print view_obj._fieldnames
@@ -415,31 +410,13 @@ def parseMat(matfile, finame):
                     objects[field] = True
             else:
                 cat_id = getattr(the_obj, field)
-                #if cat_id == 'bottle': 
-                #    print cat_id
-                #    print 'breaking'
-                #    break
                 objects['category_id'] = cat_id
         if 'viewpoint' in objects:
             objects['iscrowd'] = 0
             list_obj.append(objects)
-    #print list_obj
-    #print len(list_obj)
-    #sys.exit()
+
     if list_obj == []:
-        print finame
         print 'whoops'
     img_annotation['annotation'] = list_obj
     return img_annotation
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--num_bins', default='8', type=int, help='number of bins to divide angles into')
-    parser.add_argument('--num_pascal', default='1', type=int, help='number of times to include pascal ims')
-    parser.add_argument('--difficult', action='store_false', help='filter difficult images from the dataset')
-    parser.add_argument('--imagenet', action='store_false', help='exclude imagenet images')
-    parser.add_argument('--rotate', action='store_true', help='bin angles non standard way')
-
-    args = parser.parse_args()
-    params = vars(args) # turn into a dict
-    main(params)
