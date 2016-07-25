@@ -111,7 +111,7 @@ def main(args):
 
     opt.add_kv('mod_id', mod_id)
 
-    opt_out_path = osp.join('options', '%d.json' % mod_id)
+    opt_out_path = osp.join('/home/poirson/options', '%d.json' % mod_id)
     opt.write_opt(opt_out_path)
 
     #sys.exit()
