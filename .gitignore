@@ -112,7 +112,6 @@ models
 *.mat
 *.inf
 *.txt
-*.m
 *.vty
 data/3Dpascal/pascal3D/PASCAL/VOCdevkit/*
 data/3Dpascal/pascal3D/VDPM/
