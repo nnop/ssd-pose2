@@ -15,8 +15,6 @@ classes = {'bicycle',
 aps = [];
 aas = [];
 
-bins = 8;
-
 
 for i=1:length(classes)
     cls = classes{i};

@@ -38,8 +38,17 @@ def main(args):
   f = open('data/pascal3D/PASCAL/VOCdevkit/VOC2012/ImageSets/Main/val.txt', 'r')
   val = [line.strip('\n') for line in f ]
 
-  all_out = {}
+  
+  size_loc = mod_fi.find('size=')
+  size_loc += 5
+  image_resize = int(mod_fi[size_loc:size_loc+3])
+  
+  bin_loc = mod_fi.find('bins=')
+  bin_loc += 5
+  num_bins = int(mod_fi[bin_loc])
 
+
+  all_out = {}
   # hack 
   fiOutput = '%s_%d' % (mod_fi, iterx)
   skip = False
@@ -49,11 +58,9 @@ def main(args):
   for idx, v in enumerate(val):
       if skip:
         break
-
       imfile = osp.join('data/pascal3D/images/pascal/', v + '.jpg')
 
       # set net to batch size of 1
-      image_resize = 300
       net.blobs['data'].reshape(1,3,image_resize,image_resize)
       
       # hack ??
@@ -117,7 +124,7 @@ def main(args):
       out_file = osp.join('mat_eval', fiOutput, lbl + '.mat')
       sio.savemat(out_file, {'dets': all_val})
 
-  matlab_cmd = 'bins = %d; path = \'%s\'; avp_eval;' % (args['bins'], osp.join('mat_eval', fiOutput))
+  matlab_cmd = 'bins = %d; path = \'%s\'; avp_eval;' % (num_bins, osp.join('mat_eval', fiOutput))
   print matlab_cmd
   os.system('matlab -nodisplay -r "try %s catch; end; quit;"' % (matlab_cmd))
 
@@ -141,7 +148,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test an SSD model ")
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
-    parser.add_argument('--bins', default=8, type=int, help='number of bins')
     
     args = parser.parse_args()
     params = vars(args)
