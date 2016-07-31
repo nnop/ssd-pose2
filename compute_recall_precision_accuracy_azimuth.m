@@ -6,7 +6,7 @@ function [recall, precision, accuracy, ap, aa] = compute_recall_precision_accura
 
     
 %azimuth_interval = [0 (360/(vnum_test*2)):(360/vnum_test):360-(360/(vnum_test*2))];    
-azimuth_interval = [0 (360/(vnum_test)):(360/vnum_test):360];
+%azimuth_interval = [0 (360/(vnum_test)):(360/vnum_test):360];
 
 
 data_path = 'data/pascal3D/';
@@ -67,7 +67,7 @@ for i = 1:M
             else
                 azimuth = record.objects(clsinds(j)).viewpoint.azimuth;
             end
-            view_gt(j) = find_interval(azimuth, azimuth_interval);
+            view_gt(j) = find_interval(azimuth, vnum_test);
         end
     else
         view_gt = [];
@@ -164,15 +164,15 @@ title(tit);
 hold off;
 end
 
-function ind = find_interval(azimuth, a)
-
-for i = 1:numel(a)
-    if azimuth < a(i)
-        break;
-    end
-end
-ind = i - 1;
-if azimuth > a(end)
-    ind = 1;
-end
-ind = ind - 1;
+function ind = find_interval(azimuth, bins)
+ind = uint8( mod(azimuth, 360) / (360/bins));
+%for i = 1:numel(a)
+%    if azimuth < a(i)
+%        break;
+%    end
+%end
+%ind = i - 1;
+%if azimuth > a(end)
+%    ind = 1;
+%end
+%ind = ind - 1;
