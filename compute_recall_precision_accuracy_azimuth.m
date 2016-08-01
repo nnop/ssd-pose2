@@ -151,7 +151,7 @@ aa = VOCap(recall, accuracy);
 fprintf('AA = %.4f\n', aa);
 
 % draw recall-precision and accuracy curve
-show_curve = true;
+show_curve = false;
 if show_curve
 figure;
 hold on;
@@ -170,14 +170,3 @@ if rotate
     offset = 360 / (bins * 2);
 end
 ind = floor( mod(azimuth + offset, 360) / (360/bins));
-%disp(ind);
-%for i = 1:numel(a)
-%    if azimuth < a(i)
-%        break;
-%    end
-%end
-%ind = i - 1;
-%if azimuth > a(end)
-%    ind = 1;
-%end
-%ind = ind - 1;

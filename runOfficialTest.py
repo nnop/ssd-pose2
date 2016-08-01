@@ -3,7 +3,6 @@ import sys
 sys.path.insert(0, 'python')
 import caffe
 caffe.set_mode_gpu()
-caffe.set_device(0)
 from google.protobuf import text_format
 from caffe.proto import caffe_pb2
 import json
@@ -16,6 +15,7 @@ import numpy as np
 
 def main(args):
   
+  caffe.set_device(args['gpu'])
   voc_labelmap_file = 'data/pascal3D/labelmap_3D.prototxt'
   file = open(voc_labelmap_file, 'r')
   voc_labelmap = caffe_pb2.LabelMap()
@@ -156,6 +156,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test an SSD model ")
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
+    parser.add_argument('--gpu', type=int, default=0, help='gpu to use')
     
     args = parser.parse_args()
     params = vars(args)
