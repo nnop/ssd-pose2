@@ -47,6 +47,10 @@ def main(args):
   bin_loc += 5
   num_bins = int(mod_fi[bin_loc])
 
+  rotate = False
+  if mod_fi.find('rotate=True') != -1:
+    rotate = True
+
 
   all_out = {}
   # hack 
@@ -124,7 +128,11 @@ def main(args):
       out_file = osp.join('mat_eval', fiOutput, lbl + '.mat')
       sio.savemat(out_file, {'dets': all_val})
 
-  matlab_cmd = 'bins = %d; path = \'%s\'; avp_eval;' % (num_bins, osp.join('mat_eval', fiOutput))
+  extra = ' rotate = false; '
+  if rotate:
+    extra = ' rotate = true; '
+    
+  matlab_cmd = 'bins = %d; path = \'%s\'; %s avp_eval;' % (num_bins, osp.join('mat_eval', fiOutput), extra)
   print matlab_cmd
   os.system('matlab -nodisplay -r "try %s catch; end; quit;"' % (matlab_cmd))
 

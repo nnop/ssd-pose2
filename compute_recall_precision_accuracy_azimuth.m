@@ -1,6 +1,6 @@
 
 
-function [recall, precision, accuracy, ap, aa] = compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename, show_curve)
+function [recall, precision, accuracy, ap, aa] = compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename, rotate)
 %compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename)
 %BASE_DIR = 'data/pascal3D/';
 
@@ -67,7 +67,7 @@ for i = 1:M
             else
                 azimuth = record.objects(clsinds(j)).viewpoint.azimuth;
             end
-            view_gt(j) = find_interval(azimuth, vnum_test);
+            view_gt(j) = find_interval(azimuth, vnum_test, rotate);
         end
     else
         view_gt = [];
@@ -164,8 +164,13 @@ title(tit);
 hold off;
 end
 
-function ind = find_interval(azimuth, bins)
-ind = uint8( mod(azimuth, 360) / (360/bins));
+function ind = find_interval(azimuth, bins, rotate)
+offset = 0;
+if rotate 
+    offset = 360 / (bins * 2);
+end
+ind = floor( mod(azimuth + offset, 360) / (360/bins));
+%disp(ind);
 %for i = 1:numel(a)
 %    if azimuth < a(i)
 %        break;

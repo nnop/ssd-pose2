@@ -20,7 +20,7 @@ for i=1:length(classes)
     cls = classes{i};
     fname = fullfile(path, [cls '.mat']);
     
-    [recall, precision, accuracy, ap, aa] = compute_recall_precision_accuracy_azimuth(cls, bins, bins, fname);
+    [recall, precision, accuracy, ap, aa] = compute_recall_precision_accuracy_azimuth(cls, bins, bins, fname, rotate);
     %ap = 0;
     %disp(ap)
     %aps = [aps ap];
@@ -47,5 +47,7 @@ fprintf(fid, '\n');
 fprintf(fid, sprintf('Mean = %.1f\n', mean(aas)*100));
 
 fclose(fid);
+
+disp(mean(aas)*100);
 
 
