@@ -56,6 +56,12 @@ class MakeAnns:
 
         print train_dir
 
+        # should be a boolean
+        full3D = self.opt.get_opts('full_3D')
+        if full3D:
+            joint = self.opt.get_opts('joint')
+            
+
         # always filter difficult ?
         if not self.opt.get_opts('difficult'):
             filterDifficult(data)
