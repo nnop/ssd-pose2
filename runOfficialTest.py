@@ -10,6 +10,7 @@ import os.path as osp
 import scipy.io as sio
 import argparse
 import numpy as np
+from utils import options
 
 
 
@@ -21,9 +22,14 @@ def main(args):
   voc_labelmap = caffe_pb2.LabelMap()
   text_format.Merge(str(file.read()), voc_labelmap)
 
+  stem = 'SSD_share_pose_'
+
 
   mod_fi = args['model']
   iterx = args['iter']
+  opts = mod_fi[len(stem):] + '.json'
+  opt = options.Options(osp.join('/home/poirson/options/', opts))
+
   modelW = 'VGG_Pascal3D_%s_iter_%d.caffemodel' % (mod_fi, iterx)
   model_def = osp.join('models/VGGNet/Pascal3D/', mod_fi, 'deploy.prototxt')
   model_weights = osp.join('models/VGGNet/Pascal3D/', mod_fi, modelW)
@@ -39,17 +45,20 @@ def main(args):
   val = [line.strip('\n') for line in f ]
 
   
-  size_loc = mod_fi.find('size=')
-  size_loc += 5
-  image_resize = int(mod_fi[size_loc:size_loc+3])
-  
-  bin_loc = mod_fi.find('bins=')
-  bin_loc += 5
-  num_bins = int(mod_fi[bin_loc])
+  #size_loc = mod_fi.find('size=')
+  #size_loc += 5
+  #image_resize = int(mod_fi[size_loc:size_loc+3])
+  image_resize = opt.get_opts('size')
 
-  rotate = False
-  if mod_fi.find('rotate=True') != -1:
-    rotate = True
+  #bin_loc = mod_fi.find('bins=')
+  #bin_loc += 5
+  #num_bins = int(mod_fi[bin_loc])
+  num_bins = opt.get_opts('num_bins')
+
+  #rotate = False
+  #if mod_fi.find('rotate=True') != -1:
+  #  rotate = True
+  rotate = opt.get_opts('rotate')
 
 
   all_out = {}
