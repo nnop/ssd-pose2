@@ -207,8 +207,10 @@ void DetectionEvaluatePoseLayer<Dtype>::Forward_cpu(
                   (!evaluate_difficult_gt_ && !gt_bboxes[jmax].difficult())) {
                 if (!visited[jmax]) {
                   //int pred_bbox = floor(bboxes[i].azilabel() / 2);
-                  int pred_bbox = bboxes[i].azilabel();
-                  if(gt_bboxes[jmax].azilabel() == pred_bbox) {
+                  int pred_bbox = bboxes[i].azilabel() % 8;
+                  // hack TODO
+                  int cur_gt = gt_bboxes[jmax].azilabel() % 8;
+                  if(cur_gt == pred_bbox) {
                     // true positive.
                     top_data[num_det * 5 + 3] = 1;
                     top_data[num_det * 5 + 4] = 0;

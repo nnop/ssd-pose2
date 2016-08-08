@@ -21,7 +21,9 @@ class Options:
 		'max_iter':30000,\
 		'base_lr':0.00004,\
 		'size':300,
-		'resume':True\
+		'resume':True,\
+		'full3D':False,\
+		'sep3D':False\
 		}
 
 		self.opts = self.set_opts(path)
@@ -52,9 +54,16 @@ class Options:
 
 
 	def get_db_name_stem(self, split):
+
 		out = '%s_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' \
 		% (split, self.get_opts('num_bins'), self.get_opts('difficult'),\
 		 self.get_opts('imagenet'), self.get_opts('num_pascal'), self.get_opts('rotate'))
+		
+		if self.get_opts('full3D'):
+			if self.get_opts('sep3D'):
+				out = '%s_sep3d' % out
+			else:
+				out = '%s_joint3d' % out 
 		return out
 
 
@@ -64,7 +73,4 @@ class Options:
 	def write_opt(self, path):
 		with open(path, 'w') as out:
 			json.dump(self.opts, out)
-
-	def dummy_test(self):
-		print osp.exists('data/pascal3D/all_anns.json')
 

@@ -12,13 +12,15 @@ from random import shuffle
 
 
 '''
-This script preprocesses the annotations 
+This script preprocesses the annotations
+And puts the data in the correct format 
 ''' 
 
 class MakeAnns:
 
     def __init__(self, opt):
         self.opt = opt
+
 
     def run_main(self):
 
@@ -28,15 +30,10 @@ class MakeAnns:
             makeAllAnns()
 
         # something with args
-        data = json.load(open('data/pascal3D/all_anns.json', 'r'))
+        data = json.load(open( 'data/pascal3D/all_anns.json', 'r'))
         if not osp.exists('data/pascal3D/map.txt'):
             createLabelMap(data)
         
-        # make a train/val/test directory
-        #shutil.rmtree('./cache/')
-        #train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'], args['rotate'])
-        #val_dir = 'val_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
-        #tes_dir = 'test_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
 
         train_dir = self.opt.get_db_name_stem('train')
         val_dir = self.opt.get_db_name_stem('val')
@@ -56,37 +53,26 @@ class MakeAnns:
 
         print train_dir
 
-        # should be a boolean
-        full3D = self.opt.get_opts('full_3D')
-        if full3D:
-            joint = self.opt.get_opts('joint')
-            
-
         # always filter difficult ?
         if not self.opt.get_opts('difficult'):
             filterDifficult(data)
 
         if not osp.exists(osp.join(base_path, 'cache', train_dir, 'train.txt')):
-            #trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
             tr = True
             trList = []
-            #if not args['difficult']:
-            #    filterDifficult(data)
 
         if not osp.exists(osp.join(base_path, 'cache', val_dir, 'val.txt')):
-            #valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
             vaList = []
             val = True
         
         if not osp.exists(osp.join(base_path, 'cache', tes_dir, 'test.txt')):
-            #teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
             teList = []
             test = True
 
-        #cur_dir = os.getcwd()
 
         rot = self.opt.get_opts('rotate')
         bins = self.opt.get_opts('num_bins')
+
         imnet = self.opt.get_opts('imagenet')
         npascal = self.opt.get_opts('num_pascal')
         
@@ -94,8 +80,10 @@ class MakeAnns:
             annLoc = osp.join(getAnnPath(ann, train_dir, val_dir, tes_dir), idx + '.json')
             output = getImPath(ann) + ' ' + annLoc + '\n'
 
-
-            binAngles(ann, bins, rot)
+            if self.opt.get_opts('full3D'):
+                self.bin3D(ann, bins, rot)
+            else:
+                binAngles(ann, bins, rot)
 
             json.dump(ann, open(annLoc, 'w'))
 
@@ -105,40 +93,85 @@ class MakeAnns:
                     #print 'stop it '
                     if imnet:
                         trList.append(output)
-                        #trWriter.write(output)
-                    #yo = 'do nothing '
                 else:
                     for _ in xrange(npascal):
                         trList.append(output)
-                        #trWriter.write(output)
                 
             elif ann['split'] == 'val' and val:
-                # use val file writer
                 vaList.append(output)
-                #valWriter.write(output)
             elif ann['split'] == 'test' and test:
-                # use test file writer
                 teList.append(output)
-                #teWriter.write(output)
         
         if tr:
             with open(osp.join(base_path, 'cache', train_dir, 'train.txt'), 'w') as outfile:
                 shuffle(trList)
                 for line in trList:
                     outfile.write(line)
-            #trWriter.close()
         if val:
             with open(osp.join(base_path, 'cache', val_dir, 'val.txt'), 'w') as outfile:
                 shuffle(vaList)
                 for line in vaList:
                     outfile.write(line)
-            #valWriter.close()
         if test:
             with open(osp.join(base_path, 'cache', tes_dir, 'test.txt'), 'w') as outfile:
                 shuffle(teList)
                 for line in teList:
                     outfile.write(line)
-            #teWriter.close()
+
+
+    def bin3D(self, ann, bins, rotate=False):
+        # can change.. 
+        nElbins = 3
+        nThbins = 3
+
+        offset = 0
+        if rotate:
+            offset = 360 / (bins * 2)
+        for obj in ann['annotation']:
+            azi = obj['viewpoint']['azimuth_coarse']
+            eleva = obj['viewpoint']['elevation_coarse']
+            the = 0
+            if 'theta' in obj['viewpoint']:
+                the = obj['viewpoint']['theta']
+
+            # hard code some thresholding
+            if the < -45:
+                the = -45
+            if the > 45:
+                the = 45
+            
+            if 'azimuth' in obj['viewpoint'] and obj['viewpoint']['distance'] != 0.0:
+                azi = obj['viewpoint']['azimuth']
+            if 'elevation' in obj['viewpoint'] and obj['viewpoint']['distance'] != 0.0:
+                eleva = obj['viewpoint']['elevation']
+
+            eleva += 90.0
+            the += 45.0
+
+            aziBin = int( ((azi + offset) % 360) / (360/bins) )
+            eleBin = int( (eleva % 180) / (180.0/ nElbins))
+            theBin = int( (the % 90) / (90.0/ nThbins))
+
+            flipAzi = 360 - azi
+            aziFlip = int( ((flipAzi + offset) % 360) / (360/bins) )
+
+            if self.opt.get_opts('sep3D'):
+                obj['aziLabel'] = aziBin
+                obj['aziLabelFlip'] = aziFlip
+                obj['eleLabel'] = eleBin
+                obj['theLabel'] = theBin
+            else:
+                obj['aziLabelTrue'] = aziBin
+                obj['aziLabelFlipTrue'] = aziFlip
+                obj['eleLabel'] = eleBin
+                obj['theLabel'] = theBin
+
+                lbl = nThbins*bins*eleBin + bins*theBin + aziBin
+                lblFlip = nThbins*bins*eleBin + bins*theBin + aziFlip
+
+                obj['aziLabel'] = lbl
+                obj['aziLabelFlip'] = lblFlip
+
 
 
 def filterDifficult(data):
@@ -174,6 +207,7 @@ def getImPath(ann):
         path = osp.join('data/pascal3D/images/pascal/', ann['filename'])
     return path
 
+
 def getAnnPath(ann, train_dir, val_dir, tes_dir):
     if ann['split'] == 'train':
         path = osp.join('data/pascal3D/cache', train_dir)
@@ -181,12 +215,11 @@ def getAnnPath(ann, train_dir, val_dir, tes_dir):
         path = osp.join('data/pascal3D/cache', val_dir)
     elif ann['split'] == 'test':
         path = osp.join('data/pascal3D/cache', tes_dir)
-
     return path
 
 
-
 def binAngles(ann, bins, rotate=False):
+
     offset = 0
     if rotate:
         offset = 360 / (bins * 2)
@@ -210,7 +243,6 @@ def binAngles(ann, bins, rotate=False):
             print 'woah where yo angle'
 
 
-
 def makeAllAnns():
     base_path = 'data/pascal3D'
 
@@ -220,9 +252,7 @@ def makeAllAnns():
     for ann in anns:
         files = os.listdir(osp.join(base_path, 'Annotations', ann))
         for idx, fi in enumerate(files):
-            #if idx % 100 == 0: print 'processing file %d in %s' %(idx, ann)
             matfile = sio.loadmat(osp.join(base_path, 'Annotations', ann, fi), squeeze_me=True, struct_as_record=False)
-            #all_anns[fi[:-4]] = parseMat(matfile)
             temp = parseMat(matfile)
             if fi[:-4] in all_anns:
                 all_anns[fi[:-4]]['annotation'] += temp['annotation']
@@ -231,10 +261,6 @@ def makeAllAnns():
 
     all_anns = removeBottle(all_anns)
 
-    #checkCounts(all_anns)
-    # checkDB(all_anns)
-    # checkTrain(myFiles)
-    #checkCounts(all_anns)
     all_anns = splitData(all_anns)
     checkCounts(all_anns)
     convertBbox(all_anns)
@@ -245,15 +271,6 @@ def makeAllAnns():
 
     json.dump(all_anns, open('data/pascal3D/all_anns.json', 'w'))
     print 'json dumped'
-
-# def checkDB(data):
-#     dbs = []
-#     for obj in data.itervalues():
-#         dbs.append(obj['database'])
-#     set(dbs)
-#     print dbs
-#     sys.exit()
-
 
 
 def checkCounts(data):
@@ -273,6 +290,7 @@ def checkCounts(data):
     for key in sorted(counts):
         print "%s: %s" % (key, counts[key])
 
+
 def removeBottle(data):
     keysToRemove = []
     count = 0
@@ -289,6 +307,7 @@ def removeBottle(data):
     for rem in keysToRemove:
         del data[rem]
     return data
+
 
 def convertBbox(data):
     for ann in data.itervalues():
@@ -338,8 +357,8 @@ def splitData(data):
 
     f = open('data/pascal3D/PASCAL/VOCdevkit/VOC2012/ImageSets/Main/val.txt', 'r')
     val = [line.strip('\n') for line in f ]
-    i = 0
     print 'testing data %d' % len(val)
+
     count = 0
     for tr in val:
         if tr in data:
@@ -347,15 +366,10 @@ def splitData(data):
             count += 1
     print 'actual test %d' % count
 
-    #remKeys = []
 
     for key, obj in data.iteritems():
         if obj['database'] == 'ImageNet':
             obj['split'] = 'train'
-            #remKeys.append(key)
-
-    #for key in remKeys:
-    #    del data[key]
 
     keys = data.keys()
     random.shuffle(keys)
@@ -366,7 +380,6 @@ def splitData(data):
             data[k]['split'] = 'val'
             counter += 1
     return data
-
 
 
 def parseMat(matfile):

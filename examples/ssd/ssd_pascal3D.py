@@ -195,6 +195,11 @@ class P3DSSD:
         num_classes = 12
         num_poses = args.get_opts('num_bins')
 
+        if args.get_opts('full3D'):
+            if not args.get_opts('sep3D'):
+                # hard coded TODO
+                num_poses *= 3 * 3
+
         # Set true if you want to start training right after generating all files.
         run_soon = True
         # Set true if you want to load from most recently saved snapshot.
