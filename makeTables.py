@@ -13,14 +13,9 @@ This script removes models which have been run trained for less
 than some number of iterations
 '''
 
+eval_dir = 'mat_eval/'
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Remove old / unused models ')
-    parser.add_argument('--iter', default=0, type=int, help='minimum number of iterations')
-    args = parser.parse_args()
-    args = vars(args)
-    
+def main(args):
     mod_path = 'models/VGGNet/Pascal3D/'
     models = os.listdir(mod_path)
 
@@ -87,7 +82,7 @@ if __name__ == "__main__":
 
         for bins in [4, 8, 16, 24]:
             for mod, val in mod_to_opts.iteritems():
-                if val.get_opts('share_pose') == des and\ 
+                if val.get_opts('share_pose') == des and\
                 val.get_opts('num_bins') == bins and val.get_opts('rotate')\
                 and val.get_opts('size') == 300:
                     out = make_out(mod, args['iter'], out)
@@ -156,7 +151,7 @@ if __name__ == "__main__":
 
 
 def get_row(mod, iterx, out):
-     cmd = 'python runOfficialTest.py --model=%s --iter=%d' % (mod, iterx)
+    cmd = 'python runOfficialTest.py --model=%s --iter=%d' % (mod, iterx)
     subprocess.call(cmd, shell=True)
 
     # open output file
@@ -181,3 +176,14 @@ def make_out(mod, iterx, out):
         out += ' %s &' % lines[1][:-1]
 
     return out
+
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Remove old / unused models ')
+    parser.add_argument('--iter', default=0, type=int, help='minimum number of iterations')
+    args = parser.parse_args()
+    args = vars(args)
+    main(args)
+
