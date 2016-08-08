@@ -99,7 +99,10 @@ def main(args):
       out[:, 1] = detections[0,0,:,4]*image.shape[0]
       out[:, 2] = detections[0,0,:,5]*image.shape[1]
       out[:, 3] = detections[0,0,:,6]*image.shape[0]
-      out[:, 4] = detections[0,0,:,7]
+      if opt.get_opts('full3D') and not opt.get_opts('sep3D'):
+        out[:, 4] = detections[0,0,:,7] % opt.get_opts('num_bins')
+      else:
+        out[:, 4] = detections[0,0,:,7]
       out[:, 5] = detections[0,0,:,2]
           
       cur_out = {'bicycle':[],
