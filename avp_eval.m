@@ -1,15 +1,15 @@
 close all;
-classes = {'bicycle',
-               'motorbike',
-               'car',
+classes = {'aeroplane', 
+               'bicycle',
+               'boat',
                'bus',
-               'train',
+               'car',
+               'chair',
               'diningtable',
-              'aeroplane',
+               'motorbike',
               'sofa',
-              'tvmonitor',
-              'chair',
-              'boat'};
+               'train',
+              'tvmonitor'};
 
           
 aps = [];
@@ -29,22 +29,23 @@ end
 
 
 fid = fopen(fullfile(path, 'results.txt'), 'w');
-for i=1:length(classes)
-    cls = classes{i};
-    fprintf(fid, sprintf('%s', cls));
-    spaces = 15 - length(cls);
-    for j=1:spaces
-        fprintf(fid, ' ');
-    end
-end
-fprintf(fid, '\n');
+%for i=1:length(classes)
+%    cls = classes{i};
+%    fprintf(fid, sprintf('%s', cls));
+%    spaces = 15 - length(cls);
+%    for j=1:spaces
+%        fprintf(fid, ' ');
+%    end
+%end
+%fprintf(fid, '\n');
 
 %disp(aas(2))
 for i=1:length(classes)
-    fprintf(fid, sprintf('%.1f           ', aas(i)*100));
+%    fprintf(fid, sprintf('%.1f           ', aas(i)*100));
+     fprintf(fid, sprintf('%.1f & ', aas(i)*100));
 end
 fprintf(fid, '\n');
-fprintf(fid, sprintf('Mean = %.1f\n', mean(aas)*100));
+fprintf(fid, sprintf('%.1f\n', mean(aas)*100));
 
 fclose(fid);
 
