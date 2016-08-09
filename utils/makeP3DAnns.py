@@ -121,7 +121,7 @@ class MakeAnns:
 
     def bin3D(self, ann, bins, rotate=False):
         # can change.. 
-        nElbins = 6
+        nElbins = 4
         nThbins = 3
 
         offset = 0
