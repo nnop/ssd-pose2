@@ -22,6 +22,7 @@ def main(args):
   voc_labelmap = caffe_pb2.LabelMap()
   text_format.Merge(str(file.read()), voc_labelmap)
 
+  mod_fi = args['model']
   if 'SSD_share_pose_' in mod_fi:
     opts = mod_fi[len('SSD_share_pose_'):] + '.json'
   elif 'SSD_seperate_pose_' in mod_fi:
@@ -31,7 +32,6 @@ def main(args):
     return
 
 
-  mod_fi = args['model']
   iterx = args['iter']
   opt = options.Options(osp.join('/home/poirson/options/', opts))
 
