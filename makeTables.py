@@ -66,9 +66,11 @@ def main(args):
                 opt = options.Options(opt_file)
                 mod_to_opts[mod] = opt
 
-    for idx, val in mod_to_opts.iteritems():
-        print idx
-        print val.get_opts('rotate') 
+
+    # list to save time
+    # if mat_eval called for file
+    # append to this list 
+    eval_done = []
 
     # make share and seperate table
     out_fi = open('share_sep_eval.txt', 'w')
@@ -84,8 +86,8 @@ def main(args):
             for mod, val in mod_to_opts.iteritems():
                 if val.get_opts('share_pose') == des and\
                 val.get_opts('num_bins') == bins and val.get_opts('rotate')\
-                and val.get_opts('size') == 300:
-                    out = make_out(mod, args['iter'], out)
+                and val.get_opts('imagenet') and val.get_opts('size') == 300:
+                    out, eval_done = make_out(mod, args['iter'], out, eval_done)
 
 
         # write output
@@ -107,7 +109,7 @@ def main(args):
                 if val.get_opts('share_pose') and val.get_opts('num_bins') == bins\
                 and val.get_opts('rotate') and val.get_opts('imagenet') == des\
                 and val.get_opts('size') == 300:
-                    out = make_out(mod, args['iter'], out)
+                    out, eval_done = make_out(mod, args['iter'], out, eval_done)
 
         out_fi.write(out + '\n')
     out_fi.close()
@@ -128,7 +130,7 @@ def main(args):
                     if val.get_opts('share_pose') and val.get_opts('num_bins') == bins\
                     and val.get_opts('rotate') == rot and val.get_opts('imagenet')\
                     and val.get_opts('size') == sz:
-                        out = make_out(mod, args['iter'], out)
+                        out, eval_done = make_out(mod, args['iter'], out, eval_done)
             out_fi.write(out + '\n')
     out_fi.close()
 
@@ -144,29 +146,33 @@ def main(args):
                 if val.get_opts('share_pose') and val.get_opts('num_bins') == bins\
                 and val.get_opts('rotate') and val.get_opts('imagenet')\
                 and val.get_opts('size') == sz:
-                    out = get_row(mod, args['iter'], out)
+                    out, eval_done = get_row(mod, args['iter'], out, eval_done)
 
             out_fi.write(out + '\n')
     out_fi.close()
 
 
-def get_row(mod, iterx, out):
-    cmd = 'python runOfficialTest.py --model=%s --iter=%d' % (mod, iterx)
-    subprocess.call(cmd, shell=True)
+def get_row(mod, iterx, out, eval_done):
+    if mod not in eval_done:
+        cmd = 'python runOfficialTest.py --model=%s --iter=%d' % (mod, iterx)
+        subprocess.call(cmd, shell=True)
+        eval_done.append(mod)
 
     # open output file
     eval_fi = osp.join(eval_dir, '%s_%d' % (mod, args['iter']), 'results.txt')
     with open(eval_fi, 'r') as f:
         lines = [line for line in f]
         # make output string
-        out += ' %s &' % lines[0][:-1]
+        out += ' %s' % lines[0][:-1]
 
-    return out   
+    return out, eval_done   
 
 
-def make_out(mod, iterx, out):
-    cmd = 'python runOfficialTest.py --model=%s --iter=%d' % (mod, iterx)
-    subprocess.call(cmd, shell=True)
+def make_out(mod, iterx, out, eval_done):
+    if mod not in eval_done:
+        cmd = 'python runOfficialTest.py --model=%s --iter=%d' % (mod, iterx)
+        subprocess.call(cmd, shell=True)
+        eval_done.append(mod)
 
     # open output file
     eval_fi = osp.join(eval_dir, '%s_%d' % (mod, args['iter']), 'results.txt')
@@ -175,7 +181,7 @@ def make_out(mod, iterx, out):
         # make output string
         out += ' %s &' % lines[1][:-1]
 
-    return out
+    return out, eval_done
 
 
 
