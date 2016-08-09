@@ -22,12 +22,17 @@ def main(args):
   voc_labelmap = caffe_pb2.LabelMap()
   text_format.Merge(str(file.read()), voc_labelmap)
 
-  stem = 'SSD_share_pose_'
+  if 'SSD_share_pose_' in mod_fi:
+    opts = mod_fi[len('SSD_share_pose_'):] + '.json'
+  elif 'SSD_seperate_pose_' in mod_fi:
+    opts = mod_fi[len('SSD_seperate_pose_'):] + '.json'
+  else:
+    print 'whoops'
+    return
 
 
   mod_fi = args['model']
   iterx = args['iter']
-  opts = mod_fi[len(stem):] + '.json'
   opt = options.Options(osp.join('/home/poirson/options/', opts))
 
   modelW = 'VGG_Pascal3D_%s_iter_%d.caffemodel' % (mod_fi, iterx)
