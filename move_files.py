@@ -15,7 +15,9 @@ def main():
 
     for fi in log_fi:
         fidx = fi.strip('.log')
-        fidx = fidx.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
+        #fidx = fidx.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
+        # hack
+        fidx = fidx[len(osp.join(log_dir, 'VGG_Pascal3D_')):]
 
         if fidx in models:
             shutil.move(osp.join(mod_temp, fidx), mod_dir)
