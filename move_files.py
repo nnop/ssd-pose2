@@ -15,10 +15,10 @@ def main():
 
     for fi in log_fi:
         fidx = fi.strip('.log')
-        fidx = fi.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
+        fidx = fidx.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
 
         if fidx in models:
-            shutil.move(osp.join(mod_temp, fi), mod_dir)
+            shutil.move(osp.join(mod_temp, fidx), mod_dir)
 
     models = os.listdir(mod_dir)
 
@@ -34,11 +34,13 @@ def main():
         if fidx not in models:
             print fidx
 
+    # cleaning up files
+    '''
     for m in models:
         cor_log = osp.join(log_dir, 'VGG_Pascal3D_' + m + '.log')
         if cor_log not in log_fi:
             shutil.move(osp.join(mod_dir, m), mod_temp)
-
+    '''
 
 
 if __name__ == '__main__':
