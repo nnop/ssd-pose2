@@ -14,11 +14,31 @@ def main():
     log_fi = glob.glob(osp.join(log_dir, '*.log'))
 
     for fi in log_fi:
-        fi = fi.strip('.log')
-        fi = fi.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
+        fidx = fi.strip('.log')
+        fidx = fi.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
 
-        if fi in models:
+        if fidx in models:
             shutil.move(osp.join(mod_temp, fi), mod_dir)
+
+    models = os.listdir(mod_dir)
+
+    for fi in log_fi:
+        fidx = fi.strip('.log')
+        #print fidx
+        
+        #fidx = fidx.strip(osp.join(log_dir, 'VGG_Pascal3D_'))
+        # hack
+        fidx = fidx[len(osp.join(log_dir, 'VGG_Pascal3D_')):]
+        #print fidx
+
+        if fidx not in models:
+            print fidx
+
+    for m in models:
+        cor_log = osp.join(log_dir, 'VGG_Pascal3D_' + m + '.log')
+        if cor_log not in log_fi:
+            shutil.move(osp.join(mod_dir, m), mod_temp)
+
 
 
 if __name__ == '__main__':
