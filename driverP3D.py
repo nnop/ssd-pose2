@@ -50,9 +50,12 @@ def main(args):
     os.chdir('../../..')
     '''
 
+    opt_dir = args['opt']
 
+    if args['idx'] != 0 and opt_dir == '':
+        opt_dir = osp.join('/home/poirson/options/', args['idx'] + '.json')
 
-    opt = options.Options(args['opt'])
+    opt = options.Options(opt_dir)
     anns = makeP3DAnns.MakeAnns(opt)
     anns.run_main()
 

@@ -9,8 +9,7 @@ import subprocess
 from utils import options
 
 '''
-This script removes models which have been run trained for less
-than some number of iterations
+Makes the tables for different model evaluations 
 '''
 
 eval_dir = 'mat_eval/'
@@ -40,7 +39,7 @@ def main(args):
                 found = True
                 break
 
-        # try and remove model / logs / options
+        # try and get model idx
         if found:
             # try to get options
             if 'SSD_share_pose_' in mod:
@@ -60,7 +59,7 @@ def main(args):
             else:
                 idx = 0
 
-            # try to remove options file
+            # get mod to options dictionary
             opt_file = osp.join('/home/poirson/options/', '%d.json' % idx)
             if osp.exists(opt_file):
                 opt = options.Options(opt_file)
@@ -72,8 +71,11 @@ def main(args):
     # append to this list 
     eval_done = []
 
+    eval_dir = 'eval_%d' % args['iter']
+    os.mkdir(eval_dir)
+
     # make share and seperate table
-    out_fi = open('share_sep_eval.txt', 'w')
+    out_fi = open(osp.join(eval_dir, 'share_sep_eval.txt'), 'w')
     for des in [True, False]:
         # make output string
         out = ''
@@ -83,11 +85,16 @@ def main(args):
             out += 'Separate 300 &'
 
         for bins in [4, 8, 16, 24]:
+            found_mod = False
             for mod, val in mod_to_opts.iteritems():
                 if val.get_opts('share_pose') == des and\
                 val.get_opts('num_bins') == bins and val.get_opts('rotate')\
                 and val.get_opts('imagenet') and val.get_opts('size') == 300:
                     out, eval_done = make_out(mod, args['iter'], out, eval_done)
+                    found_mod = True
+            if not found_mod:
+                out += ' none &'
+
 
 
         # write output
@@ -96,7 +103,7 @@ def main(args):
 
 
     # make with and without pascal table
-    out_fi = open('no_pascal_eval.txt', 'w')
+    out_fi = open(osp.join(eval_dir, 'no_pascal_eval.txt'), 'w')
     for des in [True, False]:
         out = ''
         if des:
@@ -105,18 +112,23 @@ def main(args):
             out += 'Share 300 Pascal &'
 
         for bins in [4, 8, 16, 24]:
+            found_mod = False
             for mod, val in mod_to_opts.iteritems():
                 if val.get_opts('share_pose') and val.get_opts('num_bins') == bins\
                 and val.get_opts('rotate') and val.get_opts('imagenet') == des\
                 and val.get_opts('size') == 300:
                     out, eval_done = make_out(mod, args['iter'], out, eval_done)
+                    found_mod = True
+
+            if not found_mod:
+                out += ' none &'
 
         out_fi.write(out + '\n')
     out_fi.close()
 
 
     # make rotated table
-    out_fi = open('rot_eval.txt', 'w')
+    out_fi = open(osp.join(eval_dir,'rot_eval.txt'), 'w')
     for sz in [300, 500]:
         for rot in [False, True]:
             out = ''
@@ -126,17 +138,23 @@ def main(args):
                 out += 'Share %d &' % sz
 
             for bins in [4, 8, 16, 24]:
+                found_mod = False
                 for mod, val in mod_to_opts.iteritems():
                     if val.get_opts('share_pose') and val.get_opts('num_bins') == bins\
                     and val.get_opts('rotate') == rot and val.get_opts('imagenet')\
                     and val.get_opts('size') == sz:
                         out, eval_done = make_out(mod, args['iter'], out, eval_done)
+                        found_mod = True
+
+                if not found_mod:
+                    out += ' none &'
+
             out_fi.write(out + '\n')
     out_fi.close()
 
     
     # make large results table
-    out_fi = open('all_res.txt', 'w')
+    out_fi = open(osp.join(eval_dir,'all_res.txt'), 'w')
     for bins in [4, 8, 16, 24]:
         out_fi.write('%d bins \n' % bins)
         for sz in [300, 500]:
