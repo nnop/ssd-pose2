@@ -37,12 +37,12 @@ def main():
             print fidx
 
     # cleaning up files
-    '''
+    
     for m in models:
         cor_log = osp.join(log_dir, 'VGG_Pascal3D_' + m + '.log')
         if cor_log not in log_fi:
             shutil.move(osp.join(mod_dir, m), mod_temp)
-    '''
+    
 
 
 if __name__ == '__main__':
