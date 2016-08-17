@@ -13,11 +13,12 @@ from examples.ssd import ssd_pascal3D
 
 def main(args):
 
-    opt_path = args['opt']
-    if args['idx'] != 0:
-        opt_path = osp.join('/home/poirson/options', '%d.json' % args['idx'])
+    opt_dir = args['opt']
 
-    opt = options.Options(opt_path)
+    if args['idx'] != 0 and opt_dir == '':
+        opt_dir = osp.join('/home/poirson/options/', str(args['idx']) + '.json')
+
+    opt = options.Options(opt_dir)
     anns = makeP3DAnns.MakeAnns(opt)
     anns.run_main()
 
