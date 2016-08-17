@@ -72,7 +72,7 @@ def main(args):
     eval_done = []
 
     eval_dir = 'eval_%d' % args['iter']
-    if not osp.exists eval_dir:
+    if not osp.exists(eval_dir):
         os.mkdir(eval_dir)
 
     # make share and seperate table
