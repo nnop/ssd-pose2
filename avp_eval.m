@@ -44,7 +44,8 @@ for i=1:length(classes)
 %    fprintf(fid, sprintf('%.1f           ', aas(i)*100));
      fprintf(fid, sprintf('%.1f & ', aas(i)*100));
 end
-fprintf(fid, '\n');
+fprintf(fid, sprintf('%.1f\n', mean(aas)*100));
+%fprintf(fid, '\n');
 fprintf(fid, sprintf('%.1f\n', mean(aas)*100));
 
 fclose(fid);

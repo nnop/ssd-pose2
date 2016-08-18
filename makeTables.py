@@ -99,7 +99,8 @@ def main(args):
 
 
         # write output
-        out_fi.write(out + '\n')
+        out_fi.write(out[:-2] + ' \\\\ \n')
+        out_fi.write('\hline \n')
     out_fi.close()
 
 
@@ -124,7 +125,8 @@ def main(args):
             if not found_mod:
                 out += ' none &'
 
-        out_fi.write(out + '\n')
+        out_fi.write(out[:-2] + ' \\\\ \n')
+        out_fi.write('\hline \n')
     out_fi.close()
 
 
@@ -150,7 +152,8 @@ def main(args):
                 if not found_mod:
                     out += ' none &'
 
-            out_fi.write(out + '\n')
+            out_fi.write(out[:-2] + ' \\\\ \n')
+            out_fi.write('\hline \n')
     out_fi.close()
 
     
@@ -167,7 +170,8 @@ def main(args):
                 and val.get_opts('size') == sz:
                     out, eval_done = get_row(mod, args['iter'], out, eval_done)
 
-            out_fi.write(out + '\n')
+            out_fi.write(out + ' \\\\ \n')
+            out_fi.write('\hline \n')
     out_fi.close()
 
 
