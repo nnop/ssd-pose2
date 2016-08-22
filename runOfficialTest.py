@@ -149,7 +149,7 @@ def main(args):
   if args['test_bins'] != -1:
     num_bins = args['test_bins']
     
-  matlab_cmd = 'bins = %d; path = \'%s\'; %s avp_eval;' % (num_bins, osp.join('mat_eval', fiOutput), extra)
+  matlab_cmd = 'bins = %d; bin_fa = %f; path = \'%s\'; %s avp_eval;' % (num_bins, args['bin_fa'], osp.join('mat_eval', fiOutput), extra)
   print matlab_cmd
   os.system('matlab -nodisplay -r "try %s catch; end; quit;"' % (matlab_cmd))
 
@@ -174,6 +174,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
     parser.add_argument('--test_bins', type=int, default=-1, help='bins to test with 24 bin model')
+    parser.add_argument('--bin_fa', type=float, default=1.0, help='scale the bins')
     parser.add_argument('--gpu', type=int, default=0, help='gpu to use')
     
     args = parser.parse_args()

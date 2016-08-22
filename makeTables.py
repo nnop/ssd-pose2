@@ -231,7 +231,9 @@ def make_out(mod, iterx, out, eval_done):
 
 
 def make_twoFour_out(mod, iterx, bins, out):
-    cmd = 'python runOfficialTest.py --model=%s --iter=%d --test_bins=%d' % (mod, iterx, bins)
+    bin_fa = float(bins) / float(24.0)
+
+    cmd = 'python runOfficialTest.py --model=%s --iter=%d --test_bins=%d --bin_fa=%f' % (mod, iterx, bins, bin_fa)
     subprocess.call(cmd, shell=True)
 
     eval_fi = osp.join(eval_dir, '%s_%d' % (mod, args['iter']), 'results.txt')

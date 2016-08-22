@@ -1,6 +1,6 @@
 
 
-function [recall, precision, accuracy, ap, aa] = compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename, rotate)
+function [recall, precision, accuracy, ap, aa] = compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename, rotate, bin_fa)
 %compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename)
 %BASE_DIR = 'data/pascal3D/';
 
@@ -82,7 +82,7 @@ for i = 1:M
         energy(num_pr) = dets(j, 6);        
         bbox_pr = dets(j, 1:4);
         %view_pr = find_interval((dets(j, 5) - 1) * (360 / vnum_train), azimuth_interval);
-        view_pr = dets(j, 5);
+        view_pr = floor(dets(j, 5) * bin_fa);
         
         % compute box overlap
         if isempty(bbox) == 0
