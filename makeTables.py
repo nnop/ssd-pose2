@@ -240,6 +240,8 @@ def make_twoFour_out(mod, iterx, bins, out):
         # make output string
         out += ' %s &' % lines[1][:-1]
 
+    return out
+
 
 
 if __name__ == "__main__":
