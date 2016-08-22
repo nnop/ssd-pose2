@@ -174,6 +174,29 @@ def main(args):
             out_fi.write('\hline \n')
     out_fi.close()
 
+    # make 24-V tables
+    out_fi = open(osp.join(eval_dir, '24v.txt'), 'w')
+    for sz in [300, 500]:
+        out = 'Share %d 24-V &' % sz
+
+        the_mod = None
+
+        for mod, val in mod_to_opts.iteritems():
+            if val.get_opts('share_pose') and val.get_opts('num_bins') == 24\
+            and val.get_opts('rotate') and val.get_opts('imagenet')\
+            and val.get_opts('size') == sz:
+                found_mod = True
+                the_mod = mod
+        if not found_mod:
+            break
+
+        for bins in [4, 8 , 16]:
+            out = make_twoFour_out(the_mod, args['iter'], bins, out)
+        out_fi.write(out[:-2] + ' \\\\ \n')
+        out_fi.write('\hline \n')
+    out_fi.close()
+
+
 
 def get_row(mod, iterx, out, eval_done):
     if mod not in eval_done:
@@ -205,6 +228,17 @@ def make_out(mod, iterx, out, eval_done):
         out += ' %s &' % lines[1][:-1]
 
     return out, eval_done
+
+
+def make_twoFour_out(mod, iterx, bins, out):
+    cmd = 'python runOfficialTest.py --model=%s --iter=%d --test_bins=%d' % (mod, iterx, bins)
+    subprocess.call(cmd, shell=True)
+
+    eval_fi = osp.join(eval_dir, '%s_%d' % (mod, args['iter']), 'results.txt')
+    with open(eval_fi, 'r') as f:
+        lines = [line for line in f]
+        # make output string
+        out += ' %s &' % lines[1][:-1]
 
 
 

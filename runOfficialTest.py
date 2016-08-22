@@ -145,6 +145,9 @@ def main(args):
   extra = ' rotate = false; '
   if rotate:
     extra = ' rotate = true; '
+
+  if args['test_bins'] != -1:
+    num_bins = args['test_bins']
     
   matlab_cmd = 'bins = %d; path = \'%s\'; %s avp_eval;' % (num_bins, osp.join('mat_eval', fiOutput), extra)
   print matlab_cmd
@@ -170,6 +173,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test an SSD model ")
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
+    parser.add_argument('--test_bins', type=int, default=-1, help='bins to test with 24 bin model')
     parser.add_argument('--gpu', type=int, default=0, help='gpu to use')
     
     args = parser.parse_args()
