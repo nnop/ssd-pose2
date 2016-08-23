@@ -16,11 +16,12 @@ class Options:
 		'imagenet': True,\
 		'pose_weight': 1.0,\
 		'stepsize': 11000,\
-		'rotate': False,\
+		'rotate': True,\
 		'gpu':'0',\
 		'max_iter':30000,\
 		'base_lr':0.00004,\
-		'size':300,
+		'size':300,\
+		'scene':-1,\
 		'resume':True\
 		}
 
@@ -55,6 +56,12 @@ class Options:
 		out = '%s_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' \
 		% (split, self.get_opts('num_bins'), self.get_opts('difficult'),\
 		 self.get_opts('imagenet'), self.get_opts('num_pascal'), self.get_opts('rotate'))
+		return out
+
+	def get_scene_db_stem(self, split):
+		#out = '%s_bins=%d_rotate=%r_scene=%d' \
+		#% (split, self.get_opts('num_bins'), self.get_opts('rotate'), self.get_opts('scene'))
+		out = '%s_bins=%d_scene=%d' % (split, self.get_opts('num_bins'), self.get_opts('scene'))
 		return out
 
 

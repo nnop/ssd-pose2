@@ -12,22 +12,102 @@ from random import shuffle
 
 
 '''
-This script preprocesses the annotations 
+This script preprocesses the annotations for scenes dataset
 ''' 
 
 
-DATA_DIR = 'data/philData/'
+#DATA_DIR = 'data/philData/'
 LABEL_CLS = {1:'chair', 2:'diningtable', 3:'monitor', 4:'sofa'}
 
+class MakeAnns:
 
+    def __init__(self, opt):
+        self.opt = opt
+
+    def run_main(self):
+
+        base_path = 'data/philData/'
+
+        if not osp.exists(osp.join(base_path, 'all_anns.json')):
+            makeAllAnns()
+
+        sceneidx = readSceneToIdx()
+
+        data = json.load(open(osp.join(DATA_DIR, 'all_anns.json'), 'r'))
+        if not osp.exists(osp.join(DATA_DIR, 'map.txt')):
+            createLabelMap(data)
+
+        train_dir = self.opt.get_scene_db_stem('train')
+        #val_dir = self.opt.get_scene_db_stem('val')
+        tes_dir = self.opt.get_scene_db_stem('test')
+
+        if not osp.exists(osp.join(base_path, 'cache/')):
+            os.mkdir(osp.join(base_path, 'cache/'))
+
+        #splits = [train_dir, val_dir, tes_dir]
+        splits = [train_dir, tes_dir]
+        for split in splits:
+            if not osp.exists(osp.join(base_path, 'cache', split)):
+                os.mkdir(osp.join(base_path, 'cache', split))
+
+        tr = False
+        #val = False
+        test = False
+
+        print train_dir
+
+        if not osp.exists(osp.join(base_path, 'cache', train_dir, 'train.txt')):
+            tr = True
+            trList = []
+
+        '''
+        if not osp.exists(osp.join(base_path, 'cache', val_dir, 'val.txt')):
+            vaList = []
+            val = True
+        '''
+
+        if not osp.exists(osp.join(base_path, 'cache', tes_dir, 'test.txt')):
+            teList = []
+            test = True
+
+        bins = self.opt.get_opts('num_bins')
+
+        for idx, ann in data.iteritems():
+
+            if sceneidx[ann['scene_name']] != args['test_scene_id']:
+                annpath = osp.join(base_path, 'cache', train_dir)
+            elif sceneidx[ann['scene_name']] == args['test_scene_id']:
+                 annpath = osp.join(base_path, 'cache', tes_dir)
+
+            annLoc = osp.join(annpath, idx + '.json')
+            output = getImPath(ann) + ' ' + annLoc + '\n'
+            binAngles(ann, bins, True)
+            json.dump(ann, open(annLoc, 'w'))
+
+            if sceneidx[ann['scene_name']] != args['test_scene_id'] and tr:
+                trList.append(output)
+            elif sceneidx[ann['scene_name']] == args['test_scene_id'] and test:
+                teList.append(output)
+
+        if tr:
+            with open(osp.join(base_path, 'cache', train_dir, 'train.txt'), 'w') as outfile:
+                shuffle(trList)
+                for line in trList:
+                    outfile.write(line)
+        if test:
+            with open(osp.join(base_path, 'cache', tes_dir, 'test.txt'), 'w') as outfile:
+                shuffle(teList)
+                for line in teList:
+                    outfile.write(line)
+
+
+'''
 def main(args):
 
     if not osp.exists(osp.join(DATA_DIR, 'all_anns.json')):
         makeAllAnns()
 
-    sceneidx = readSceneToIdx()
-
-    # something with args
+    # get list of scene indexes
     
     data = json.load(open(osp.join(DATA_DIR, 'all_anns.json'), 'r'))
     if not osp.exists(osp.join(DATA_DIR, 'map.txt')):
@@ -118,7 +198,7 @@ def main(args):
             for line in teList:
                 outfile.write(line)
         #teWriter.close()
-
+'''
 
 
 def createLabelMap(data):

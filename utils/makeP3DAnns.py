@@ -27,16 +27,9 @@ class MakeAnns:
         if not osp.exists(osp.join(base_path, 'all_anns.json')):
             makeAllAnns()
 
-        # something with args
         data = json.load(open('data/pascal3D/all_anns.json', 'r'))
         if not osp.exists('data/pascal3D/map.txt'):
             createLabelMap(data)
-        
-        # make a train/val/test directory
-        #shutil.rmtree('./cache/')
-        #train_dir = 'train_bins=%d_diff=%r_imgnet=%r_numPascal=%d_rotate=%r' % (args['num_bins'], args['difficult'], args['imagenet'], args['num_pascal'], args['rotate'])
-        #val_dir = 'val_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
-        #tes_dir = 'test_bins=%d_diff=%r_rotate=%r' % (args['num_bins'], args['difficult'], args['rotate'])
 
         train_dir = self.opt.get_db_name_stem('train')
         val_dir = self.opt.get_db_name_stem('val')
@@ -61,23 +54,16 @@ class MakeAnns:
             filterDifficult(data)
 
         if not osp.exists(osp.join(base_path, 'cache', train_dir, 'train.txt')):
-            #trWriter = open(osp.join('./cache', train_dir, 'train.txt'), 'w')
             tr = True
             trList = []
-            #if not args['difficult']:
-            #    filterDifficult(data)
 
         if not osp.exists(osp.join(base_path, 'cache', val_dir, 'val.txt')):
-            #valWriter = open(osp.join('./cache', val_dir, 'val.txt'), 'w')
             vaList = []
             val = True
         
         if not osp.exists(osp.join(base_path, 'cache', tes_dir, 'test.txt')):
-            #teWriter = open(osp.join('./cache', tes_dir, 'test.txt'), 'w')
             teList = []
             test = True
-
-        #cur_dir = os.getcwd()
 
         rot = self.opt.get_opts('rotate')
         bins = self.opt.get_opts('num_bins')
@@ -94,45 +80,35 @@ class MakeAnns:
             json.dump(ann, open(annLoc, 'w'))
 
             if ann['split'] == 'train' and tr:
-                # use train file writer
+                # append to train list
                 if ann['database'] == 'ImageNet':
-                    #print 'stop it '
                     if imnet:
                         trList.append(output)
-                        #trWriter.write(output)
-                    #yo = 'do nothing '
                 else:
                     for _ in xrange(npascal):
                         trList.append(output)
-                        #trWriter.write(output)
-                
             elif ann['split'] == 'val' and val:
-                # use val file writer
+                # append to val list
                 vaList.append(output)
-                #valWriter.write(output)
             elif ann['split'] == 'test' and test:
-                # use test file writer
+                # append to test list
                 teList.append(output)
-                #teWriter.write(output)
         
         if tr:
             with open(osp.join(base_path, 'cache', train_dir, 'train.txt'), 'w') as outfile:
                 shuffle(trList)
                 for line in trList:
                     outfile.write(line)
-            #trWriter.close()
         if val:
             with open(osp.join(base_path, 'cache', val_dir, 'val.txt'), 'w') as outfile:
                 shuffle(vaList)
                 for line in vaList:
                     outfile.write(line)
-            #valWriter.close()
         if test:
             with open(osp.join(base_path, 'cache', tes_dir, 'test.txt'), 'w') as outfile:
                 shuffle(teList)
                 for line in teList:
                     outfile.write(line)
-            #teWriter.close()
 
 
 def filterDifficult(data):
