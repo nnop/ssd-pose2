@@ -3,12 +3,13 @@ import os
 import os.path as osp
 import subprocess
 import sys
+import random
 
 from utils import options
 from utils import makeScenesAnns
 from examples.ssd import ssd_Scenes
 
-#DATA_DIR = 'data/philData/'
+DATA_DIR = 'data/scenes/'
 
 def main(args):
 
@@ -58,7 +59,7 @@ def main(args):
     #print splits
     '''
 
-    data_root_dir = 'data/philData/'
+    data_root_dir = DATA_DIR
 
     opt_dir = args['opt']
 
@@ -71,7 +72,7 @@ def main(args):
 
     #data_root_dir='data/pascal3D'
     #data_root_dir = ''
-    mapfile = 'data/philData/labelmap.prototxt'
+    mapfile = osp.join(DATA_DIR, 'labelmap.prototxt')
     anno_type='detection'
     label_type='json'
 
@@ -84,7 +85,7 @@ def main(args):
     #valstem = opt.opt.get_scene_db_stem('val') 
     #valdb = ('%s_lmdb' % valstem, valstem, 'val.txt')
 
-    testem = opt.opt.get_scene_db_stem('test') 
+    testem = opt.get_scene_db_stem('test') 
     testdb = ('%s_lmdb' % testem, testem, 'test.txt')
 
     opt.add_kv('num_val', 0)

@@ -222,9 +222,9 @@ class SSD:
         #val_data = args['test_lmdb']
         #test_data = args['test_lmdb']
 
-        train_data = 'data/philData/lmdb/%s_lmdb' % args.get_db_name_stem('train')
-        #val_data = 'data/philData/lmdb/%s_lmdb' % args.get_db_name_stem('val')
-        test_data = 'data/philData/lmdb/%s_lmdb' % args.get_db_name_stem('test')
+        train_data = 'data/scenes/lmdb/%s_lmdb' % args.get_scene_db_stem('train')
+        #val_data = 'data/scenes/lmdb/%s_lmdb' % args.get_db_name_stem('val')
+        test_data = 'data/scenes/lmdb/%s_lmdb' % args.get_scene_db_stem('test')
 
 
 
@@ -292,13 +292,13 @@ class SSD:
 
 
         # Directory which stores the model .prototxt file.
-        save_dir = "models/VGGNet/philData/{}".format(job_name)
+        save_dir = "models/VGGNet/scenes/{}".format(job_name)
         # Directory which stores the snapshot of models.
-        snapshot_dir = "models/VGGNet/philData/{}".format(job_name)
+        snapshot_dir = "models/VGGNet/scenes/{}".format(job_name)
         # Directory which stores the job script and log file.
-        job_dir = "jobs/VGGNet/philData/{}".format(job_name)
+        job_dir = "jobs/VGGNet/scenes/{}".format(job_name)
         # Directory which stores the detection results.
-        output_result_dir = "data/philData/results/{}/Main".format(job_name)
+        output_result_dir = "data/scenes/results/{}/Main".format(job_name)
 
         # model definition files.
         train_net_file = "{}/train.prototxt".format(save_dir)
@@ -317,7 +317,7 @@ class SSD:
         # The pretrained model. We use the Fully convolutional reduced (atrous) VGGNet.
         pretrain_model = "models/VGGNet/VGG_ILSVRC_16_layers_fc_reduced.caffemodel"
         # Stores LabelMapItem.
-        label_map_file = "data/philData/labelmap.prototxt"
+        label_map_file = "data/scenes/labelmap.prototxt"
 
         # MultiBoxLoss parameters.
 
@@ -334,7 +334,7 @@ class SSD:
             'loc_loss_type': caffe_pb2.LocLossType.Value('LocLossType_SMOOTH_L1'),
             'conf_loss_type':caffe_pb2.ConfLossType.Value('ConfLossType_SOFTMAX'),
             'loc_weight': loc_weight,
-            'pose_weight': args['pose_weight'],
+            'pose_weight': args.get_opts('pose_weight'),
             'num_classes': num_classes,
             'num_poses': num_poses,
             'share_location': share_location,
@@ -356,7 +356,7 @@ class SSD:
         # parameters for generating priors.
         # minimum dimension of input image
         # TODO ASK WEI
-        min_dim = args['size']
+        min_dim = args.get_opts('size')
         # conv4_3 ==> 38 x 38
         # fc7 ==> 19 x 19
         # conv6_2 ==> 10 x 10
@@ -415,7 +415,7 @@ class SSD:
 
         # Evaluate on whole test set.
         #num_test_image = args['num_val']
-        num_test_image = args['num_test']
+        num_test_image = args.get_opts('num_test')
         test_batch_size = 1
         test_iter = num_test_image / test_batch_size
 
@@ -424,11 +424,11 @@ class SSD:
             'base_lr': base_lr,
             'weight_decay': 0.0005,
             'lr_policy': "step",
-            'stepsize': args['stepsize'],
+            'stepsize': args.get_opts('stepsize'),
             'gamma': 0.1,
             'momentum': 0.9,
             'iter_size': iter_size,
-            'max_iter': args['max_iter'],
+            'max_iter': args.get_opts('max_iter'),
             'snapshot': 2000,
             'display': 10,
             'average_loss': 10,
@@ -450,11 +450,11 @@ class SSD:
             'base_lr': base_lr,
             'weight_decay': 0.0005,
             'lr_policy': "step",
-            'stepsize': args['stepsize'],
+            'stepsize': args.get_opts('stepsize'),
             'gamma': 0.1,
             'momentum': 0.9,
             'iter_size': iter_size,
-            'max_iter': args['max_iter'],
+            'max_iter': args.get_opts('max_iter'),
             'snapshot': 2000,
             'display': 10,
             'average_loss': 10,
@@ -464,7 +464,7 @@ class SSD:
             'debug_info': False,
             'snapshot_after_train': True,
             # Test parameters
-            'test_iter': [args['num_test']],
+            'test_iter': [args.get_opts('num_test')],
             #'test_iter': ,
             'test_interval': 1,
             'eval_type': "detection",
@@ -505,7 +505,7 @@ class SSD:
         ### Hopefully you don't need to change the following ###
         # Check file.
         check_if_exist(train_data)
-        check_if_exist(val_data)
+        #check_if_exist(val_data)
         check_if_exist(test_data)
         check_if_exist(label_map_file)
         check_if_exist(pretrain_model)
@@ -545,7 +545,7 @@ class SSD:
 
         # Create val net.
         net = caffe.NetSpec()
-        net.data, net.label = CreateAnnotatedDataLayer(val_data, batch_size=test_batch_size,
+        net.data, net.label = CreateAnnotatedDataLayer(test_data, batch_size=test_batch_size,
                 train=False, output_label=True, label_map_file=label_map_file,
                 transform_param=test_transform_param)
 

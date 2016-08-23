@@ -16,7 +16,7 @@ This script preprocesses the annotations for scenes dataset
 ''' 
 
 
-#DATA_DIR = 'data/philData/'
+DATA_DIR = 'data/scenes/'
 LABEL_CLS = {1:'chair', 2:'diningtable', 3:'monitor', 4:'sofa'}
 
 class MakeAnns:
@@ -26,15 +26,15 @@ class MakeAnns:
 
     def run_main(self):
 
-        base_path = 'data/philData/'
+        base_path = DATA_DIR
 
         if not osp.exists(osp.join(base_path, 'all_anns.json')):
             makeAllAnns()
 
         sceneidx = readSceneToIdx()
 
-        data = json.load(open(osp.join(DATA_DIR, 'all_anns.json'), 'r'))
-        if not osp.exists(osp.join(DATA_DIR, 'map.txt')):
+        data = json.load(open(osp.join(base_path, 'all_anns.json'), 'r'))
+        if not osp.exists(osp.join(base_path, 'map.txt')):
             createLabelMap(data)
 
         train_dir = self.opt.get_scene_db_stem('train')
@@ -71,12 +71,13 @@ class MakeAnns:
             test = True
 
         bins = self.opt.get_opts('num_bins')
+        scene_id = self.opt.get_opts('scene')
 
         for idx, ann in data.iteritems():
 
-            if sceneidx[ann['scene_name']] != args['test_scene_id']:
+            if sceneidx[ann['scene_name']] != scene_id:
                 annpath = osp.join(base_path, 'cache', train_dir)
-            elif sceneidx[ann['scene_name']] == args['test_scene_id']:
+            elif sceneidx[ann['scene_name']] == scene_id:
                  annpath = osp.join(base_path, 'cache', tes_dir)
 
             annLoc = osp.join(annpath, idx + '.json')
@@ -84,9 +85,9 @@ class MakeAnns:
             binAngles(ann, bins, True)
             json.dump(ann, open(annLoc, 'w'))
 
-            if sceneidx[ann['scene_name']] != args['test_scene_id'] and tr:
+            if sceneidx[ann['scene_name']] != scene_id and tr:
                 trList.append(output)
-            elif sceneidx[ann['scene_name']] == args['test_scene_id'] and test:
+            elif sceneidx[ann['scene_name']] == scene_id and test:
                 teList.append(output)
 
         if tr:
