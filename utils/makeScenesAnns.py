@@ -82,6 +82,8 @@ class MakeAnns:
 
             annLoc = osp.join(annpath, idx + '.json')
             output = getImPath(ann) + ' ' + annLoc + '\n'
+            if not osp.exists(getImPath(ann)):
+                continue
             binAngles(ann, bins, True)
             json.dump(ann, open(annLoc, 'w'))
 

@@ -67,7 +67,7 @@ def main(args):
 	pas_deploy = osp.join('models/VGGNet/Pascal3D/', p3d_dir, 'deploy.prototxt')
 	phil_deploy = osp.join('models/VGGNet/scenes/', rohit_dir,'deploy.prototxt')
 
-	model_name = 'VGG_Rohit_%s' % (rohit_dir)
+	model_name = 'VGG_scenes_%s' % (rohit_dir)
 
 	max_iter = 0
 	# Find most recent snapshot.
