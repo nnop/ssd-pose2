@@ -2,18 +2,22 @@ close all;
 classes = {'chair',
               'diningtable',
               'sofa',
-              'tvmonitor'};
+              'monitor'};
 
           
 aps = [];
 aas = [];
 
 
+rotate = true;
+
+
 for i=1:length(classes)
     cls = classes{i};
     fname = fullfile(path, [cls '.mat']);
     
-    [recall, precision, accuracy, ap, aa] = scene_compute_recall_precision_accuracy_azimuth(cls, bins, bins, fname, rotate, bin_fa);
+    [recall, precision, accuracy, ap, aa] = scene_compute_recall_precision_accuracy_azimuth(cls, bins, ...
+        bins, fname, rotate, scene_path);
     aas = [aas aa];
 end
 

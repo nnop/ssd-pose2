@@ -35,7 +35,19 @@ def main(args):
   iterx = args['iter']
   opt = options.Options(osp.join('/home/poirson/options/', opts))
 
-  modelW = 'VGG_scenes_%s_iter_%d.caffemodel' % (mod_fi, iterx)
+  if osp.exists(osp.join('models/VGGNet/scenes/', mod_fi,\
+   'VGG_scenes_%s_iter_%d.caffemodel' % (mod_fi, iterx))):
+    modelW = 'VGG_scenes_%s_iter_%d.caffemodel' % (mod_fi, iterx)
+  elif osp.exists(osp.join('models/VGGNet/scenes/', mod_fi,\
+    'VGG_Rohit_%s_iter_%d.caffemodel' % (mod_fi, iterx))):
+    modelW = 'VGG_Rohit_%s_iter_%d.caffemodel' % (mod_fi, iterx)
+  elif osp.exists(osp.join('models/VGGNet/scenes/', mod_fi,\
+    'VGG_Pascal3D_%s_iter_%d.caffemodel' % (mod_fi, iterx))):
+    modelW = 'VGG_Pascal3D_%s_iter_%d.caffemodel' % (mod_fi, iterx)
+  else:
+    print 'whoops'
+    return
+
   model_def = osp.join('models/VGGNet/scenes/', mod_fi, 'deploy.prototxt')
   model_weights = osp.join('models/VGGNet/scenes/', mod_fi, modelW)
 
@@ -47,7 +59,7 @@ def main(args):
   transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
 
   db_idx = opt.get_scene_db_stem('test')
-  f = open(osp.join('data/scenes/', db_idx, 'test.txt'), 'r')
+  f = open(osp.join('data/scenes/', 'cache', db_idx, 'test.txt'), 'r')
   val = [line.strip('\n').split(' ')[0] for line in f ]
 
   
@@ -73,6 +85,7 @@ def main(args):
   skip = False
   if osp.exists(osp.join('mat_eval', fiOutput, 'chair.mat')):
     skip = True
+
 
   for idx, v in enumerate(val):
       if skip:
@@ -110,7 +123,7 @@ def main(args):
           
       cur_out = {'diningtable':[],
                 'sofa':[],
-                'tvmonitor':[],
+                'monitor':[],
                 'chair':[]}
       
       for det_idx, lbl in enumerate(det_label):
@@ -141,10 +154,56 @@ def main(args):
 
   #if args['test_bins'] != -1:
   #  num_bins = args['test_bins']
+  
+  # make test scene gts
+  # hack
+  prepare_test_gt(db_idx)
+
+  # hard coded hack
+  # TODO use options instead
+  sc_path = db_idx[-7:]
+  print 
     
-  matlab_cmd = 'bins = %d; ; path = \'%s\'; scene_avp_eval;' % (num_bins, osp.join('scene_mat_eval', fiOutput))
+  matlab_cmd = 'bins = %d; scene_path=\'%s\'; path = \'%s\'; scene_avp_eval;' % (num_bins, sc_path, osp.join('scene_mat_eval', fiOutput))
   print matlab_cmd
   os.system('matlab -nodisplay -r "try %s catch; end; quit;"' % (matlab_cmd))
+
+
+def prepare_test_gt(fold):
+  data_path = 'data/scenes/cache/'
+
+  out_path = 'data/scenes/matTest/'
+
+  if not osp.exists(out_path):
+    os.mkdir(out_path)
+
+  out_dir = osp.join(out_path, fold[-7:])
+
+  if not osp.exists(out_dir):
+    os.mkdir(out_dir)
+
+  f = open(osp.join(data_path, fold, 'test.txt'), 'r')
+
+  jsons = [line.strip('\n').split(' ')[1][len(osp.join(data_path, fold))+1:] for line in f]
+  f.close()
+
+  out_f = open(osp.join(out_dir, 'jsons.txt'), 'w')
+
+  for js in jsons:
+    out_f.write(js[:-5] + '\n')
+    d_fi = osp.join(data_path, fold, js)
+    data = json.load(open(d_fi, 'r'))
+    
+    rec = {}
+    objs = []
+    for idx, ann in enumerate(data['annotation']):
+        temp = {}
+        temp['class'] = ann['category_id']
+        temp['azimuth'] = ann['viewpoint']['azimuth']
+        temp['bbox'] = ann['bbox']
+        objs.append(temp)
+    rec['objects'] = np.asarray(objs)
+    sio.savemat(osp.join(out_dir, js[:-5] + '.mat'), rec)
 
 
 def get_labelname(labelmap, labels):
@@ -167,7 +226,6 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
     parser.add_argument('--test_bins', type=int, default=-1, help='bins to test with 24 bin model')
-    parser.add_argument('--bin_fa', type=float, default=1.0, help='scale the bins')
     parser.add_argument('--gpu', type=int, default=0, help='gpu to use')
     
     args = parser.parse_args()

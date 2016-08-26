@@ -1,16 +1,12 @@
 
 
-function [recall, precision, accuracy, ap, aa] = scene_compute_recall_precision_accuracy_azimuth(cls, vnum_train, vnum_test, prediction_filename, rotate, bin_fa)
+function [recall, precision, accuracy, ap, aa] = scene_compute_recall_precision_accuracy_azimuth(cls,...
+    vnum_train, vnum_test, prediction_filename, rotate, scene_path)
 
 
 data_path = 'data/scenes/';
 path_ann_view = fullfile(data_path, 'Annotations');
 
-addpath(fullfile(data_path, 'VDPM'));
-addpath(fullfile(data_path, 'PASCAL/VOCdevkit/VOCcode'));
-VOCinit;
-ids = textread(sprintf(VOCopts.imgsetpath, 'val'), '%s');
-M = numel(ids);
 
 filename = prediction_filename;
 object = load(filename);
@@ -20,13 +16,14 @@ dets_all = object.dets;
 % this step greatly accelerates testing.
 %object = load('voc12val_records.mat');
 try
-    object = load(fullfile(data_path, 'voc12val_records.mat'));
+    object = load(fullfile('data/scenes/matTest/', scene_path, 'scene_records.mat'));
 catch
-    run(fullfile('extract_records.m'));
-    object = load(fullfile(data_path, 'voc12val_records.mat'));
+    scene_extract_records(scene_path);
+    object = load(fullfile('data/scenes/matTest/', scene_path, 'scene_records.mat'));
 end
 voc12val_records = object.voc12val_records;
 
+M = length(voc12val_records);
 energy = [];
 correct = [];
 correct_view = [];
@@ -38,31 +35,35 @@ for i = 1:M
     %fprintf('%s train view %d test view %d: %d/%d\n', cls, vnum_train, vnum_test, i, M);    
     % read ground truth bounding box
     rec = voc12val_records{i}; %PASreadrecord(sprintf(VOCopts.annopath, ids{i}));
-    clsinds = strmatch(cls, {rec.objects(:).class}, 'exact');
-    diff = [rec.objects(clsinds).difficult];
-    clsinds(diff == 1) = [];
+    %clsinds = strmatch(cls, {rec.objects{:}.class}, 'exact')
+    clsinds = [];
+    for obj_idx=1:length(rec.objects)
+        if strmatch(cls, {rec.objects{obj_idx}.class}, 'exact')
+           clsinds = [clsinds obj_idx];
+        end
+    end
+    %diff = [rec.objects{clsinds}.difficult];
+    %clsinds(diff == 1) = [];
     n = numel(clsinds);
     bbox = zeros(n, 4);
     for j = 1:n
-        bbox(j,:) = rec.objects(clsinds(j)).bbox;
+        bbox(j,:) = rec.objects{clsinds(j)}.bbox;
     end
     count(i) = size(bbox, 1);
     det = zeros(count(i), 1);
     
     % read ground truth viewpoint
     if isempty(clsinds) == 0
-        filename = fullfile(path_ann_view, sprintf('%s_pascal/%s.mat', cls, ids{i}));
-        object = load(filename);
-        record = object.record;
+        %filename = fullfile(path_ann_view, sprintf('%s_pascal/%s.mat', cls, ids{i}));
+        %object = load(filename);
+        %record = object.record;
         view_gt = zeros(n, 1);
         for j = 1:n
-            if record.objects(clsinds(j)).viewpoint.distance == 0
-                azimuth = record.objects(clsinds(j)).viewpoint.azimuth_coarse;
-            else
-                azimuth = record.objects(clsinds(j)).viewpoint.azimuth;
-            end
+            azimuth = rec.objects{clsinds(j)}.azimuth;
             view_gt(j) = find_interval(azimuth, vnum_test, rotate);
         end
+        disp('gt');
+        disp(view_gt);
     else
         view_gt = [];
     end
@@ -76,7 +77,9 @@ for i = 1:M
         energy(num_pr) = dets(j, 6);        
         bbox_pr = dets(j, 1:4);
         %view_pr = find_interval((dets(j, 5) - 1) * (360 / vnum_train), azimuth_interval);
-        view_pr = floor(dets(j, 5) * bin_fa);
+        view_pr = dets(j, 5);
+        disp('predicted');
+        disp(view_pr);
         
         % compute box overlap
         if isempty(bbox) == 0
