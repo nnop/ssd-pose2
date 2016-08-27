@@ -83,7 +83,7 @@ def main(args):
   # hack 
   fiOutput = 'scenes_%s_%d' % (mod_fi, iterx)
   skip = False
-  if osp.exists(osp.join('mat_eval', fiOutput, 'chair.mat')):
+  if osp.exists(osp.join('scene_mat_eval', fiOutput, 'chair.mat')):
     skip = True
 
 
