@@ -60,6 +60,11 @@ for i = 1:M
     count(i) = size(bbox, 1);
     det = zeros(count(i), 1);
     
+    % convert bboxes to x1, y1, x2, y2
+    bbox(:,3) = bbox(:,1) + bbox(:,3);
+    bbox(:,4) = bbox(:,2) + bbox(:,4);
+    
+    
     % read ground truth viewpoint
     if isempty(clsinds) == 0
         %filename = fullfile(path_ann_view, sprintf('%s_pascal/%s.mat', cls, ids{i}));
