@@ -225,7 +225,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test an SSD model ")
     parser.add_argument('--model', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
-    parser.add_argument('--test_bins', type=int, default=-1, help='bins to test with 24 bin model')
     parser.add_argument('--gpu', type=int, default=0, help='gpu to use')
     
     args = parser.parse_args()

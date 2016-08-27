@@ -204,6 +204,8 @@ def main(args):
 	
 	voc_net_new.save(new_voc_model_file)
 	print(new_voc_model_file)
+	print(model_name)
+	print(max_iter)
 
 
 if __name__ == "__main__":

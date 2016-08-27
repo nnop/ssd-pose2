@@ -4,6 +4,14 @@ function [recall, precision, accuracy, ap, aa] = scene_compute_recall_precision_
     vnum_train, vnum_test, prediction_filename, rotate, scene_path)
 
 
+
+data_path = 'data/pascal3D/';
+path_ann_view = fullfile(data_path, 'Annotations');
+
+addpath(fullfile(data_path, 'VDPM'));
+addpath(fullfile(data_path, 'PASCAL/VOCdevkit/VOCcode'));
+VOCinit;
+
 data_path = 'data/scenes/';
 path_ann_view = fullfile(data_path, 'Annotations');
 
