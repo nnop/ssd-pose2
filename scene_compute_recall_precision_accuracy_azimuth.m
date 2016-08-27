@@ -70,8 +70,8 @@ for i = 1:M
             azimuth = rec.objects{clsinds(j)}.azimuth;
             view_gt(j) = find_interval(azimuth, vnum_test, rotate);
         end
-        disp('gt');
-        disp(view_gt);
+        %disp('gt');
+        %disp(view_gt);
     else
         view_gt = [];
     end
@@ -86,8 +86,8 @@ for i = 1:M
         bbox_pr = dets(j, 1:4);
         %view_pr = find_interval((dets(j, 5) - 1) * (360 / vnum_train), azimuth_interval);
         view_pr = dets(j, 5);
-        disp('predicted');
-        disp(view_pr);
+        %disp('predicted');
+        %disp(view_pr);
         
         % compute box overlap
         if isempty(bbox) == 0
