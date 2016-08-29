@@ -23,12 +23,12 @@ dets_all = object.dets;
 % load pre-packaged records (from extract_records.m)
 % this step greatly accelerates testing.
 %object = load('voc12val_records.mat');
-try
-    object = load(fullfile('data/scenes/matTest/', scene_path, 'scene_records.mat'));
-catch
+%try
+%    object = load(fullfile('data/scenes/matTest/', scene_path, 'scene_records.mat'));
+%catch
     scene_extract_records(scene_path);
     object = load(fullfile('data/scenes/matTest/', scene_path, 'scene_records.mat'));
-end
+%end
 voc12val_records = object.voc12val_records;
 
 M = length(voc12val_records);
