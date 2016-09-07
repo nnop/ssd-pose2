@@ -9,7 +9,7 @@ from utils import options
 from utils import makeRohitAnns
 from examples.ssd import ssd_GMU
 
-DATA_DIR = 'data/gmu_kitchen/'
+DATA_DIR = 'data/scene_one/'
 
 def main(args):
 
@@ -68,12 +68,17 @@ def main(args):
 
     opt.add_kv('mod_id', mod_id)
 
+    # hack
+    f = open(osp.join(DATA_DIR, 'map.txt'))
+    lines = [line for lin in f]
+    f.close()
+    opt.add_kv('num_classes', len(lines) + 1)
+
     opt_out_path = osp.join('/home/poirson/options', '%d.json' % mod_id)
     opt.write_opt(opt_out_path)
 
     ssd = ssd_GMU.SSD()
     ssd.run_main(opt)
-
 
 
 if __name__ == "__main__":

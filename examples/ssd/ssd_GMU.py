@@ -189,8 +189,8 @@ class SSD:
         caffe_root = os.getcwd()
 
 
-        # Ric-change
-        num_classes = 12
+        args.add_kv('sampler', True)
+        num_classes = args.get_opts('num_classes')
 
 
         # Set true if you want to start training right after generating all files.

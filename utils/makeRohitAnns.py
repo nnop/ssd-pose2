@@ -17,7 +17,6 @@ This script preprocesses the annotations for scenes dataset
 
 
 DATA_DIR = 'data/scene_one/'
-LABEL_CLS = {1:'chair', 2:'diningtable', 3:'monitor', 4:'sofa'}
 
 class MakeAnns:
 
@@ -116,18 +115,15 @@ class MakeAnns:
 
 def createLabelMap(mapping):
     f = open(osp.join(DATA_DIR, 'map.txt'), 'w')
-    for label, name in labelToCls.iteritems():
+    for label, name in mapping.iteritems():
         f.write(name + ' ' + str(label) + ' ' + name + '\n')
     f.close()
 
 
 def getImPath(ann):
     path = osp.join(DATA_DIR, 'images', ann['scene_name'], ann['filename'])
-    #if ann['database'] == 'ImageNet':
-    #    path = osp.join('images/imagenet/', ann['filename'])
-    #else:
-    #    path = osp.join('images/pascal/', ann['filename'])
     return path
+
 
 def getAnnPath(ann, train_dir, tes_dir, sceneidx):
     if sceneidx[ann['scene_name']] != args['test_scene_id']:
@@ -138,32 +134,10 @@ def getAnnPath(ann, train_dir, tes_dir, sceneidx):
     return path
 
 
-
-def binAngles(ann, bins, rotate=False):
-    offset = 0
-    if rotate:
-        offset = 360 / (bins * 2)
-    for obj in ann['annotation']:
-        if 'viewpoint' in obj:
-            
-            azi = obj['viewpoint']['azimuth']
-
-            # bin = int(azi / (360/bins))
-            bin = int(((azi + offset) % 360) / (360/bins))
-            #print "Azi: %f  bin: %d" %(azi, bin) 
-            obj['aziLabel'] = bin
-            flipAzi = 360 - azi
-            # obj['aziLabelFlip'] = int(flipAzi / (360/bins))
-            obj['aziLabelFlip'] = int(((flipAzi + offset) % 360) / (360/bins))
-        else:
-            print 'woah where yo angle'
-
-
-
 def makeAllAnns(mapping):
 
     all_anns = {}
-    ann_path = osp.join(DATA_DIR, 'Annotations')
+    ann_path = osp.join(DATA_DIR, 'annotations')
     scenes = os.listdir(ann_path)
 
     for scene_name in scenes:
@@ -183,7 +157,7 @@ def makeAllAnns(mapping):
     print len(all_anns.keys())
     all_anns = removeEmptyAnns(all_anns)
     print len(all_anns.keys())
-    #makeSceneToIdx(all_anns)
+    makeSceneToIdx(all_anns)
 
     json.dump(all_anns, open(osp.join(DATA_DIR, 'all_anns.json'), 'w'))
 
@@ -293,19 +267,20 @@ def parseMat(matfile, mapping):
             objects['category_id'] = mapping[cat_id]
             
             bbox = mat_ann[ind, 0:4]
-            bbox[0] /= 1920.0
-            bbox[0] *= 600.0
-            bbox[2] /= 1920.0
-            bbox[2] *= 600.0
 
-            bbox[1] /= 1080.0
-            bbox[1] *= 338.0
-            bbox[3] /= 1080.0
-            bbox[3] *= 338.0
+            scale_x = (600.0/1920.0)
+            scale_y = (338.0/1080.0)
+
+            bbox[0] = float(bbox[0]) * scale_x
+            bbox[2] = float(bbox[2]) * scale_x
+
+            bbox[1] = float(bbox[1]) * scale_y
+            bbox[3] = float(bbox[3]) * scale_y
 
             # Convert to w,h TODO
             bbox[2] = bbox[2] - bbox[0]
             bbox[3] = bbox[3] - bbox[1]
+
 
             bbox = bbox.tolist()
             objects['bbox'] = bbox
