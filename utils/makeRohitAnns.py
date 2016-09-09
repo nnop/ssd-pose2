@@ -59,6 +59,11 @@ class MakeAnns:
 
         scene_id = self.opt.get_opts('scene')
         data = splitData(data, sceneidx, scene_id)
+        # hack for icra conference
+        # TODO: remove
+        scene_id = 7
+        data = splitData(data, sceneidx, scene_id)
+
 
 
         if not osp.exists(osp.join(base_path, 'cache', train_dir, 'train.txt')):
