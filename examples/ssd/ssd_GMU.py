@@ -296,7 +296,7 @@ class SSD:
         # The pretrained model. We use the Fully convolutional reduced (atrous) VGGNet.
         pretrain_model = "models/VGGNet/VGG_ILSVRC_16_layers_fc_reduced.caffemodel"
         # Stores LabelMapItem.
-        label_map_file = "data/gmu_kitchen/labelmap.prototxt"
+        label_map_file = osp.join(data_dir, 'labelmap.prototxt')
 
         # MultiBoxLoss parameters.
 
