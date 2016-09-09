@@ -58,11 +58,11 @@ class MakeAnns:
         print train_dir
 
         scene_id = self.opt.get_opts('scene')
-        data = splitData(data, sceneidx, scene_id)
+        #data = splitData(data, sceneidx, scene_id)
         # hack for icra conference
         # TODO: remove
-        scene_id = 7
-        data = splitData(data, sceneidx, scene_id)
+        #scene_id = 7
+        data = splitData(data, sceneidx, scene_id, 7)
 
 
 
@@ -233,10 +233,10 @@ def checkCounts(data):
         print "%s: %s" % (key, counts[key])
 
 
-def splitData(data, sc_map, sc_test):
+def splitData(data, sc_map, sc_test1, sc_test2):
 
     for idx, ann in data.iteritems():
-        if sc_map[ann['scene_name']] == sc_test:
+        if sc_map[ann['scene_name']] == sc_test1 or sc_map[ann['scene_name']] == sc_test2:
             ann['split'] = 'test'
         else:
             ann['split'] = 'train'
