@@ -195,6 +195,7 @@ void DetectionEvaluateLayer<Dtype>::Forward_cpu(
                   (!evaluate_difficult_gt_ && !gt_bboxes[jmax].difficult())) {
                 if (!visited[jmax]) {
                   // true positive.
+                  //LOG(INFO) << "tp found " << label;
                   top_data[num_det * 5 + 3] = 1;
                   top_data[num_det * 5 + 4] = 0;
                   visited[jmax] = true;

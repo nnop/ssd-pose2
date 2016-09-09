@@ -39,19 +39,20 @@ class MakeAnns:
             createLabelMap(labelidx)
 
         train_dir = self.opt.get_gmu_db_stem('train')
-        val_dir = self.opt.get_gmu_db_stem('val')
+        #val_dir = self.opt.get_gmu_db_stem('val')
         tes_dir = self.opt.get_gmu_db_stem('test')
 
         if not osp.exists(osp.join(base_path, 'cache/')):
             os.mkdir(osp.join(base_path, 'cache/'))
 
-        splits = [train_dir, val_dir, tes_dir]
+        #splits = [train_dir, val_dir, tes_dir]
+        splits = [train_dir, tes_dir]
         for split in splits:
             if not osp.exists(osp.join(base_path, 'cache', split)):
                 os.mkdir(osp.join(base_path, 'cache', split))
 
         tr = False
-        val = False
+        #val = False
         test = False
 
         print train_dir
@@ -64,9 +65,9 @@ class MakeAnns:
             tr = True
             trList = []
 
-        if not osp.exists(osp.join(base_path, 'cache', val_dir, 'val.txt')):
-            vaList = []
-            val = True
+        #if not osp.exists(osp.join(base_path, 'cache', val_dir, 'val.txt')):
+        #    vaList = []
+         #   val = True
 
         if not osp.exists(osp.join(base_path, 'cache', tes_dir, 'test.txt')):
             teList = []
@@ -79,8 +80,8 @@ class MakeAnns:
                 annpath = osp.join(base_path, 'cache', train_dir)
             elif ann['split'] == 'test':
                  annpath = osp.join(base_path, 'cache', tes_dir)
-            elif ann['split'] == 'val':
-                annpath = osp.join(base_path, 'cache', val_dir)
+            #elif ann['split'] == 'val':
+            #    annpath = osp.join(base_path, 'cache', val_dir)
 
             annLoc = osp.join(annpath, idx + '.json')
             output = getImPath(ann) + ' ' + annLoc + '\n'
@@ -93,19 +94,21 @@ class MakeAnns:
                 trList.append(output)
             elif ann['split'] == 'test' and test:
                 teList.append(output)
-            elif ann['split'] == 'val' and val:
-                vaList.append(output)
+            #elif ann['split'] == 'val' and val:
+            #    vaList.append(output)
 
         if tr:
             with open(osp.join(base_path, 'cache', train_dir, 'train.txt'), 'w') as outfile:
                 shuffle(trList)
                 for line in trList:
                     outfile.write(line)
+        '''
         if val:
             with open(osp.join(base_path, 'cache', val_dir, 'val.txt'), 'w') as outfile:
                 shuffle(vaList)
                 for line in vaList:
                     outfile.write(line)
+        '''
         if test:
             with open(osp.join(base_path, 'cache', tes_dir, 'test.txt'), 'w') as outfile:
                 shuffle(teList)
@@ -232,7 +235,7 @@ def splitData(data, sc_map, sc_test):
             ann['split'] = 'test'
         else:
             ann['split'] = 'train'
-
+    '''
     keys = data.keys()
     random.shuffle(keys)
     counter = 0
@@ -241,6 +244,7 @@ def splitData(data, sc_map, sc_test):
         if data[k]['split'] == 'train':
             data[k]['split'] = 'val'
             counter += 1
+    '''
     return data
 
 

@@ -32,8 +32,8 @@ def main(args):
     trstem = opt.get_gmu_db_stem('train') 
     trdb = ('%s_lmdb' % trstem, trstem, 'train.txt')
 
-    valstem = opt.get_gmu_db_stem('val') 
-    valdb = ('%s_lmdb' % valstem, valstem, 'val.txt')
+    #valstem = opt.get_gmu_db_stem('val') 
+    #valdb = ('%s_lmdb' % valstem, valstem, 'val.txt')
 
     testem = opt.get_gmu_db_stem('test') 
     testdb = ('%s_lmdb' % testem, testem, 'test.txt')
@@ -43,11 +43,12 @@ def main(args):
         numTest = len([line for line in infile]) 
         opt.add_kv('num_test', numTest)
 
-    with open(osp.join(data_root_dir, 'cache', valstem, 'val.txt'), 'r') as infile:
-        numTest = len([line for line in infile]) 
-        opt.add_kv('num_val', numTest)
+    #with open(osp.join(data_root_dir, 'cache', valstem, 'val.txt'), 'r') as infile:
+    #    numTest = len([line for line in infile]) 
+    #    opt.add_kv('num_val', numTest)
 
-    splits = [trdb, valdb, testdb]
+    #splits = [trdb, valdb, testdb]
+    splits = [trdb, testdb]
     
 
     for split in splits:
@@ -70,7 +71,7 @@ def main(args):
 
     # hack
     f = open(osp.join(DATA_DIR, 'map.txt'))
-    lines = [line for lin in f]
+    lines = [line for line in f]
     f.close()
     opt.add_kv('num_classes', len(lines) + 1)
 
@@ -78,7 +79,7 @@ def main(args):
     opt.write_opt(opt_out_path)
 
     ssd = ssd_GMU.SSD()
-    ssd.run_main(opt)
+    ssd.run_main(opt, data_root_dir)
 
 
 if __name__ == "__main__":

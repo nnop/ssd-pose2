@@ -182,7 +182,7 @@ def makeBatchSampler(args):
 
 class SSD:
 
-    def run_main(self, args):
+    def run_main(self, args, data_dir):
         ### Modify the following parameters accordingly ###
         # The directory which contains the caffe code.
         # We assume you are running the script at the CAFFE_ROOT.
@@ -208,9 +208,9 @@ class SSD:
         num_gpus = len(gpulist)
 
 
-        train_data = 'data/gmu_kitchen/lmdb/%s_lmdb' % args.get_gmu_db_stem('train')
-        val_data = 'data/gmu_kitchen/lmdb/%s_lmdb' % args.get_gmu_db_stem('val')
-        test_data = 'data/gmu_kitchen/lmdb/%s_lmdb' % args.get_gmu_db_stem('test')
+        train_data = osp.join(data_dir, 'lmdb', '%s_lmdb' % args.get_gmu_db_stem('train'))
+        #val_data = 'data/gmu_kitchen/lmdb/%s_lmdb' % args.get_gmu_db_stem('val')
+        test_data = osp.join(data_dir, 'lmdb', '%s_lmdb' % args.get_gmu_db_stem('test'))
 
 
 
@@ -515,6 +515,7 @@ class SSD:
 
 
         # Create val net.
+        '''
         net = caffe.NetSpec()
         net.data, net.label = CreateAnnotatedDataLayer(val_data, batch_size=test_batch_size,
                 train=False, output_label=True, label_map_file=label_map_file,
@@ -555,6 +556,7 @@ class SSD:
         with open(val_net_file, 'w') as f:
             print('name: "{}_val"'.format(model_name), file=f)
             print(net.to_proto(), file=f)
+        '''
 
         # Create test net.
         net = caffe.NetSpec()
@@ -615,7 +617,7 @@ class SSD:
         # Create solver.
         train_solver = caffe_pb2.SolverParameter(
                 train_net=train_net_file,
-                test_net=[val_net_file],
+                test_net=[test_net_file],
                 snapshot_prefix=snapshot_prefix,
                 **train_solver_param)
             # Create solver.
@@ -645,21 +647,6 @@ class SSD:
           if max_iter > 0:
             train_src_param = '--snapshot="{}_iter_{}.solverstate" \\\n'.format(snapshot_prefix, max_iter)
 
-        '''
-        if remove_old_models:
-          # Remove any snapshots smaller than max_iter.
-          for file in os.listdir(snapshot_dir):
-            if file.endswith(".solverstate"):
-              basename = os.path.splitext(file)[0]
-              iter = int(basename.split("{}_iter_".format(model_name))[1])
-              if max_iter > iter:
-                os.remove("{}/{}".format(snapshot_dir, file))
-            if file.endswith(".caffemodel"):
-              basename = os.path.splitext(file)[0]
-              iter = int(basename.split("{}_iter_".format(model_name))[1])
-              if max_iter > iter:
-                os.remove("{}/{}".format(snapshot_dir, file))
-        '''
 
         # Create job file.
         # figure out where to tee
