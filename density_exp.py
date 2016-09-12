@@ -57,6 +57,7 @@ def main(args):
   for idx, v in enumerate(val):
       if args['test'] == 0:
         imfile = osp.join('data/scene_one/density/images/', v)
+        out_f = v
       else:
         imfile = v
         if 'data/scene_one/images/Bedroom_01_1/' in imfile:
