@@ -1,3 +1,4 @@
+
 import os
 import sys
 sys.path.insert(0, 'python')
@@ -36,6 +37,10 @@ def main(args):
 
   # phil data
   val = os.listdir('data/scene_one/density/images/')
+  if args['test'] != 0:
+    f = open('data/scene_one/cache/test_scene=2/test.txt', 'r')
+    val = [line.split(' ')[0] for line in f]
+    f.close()
 
   image_resize = opt.get_opts('size')
 
@@ -43,11 +48,21 @@ def main(args):
   all_out = {}
   # hack 
   out_dir = osp.join('data/scene_one/density/', 'det_%s_iter_%d' % (mod_idx, iterx))
+  if args['test'] != 0:
+    out_dir = osp.join('data/scene_one/density/', 'test_det_%s_iter_%d' % (mod_idx, iterx))
+
   if not osp.exists(out_dir):
     os.mkdir(out_dir)
 
   for idx, v in enumerate(val):
-      imfile = osp.join('data/scene_one/density/images/', v)
+      if args['test'] == 0:
+        imfile = osp.join('data/scene_one/density/images/', v)
+      else:
+        imfile = v
+        if 'data/scene_one/images/Bedroom_01_1/' in imfile:
+          out_f = imfile[len('data/scene_one/images/Bedroom_01_1/'):]
+        else:
+          out_f = imfile[len('data/scene_one/images/Kitchen_Living_02_1/'):]
 
       # set net to batch size of 1
       net.blobs['data'].reshape(1,3,image_resize,image_resize)
@@ -74,7 +89,8 @@ def main(args):
       out[:, 4] = detections[0,0,:,2]
       out[:, 5] = detections[0,0,:,1]
 
-      fiOutput = v[:-4] + '.mat'
+
+      fiOutput = out_f[:-4] + '.mat'
       out_file = osp.join(out_dir, fiOutput)
       sio.savemat(out_file, {'dets': out})
 
@@ -87,6 +103,7 @@ if __name__ == "__main__":
     parser.add_argument('--idx', type=str, help='model name')
     parser.add_argument('--iter', type=int, help='iteration to test')
     parser.add_argument('--gpu', type=int, default=0, help='gpu to use')
+    parser.add_argument('--test', type=int, default=0, help='run on the test set')
     
     args = parser.parse_args()
     params = vars(args)
