@@ -24,6 +24,7 @@ def main(args):
     anns = makeRohitAnns.MakeAnns(opt)
     anns.run_main()
     
+    
     mapfile = osp.join(DATA_DIR, 'labelmap.prototxt')
     anno_type='detection'
     label_type='json'
@@ -80,6 +81,7 @@ def main(args):
 
     ssd = ssd_GMU.SSD()
     ssd.run_main(opt, data_root_dir)
+
 
 
 

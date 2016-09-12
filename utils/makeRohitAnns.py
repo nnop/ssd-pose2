@@ -126,25 +126,12 @@ def removeMissingLabels(data):
     remLabels = ['softsoap_white',\
                  'tapatio_hot_sauce',\
                  'red_cup',\
-                 'red_cup',\
+                 'paper_plate',\
                  'nutrigrain_harvest_blueberry_bliss',\
                  'nature_valley_sweet_and_salty_nut_peanut',\
                  'hunts_sauce',\
                  'honey_bunches_of_oats_honey_roasted',\
                  'expo_marker_red']
-
-    f = open('data/scene_one/lbl_cat.txt', 'r')
-    lines = [line.split(' ')[0] for line in f]
-    f.close()
-
-    f = open('data/scene_one/lbl_cat.txt', 'w')
-    count = 1
-    for line in lines:
-        if line not in remLabels:
-            f.write('%s %d\n' % (line, count))
-            count += 1
-
-    f.close()
 
     copy_data = {}
     for idx, ann in data.iteritems():
@@ -206,11 +193,68 @@ def makeAllAnns(mapping):
 
     print len(all_anns.keys())
     all_anns = removeMissingLabels(all_anns)
+    #count_shit(all_anns)
     all_anns = removeEmptyAnns(all_anns)
+    #count_shit(all_anns)
+
     print len(all_anns.keys())
     makeSceneToIdx(all_anns)
 
     json.dump(all_anns, open(osp.join(DATA_DIR, 'all_anns.json'), 'w'))
+
+'''
+def count_shit(data):
+    counts = {}
+
+
+    for ann in data.itervalues():
+        if ann['scene_name'] not in counts:
+            counts[ann['scene_name']] = {}
+            
+        for obj in ann['annotation']:
+            if obj['category_id'] not in counts[ann['scene_name']]:
+                counts[ann['scene_name']][obj['category_id']] = 1
+            else:
+                counts[ann['scene_name']][obj['category_id']] += 1
+
+
+    test = ['Kitchen_Living_02_1', 'Bedroom_01_1']
+
+    test_count = {}
+    tr_count = {}
+
+    for scene, val in counts.iteritems():
+        if scene in test:
+            concat_dict(test_count, val)
+        else:
+            concat_dict(tr_count, val)
+
+
+    #print test_count
+
+    #print tr_count
+
+    print 'testing not in training'
+    for te_key in test_count.iterkeys():
+        if te_key not in tr_count:
+            print te_key
+
+
+    print 'training not in tessting'
+    for tr_key in tr_count.iterkeys():
+        if tr_key not in test_count:
+            print tr_key
+
+
+
+def concat_dict(dict1, dict2):
+    for idx, val in dict2.iteritems():
+        if idx not in dict1:
+            dict1[idx] = val
+        else:
+            dict1[idx] += val
+    return dict1
+'''
 
 
 def readLabelToCls():
