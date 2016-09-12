@@ -121,6 +121,48 @@ class MakeAnns:
                     outfile.write(line)
 
 
+
+def removeMissingLabels(data):
+    remLabels = ['softsoap_white',\
+                 'tapatio_hot_sauce',\
+                 'red_cup',\
+                 'red_cup',\
+                 'nutrigrain_harvest_blueberry_bliss',\
+                 'nature_valley_sweet_and_salty_nut_peanut',\
+                 'hunts_sauce',\
+                 'honey_bunches_of_oats_honey_roasted',\
+                 'expo_marker_red']
+
+    f = open('data/scene_one/lbl_cat.txt', 'r')
+    lines = [line.split(' ')[0] for line in f]
+    f.close()
+
+    f = open('data/scene_one/lbl_cat.txt', 'w')
+    count = 1
+    for line in lines:
+        if line not in remLabels:
+            f.write('%s %d\n' % (line, count))
+            count += 1
+
+    f.close()
+
+    copy_data = {}
+    for idx, ann in data.iteritems():
+        count = 0
+        newList = []
+        for obj in ann['annotation']:
+            if obj['category_id'] not in remLabels:
+                newList.append(obj)
+                count += 1
+
+        if count != 0:
+            copy_data[idx] = ann
+            copy_data[idx]['annotation'] = newList
+
+    return copy_data
+
+
+
 def createLabelMap(mapping):
     f = open(osp.join(DATA_DIR, 'map.txt'), 'w')
     for label, name in mapping.iteritems():
@@ -163,6 +205,7 @@ def makeAllAnns(mapping):
                 all_anns[im_id] = temp
 
     print len(all_anns.keys())
+    all_anns = removeMissingLabels(all_anns)
     all_anns = removeEmptyAnns(all_anns)
     print len(all_anns.keys())
     makeSceneToIdx(all_anns)
@@ -273,6 +316,9 @@ def parseMat(matfile, mapping):
             cat_id = mat_ann[ind, 4]
 
             # TODO
+            if cat_id not in mapping:
+                continue
+                
             objects['category_id'] = mapping[cat_id]
             
             bbox = mat_ann[ind, 0:4]
