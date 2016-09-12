@@ -36,7 +36,7 @@ class MakeAnns:
 
         data = json.load(open(osp.join(base_path, 'all_anns.json'), 'r'))
         if not osp.exists(osp.join(base_path, 'map.txt')):
-            createLabelMap(labelidx)
+            createLabelMap(data)
 
         train_dir = self.opt.get_gmu_db_stem('train')
         #val_dir = self.opt.get_gmu_db_stem('val')
@@ -150,10 +150,17 @@ def removeMissingLabels(data):
 
 
 
-def createLabelMap(mapping):
+def createLabelMap(data):
+    lbls = []
+
+    for ann in data.itervalues():
+        for obj in ann['annotation']:
+            if obj['category_id'] not in lbls:
+                lbls.append(obj['category_id'])
+
     f = open(osp.join(DATA_DIR, 'map.txt'), 'w')
-    for label, name in mapping.iteritems():
-        f.write(name + ' ' + str(label) + ' ' + name + '\n')
+    for idx, name in enumerate(lbls):
+        f.write(name + ' ' + str(idx + 1) + ' ' + name + '\n')
     f.close()
 
 
