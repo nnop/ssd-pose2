@@ -8,6 +8,8 @@ import subprocess
 
 from utils import options
 
+GPU = 0
+
 '''
 Makes the tables for different model evaluations 
 '''
@@ -236,7 +238,7 @@ def make_out(mod, iterx, out, eval_done):
 def make_twoFour_out(mod, iterx, bins, out):
     bin_fa = float(bins) / float(24.0)
 
-    cmd = 'python runOfficialTest.py --model=%s --iter=%d --test_bins=%d --bin_fa=%f' % (mod, iterx, bins, bin_fa)
+    cmd = 'python runOfficialTest.py --model=%s --iter=%d --test_bins=%d --bin_fa=%f --gpu=%d' % (mod, iterx, bins, bin_fa, GPU)
     subprocess.call(cmd, shell=True)
 
     eval_fi = osp.join(eval_dir, '%s_%d' % (mod, args['iter']), 'results.txt')
@@ -253,7 +255,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Remove old / unused models ')
     parser.add_argument('--iter', default=0, type=int, help='minimum number of iterations')
+    parser.add_argument('--gpu', default=0, type=int, help='which gpu to use')
     args = parser.parse_args()
     args = vars(args)
+    GPU = args['gpu']
     main(args)
 
