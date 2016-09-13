@@ -75,6 +75,7 @@ def main(args):
     if not osp.exists(eval_dir):
         os.mkdir(eval_dir)
 
+    '''
     # make share and seperate table
     out_fi = open(osp.join(eval_dir, 'share_sep_eval.txt'), 'w')
     for des in [True, False]:
@@ -173,6 +174,7 @@ def main(args):
             out_fi.write(out + ' \\\\ \n')
             out_fi.write('\hline \n')
     out_fi.close()
+    '''
 
     # make 24-V tables
     out_fi = open(osp.join(eval_dir, '24v.txt'), 'w')
@@ -183,14 +185,15 @@ def main(args):
 
         for mod, val in mod_to_opts.iteritems():
             if val.get_opts('share_pose') and val.get_opts('num_bins') == 24\
-            and val.get_opts('rotate') and val.get_opts('imagenet')\
+            and not val.get_opts('rotate') and val.get_opts('imagenet')\
             and val.get_opts('size') == sz:
                 found_mod = True
                 the_mod = mod
         if not found_mod:
             break
 
-        for bins in [4, 8 , 16]:
+        #for bins in [4, 8 , 16]:
+        for bins in [4, 8]:
             out = make_twoFour_out(the_mod, args['iter'], bins, out)
         out_fi.write(out[:-2] + ' \\\\ \n')
         out_fi.write('\hline \n')
