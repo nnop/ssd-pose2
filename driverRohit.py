@@ -22,7 +22,7 @@ def main(args):
 
     opt = options.Options(opt_dir)
     anns = makeRohitAnns.MakeAnns(opt)
-    anns.run_main()
+    anns.run_main(args['sec_scene'])
     
     
     mapfile = osp.join(DATA_DIR, 'labelmap.prototxt')
@@ -81,6 +81,7 @@ def main(args):
 
     ssd = ssd_GMU.SSD()
     ssd.run_main(opt, data_root_dir)
+    
 
 
 
@@ -90,6 +91,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--opt', default='', type=str, help='path to json file with options')
     parser.add_argument('--idx', default=0, type=int, help='specify model id to resume')
+    parser.add_argument('--sec_scene', default=7, type=int, help='second scene to specify')
 
     args = parser.parse_args()
     params = vars(args)

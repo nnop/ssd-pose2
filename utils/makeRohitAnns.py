@@ -23,23 +23,23 @@ class MakeAnns:
     def __init__(self, opt):
         self.opt = opt
 
-    def run_main(self):
+    def run_main(self, sec_scene_id):
 
         base_path = DATA_DIR
 
         labelidx = readLabelToCls()
 
-        if not osp.exists(osp.join(base_path, 'all_anns.json')):
-            makeAllAnns(labelidx)
+        scene_id = self.opt.get_opts('scene')
+        
+        #if not osp.exists(osp.join(base_path, 'all_anns.json')):
+        makeAllAnns(labelidx, scene_id, sec_scene_id)
 
         sceneidx = readSceneToIdx()
 
         data = json.load(open(osp.join(base_path, 'all_anns.json'), 'r'))
-        if not osp.exists(osp.join(base_path, 'map.txt')):
-            createLabelMap(data)
+        createLabelMap(data)
 
         train_dir = self.opt.get_gmu_db_stem('train')
-        #val_dir = self.opt.get_gmu_db_stem('val')
         tes_dir = self.opt.get_gmu_db_stem('test')
 
         if not osp.exists(osp.join(base_path, 'cache/')):
@@ -52,17 +52,11 @@ class MakeAnns:
                 os.mkdir(osp.join(base_path, 'cache', split))
 
         tr = False
-        #val = False
         test = False
 
         print train_dir
 
-        scene_id = self.opt.get_opts('scene')
-        #data = splitData(data, sceneidx, scene_id)
-        # hack for icra conference
-        # TODO: remove
-        #scene_id = 7
-        data = splitData(data, sceneidx, scene_id, 7)
+        data = splitData(data, sceneidx, scene_id, sec_scene_id)
 
 
 
@@ -122,16 +116,62 @@ class MakeAnns:
 
 
 
-def removeMissingLabels(data):
-    remLabels = ['softsoap_white',\
-                 'tapatio_hot_sauce',\
-                 'red_cup',\
-                 'paper_plate',\
-                 'nutrigrain_harvest_blueberry_bliss',\
-                 'nature_valley_sweet_and_salty_nut_peanut',\
-                 'hunts_sauce',\
-                 'honey_bunches_of_oats_honey_roasted',\
-                 'expo_marker_red']
+def getCounts(data):
+    counts = {}
+
+    for ann in data.itervalues():
+        if ann['scene_name'] not in counts:
+            counts[ann['scene_name']] = {}
+            
+        for obj in ann['annotation']:
+            if obj['category_id'] not in counts[ann['scene_name']]:
+                counts[ann['scene_name']][obj['category_id']] = 1
+            else:
+                counts[ann['scene_name']][obj['category_id']] += 1
+    return counts
+
+
+def getLablesToRemove(data, sc_mapping, scene_id, sec_scene_id):
+    counts = getCounts(data)
+
+    test_sc = []
+    for sc_name, idx in sc_mapping.iteritems():
+        if idx == scene_id or idx == sec_scene_id:
+            test_sc.append(sc_name)
+
+    test_count = {}
+    tr_count = {}
+
+    for scene, val in counts.iteritems():
+        if scene in test_sc:
+            concat_dict(test_count, val)
+        else:
+            concat_dict(tr_count, val)
+
+
+    
+    lblsRemove = []
+    for te_key in test_count.iterkeys():
+        if te_key not in tr_count:
+            print te_key
+            lblsRemove.append(te_key)
+
+    for tr_key in tr_count.iterkeys():
+        if tr_key not in test_count:
+            print tr_key
+            lblsRemove.append(tr_key)
+
+    return lblsRemove
+
+
+
+
+def removeMissingLabels(data, scene_id, sec_scene_id):
+    sceneidx = readSceneToIdx()
+    remLabels = getLablesToRemove(data, sceneidx, scene_id, sec_scene_id)
+    # hack hard coded
+    remLabels.append('expo_marker_red')
+
 
     copy_data = {}
     for idx, ann in data.iteritems():
@@ -178,7 +218,7 @@ def getAnnPath(ann, train_dir, tes_dir, sceneidx):
     return path
 
 
-def makeAllAnns(mapping):
+def makeAllAnns(mapping, scene_id, sec_scene_id):
 
     all_anns = {}
     ann_path = osp.join(DATA_DIR, 'annotations')
@@ -199,13 +239,13 @@ def makeAllAnns(mapping):
                 all_anns[im_id] = temp
 
     print len(all_anns.keys())
-    all_anns = removeMissingLabels(all_anns)
+    all_anns = removeMissingLabels(all_anns, scene_id, sec_scene_id)
     #count_shit(all_anns)
     all_anns = removeEmptyAnns(all_anns)
     #count_shit(all_anns)
 
     print len(all_anns.keys())
-    makeSceneToIdx(all_anns)
+    #makeSceneToIdx(all_anns)
 
     json.dump(all_anns, open(osp.join(DATA_DIR, 'all_anns.json'), 'w'))
 
@@ -252,7 +292,7 @@ def count_shit(data):
         if tr_key not in test_count:
             print tr_key
 
-
+'''
 
 def concat_dict(dict1, dict2):
     for idx, val in dict2.iteritems():
@@ -261,7 +301,6 @@ def concat_dict(dict1, dict2):
         else:
             dict1[idx] += val
     return dict1
-'''
 
 
 def readLabelToCls():
@@ -269,7 +308,7 @@ def readLabelToCls():
     with open(osp.join(DATA_DIR, 'lbl_cat.txt'), 'r') as f:
         for line in f:
             line = line.replace("\n", "")
-            print line
+            #print line
             cls_name, idx = line.split(' ')
             cls2lbl[int(idx)] = str(cls_name)
     return cls2lbl
@@ -280,7 +319,7 @@ def readSceneToIdx():
     with open(osp.join(DATA_DIR, 'sceneidx.txt'), 'r') as f:
         for line in f:
             line = line.replace("\n", "")
-            print line
+            #print line
             scene, idx = line.split(' ')
             sceneidx[scene] = int(idx)
     return sceneidx
