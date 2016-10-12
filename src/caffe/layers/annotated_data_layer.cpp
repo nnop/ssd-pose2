@@ -222,7 +222,10 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
               top_label[idx++] = bbox.xmax();
               top_label[idx++] = bbox.ymax();
               top_label[idx++] = bbox.difficult();
-              top_label[idx++] = bbox.azilabel();
+              top_label[idx++] = bbox.pose();
+              top_label[idx++] = bbox.eone();
+              top_label[idx++] = bbox.etwo();
+              top_label[idx++] = bbox.ethree();
               //LOG(INFO) << bbox.azilabel();
               // TODO add bbox.aziLabel here
             }

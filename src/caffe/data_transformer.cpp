@@ -304,7 +304,10 @@ void DataTransformer<Dtype>::TransformAnnotation(
           if (do_mirror) {
             // Todo
             //LOG(INFO) << "flip azilabel "  << transformed_bbox->azilabelflip() << " og azilabel " << transformed_bbox->azilabel();
-            transformed_bbox->set_azilabel(transformed_bbox->azilabelflip());
+            transformed_bbox->set_pose(transformed_bbox->poseflip());
+            transformed_bbox->set_eone(transformed_bbox->eoneflip());
+            transformed_bbox->set_etwo(transformed_bbox->etwoflip());
+            transformed_bbox->set_ethree(transformed_bbox->ethreeflip());
             Dtype temp = transformed_bbox->xmin();
             transformed_bbox->set_xmin(1 - transformed_bbox->xmax());
             transformed_bbox->set_xmax(1 - temp);

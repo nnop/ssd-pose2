@@ -126,8 +126,14 @@ message NormalizedBBox {
   optional bool difficult = 6;
   optional float score = 7;
   optional float size = 8;
-  optional int32 azilabel = 9;
-  optional int32 azilabelflip = 10;
+  optional int32 pose = 9;
+  optional int32 poseflip = 10;
+  optional float eone = 11;
+  optional float etwo = 12;
+  optional float ethree = 13;
+  optional float eoneflip = 14;
+  optional float etwoflip = 15;
+  optional float ethreeflip = 16;
 }
 
 // Annotation for each object instance.
@@ -1270,6 +1276,10 @@ message MultiBoxPoseLossParameter {
   optional bool map_object_to_agnostic = 17 [default = false];
   // Weight for pose loss.
   optional float pose_weight = 20 [default = 1.0];
+  // Weight for pose regression
+  optional float pose_reg_weight = 21 [default = 1.0];
+  // Loss type for pose regression
+  optional LocLossType pose_reg_loss_type = 22 [default = LocLossType_SMOOTH_L1];
 }
 
 // Message that store parameters used by MultiBoxLossLayer

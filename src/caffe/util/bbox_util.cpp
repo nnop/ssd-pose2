@@ -110,8 +110,19 @@ void ScaleBBox(const NormalizedBBox& bbox, const int height, const int width,
   bool normalized = !(width > 1 || height > 1);
   scale_bbox->set_size(BBoxSize(*scale_bbox, normalized));
   scale_bbox->set_difficult(bbox.difficult());
-  scale_bbox->set_azilabel(bbox.azilabel());
-  scale_bbox->set_azilabelflip(bbox.azilabelflip());
+
+  // set pose info
+  scale_bbox->set_pose(bbox.pose());
+  scale_bbox->set_poseflip(bbox.poseflip());
+
+  scale_bbox->set_eone(bbox.eone());
+  scale_bbox->set_eoneflip(bbox.eoneflip());
+
+  scale_bbox->set_etwo(bbox.etwo());
+  scale_bbox->set_etwoflip(bbox.etwoflip());
+
+  scale_bbox->set_ethree(bbox.ethree());
+  scale_bbox->set_ethreeflip(bbox.ethreeflip());
 }
 
 void LocateBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
@@ -123,8 +134,19 @@ void LocateBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
   loc_bbox->set_xmax(src_bbox.xmin() + bbox.xmax() * src_width);
   loc_bbox->set_ymax(src_bbox.ymin() + bbox.ymax() * src_height);
   loc_bbox->set_difficult(bbox.difficult());
-  loc_bbox->set_azilabel(bbox.azilabel());
-  loc_bbox->set_azilabelflip(bbox.azilabelflip());
+  
+  // set pose info
+  loc_bbox->set_pose(bbox.pose());
+  loc_bbox->set_poseflip(bbox.poseflip());
+
+  loc_bbox->set_eone(bbox.eone());
+  loc_bbox->set_eoneflip(bbox.eoneflip());
+
+  loc_bbox->set_etwo(bbox.etwo());
+  loc_bbox->set_etwoflip(bbox.etwoflip());
+
+  loc_bbox->set_ethree(bbox.ethree());
+  loc_bbox->set_ethreeflip(bbox.ethreeflip());
 }
 
 bool ProjectBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
@@ -140,8 +162,21 @@ bool ProjectBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
   proj_bbox->set_xmax((bbox.xmax() - src_bbox.xmin()) / src_width);
   proj_bbox->set_ymax((bbox.ymax() - src_bbox.ymin()) / src_height);
   proj_bbox->set_difficult(bbox.difficult());
-  proj_bbox->set_azilabel(bbox.azilabel());
-  proj_bbox->set_azilabelflip(bbox.azilabelflip());
+  
+  // set pose info
+  proj_bbox->set_pose(bbox.pose());
+  proj_bbox->set_poseflip(bbox.poseflip());
+
+  proj_bbox->set_eone(bbox.eone());
+  proj_bbox->set_eoneflip(bbox.eoneflip());
+
+  proj_bbox->set_etwo(bbox.etwo());
+  proj_bbox->set_etwoflip(bbox.etwoflip());
+
+  proj_bbox->set_ethree(bbox.ethree());
+  proj_bbox->set_ethreeflip(bbox.ethreeflip());
+
+  
   ClipBBox(*proj_bbox, proj_bbox);
   if (BBoxSize(*proj_bbox) > 0) {
     return true;
@@ -571,14 +606,19 @@ void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
       map<int, vector<NormalizedBBox> >* all_gt_bboxes) {
   all_gt_bboxes->clear();
   for (int i = 0; i < num_gt; ++i) {
-    int start_idx = i * 9; // RIC-changed
-    //int start_idx = i * 10; // RIC-changed
+    // labels looks like [id, cls, ?, x1, y1, x2, y2, diff, pose_lbl, e1, e2, e3]
+    int start_idx = i * 12; // RIC-changed
     int item_id = gt_data[start_idx];
     if (item_id == -1) {
       break;
     }
     int label = gt_data[start_idx + 1];
     int pose = gt_data[start_idx + 8];
+    float eOne =  gt_data[start_idx + 9];
+    float eTwo =  gt_data[start_idx + 10];
+    float eThree =  gt_data[start_idx + 11];
+    
+
     CHECK_NE(background_label_id, label)
         << "Found background label in the dataset.";
     bool difficult = static_cast<bool>(gt_data[start_idx + 7]);
@@ -587,12 +627,18 @@ void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
       continue;
     }
     NormalizedBBox bbox;
+    
     bbox.set_label(label);
-    bbox.set_azilabel(pose);
+    bbox.set_pose(pose);
+    bbox.set_eone(eOne);
+    bbox.set_etwo(eTwo);
+    bbox.set_ethree(eThree);
+    
     bbox.set_xmin(gt_data[start_idx + 3]);
     bbox.set_ymin(gt_data[start_idx + 4]);
     bbox.set_xmax(gt_data[start_idx + 5]);
     bbox.set_ymax(gt_data[start_idx + 6]);
+    
     bbox.set_difficult(difficult);
     float bbox_size = BBoxSize(bbox);
     bbox.set_size(bbox_size);
@@ -614,15 +660,20 @@ void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
       map<int, LabelBBox>* all_gt_bboxes) {
   all_gt_bboxes->clear();
   for (int i = 0; i < num_gt; ++i) {
-    int start_idx = i * 9; // RIC-changed
-    //int start_idx = i * 10; // RIC-changed
+    // labels looks like [id, cls, ?, x1, y1, x2, y2, diff, pose_lbl, e1, e2, e3]
+    int start_idx = i * 12; // RIC-changed
     int item_id = gt_data[start_idx];
     if (item_id == -1) {
       break;
     }
     NormalizedBBox bbox;
+    
     int label = gt_data[start_idx + 1];
     int pose = gt_data[start_idx + 8];
+    float eOne =  gt_data[start_idx + 9];
+    float eTwo =  gt_data[start_idx + 10];
+    float eThree =  gt_data[start_idx + 11];
+
     CHECK_NE(background_label_id, label)
         << "Found background label in the dataset.";
     bool difficult = static_cast<bool>(gt_data[start_idx + 7]);
@@ -630,7 +681,14 @@ void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
       // Skip reading difficult ground truth.
       continue;
     }
-    bbox.set_azilabel(pose);
+    
+    bbox.set_label(label);
+    bbox.set_pose(pose);
+    bbox.set_eone(eOne);
+    bbox.set_etwo(eTwo);
+    bbox.set_ethree(eThree);
+    
+
     bbox.set_xmin(gt_data[start_idx + 3]);
     bbox.set_ymin(gt_data[start_idx + 4]);
     bbox.set_xmax(gt_data[start_idx + 5]);
@@ -687,8 +745,8 @@ template void GetLocPredictions(const double* loc_data, const int num,
 
 
 
-// Understand
-// correct
+// removed. updated version below
+/*
 template <typename Dtype>
 void GetPosePredictions(const Dtype* pose_data, const int num, const int num_poses, 
       const int num_preds_per_class, const int num_pose_classes,
@@ -729,13 +787,94 @@ template void GetPosePredictions(const float* pose_data, const int num, const in
 template void GetPosePredictions(const double* pose_data, const int num, const int num_poses,
       const int num_preds_per_class, const int num_pose_classes,
       const bool share_pose, vector< map<int, vector< vector<float> >  > >* all_pose_preds);
+*/
 
 
+template <typename Dtype>
+void GetPosePredictions(const Dtype* pose_data, const int num, 
+      const int num_poses, const int num_priors, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds) {
+  
+  all_pose_preds->clear();
+
+  // for each image 
+  for (int i = 0; i < num; ++i) {
+    // all pose preds is a vector of pose_preds
+    // pose_preds is 
+    // The map[int] -> is map[label] -> vector of  pose preds for that label
+    // all pose 
+    map< int, vector< vector<float> > > pose_preds;
+    for (int p = 0; p < num_priors; ++p) {
+      int start_idx = p * num_poses;
+      int label = -1;
+      vector<float> pred;
+      pred.resize(num_poses);
+      for (int n=0; n< num_poses; n++) {
+        pred[n] =  pose_data[start_idx + n];
+      }
+      pose_preds[label].push_back(pred);
+    }
+    
+    pose_data += num_priors * num_poses;
+    all_pose_preds->push_back(pose_preds);
+  }
+}
+
+// Explicit initialization.
+template void GetPosePredictions(const float* pose_data, const int num, 
+      const int num_poses, const int num_priors, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds);
+template void GetPosePredictions(const double* pose_data, const int num, 
+      const int num_poses, const int num_priors, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds);
 
 
+/// Get Pose Regression predictions
+// assume getting 3 euler angle regressions
+template <typename Dtype>
+void GetPoseRegPredictions(const Dtype* pose_reg_data, const int num,
+      const int num_priors, const int num_pose_classes, const bool share_pose, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds) {
 
+  const int num_poses = 3;
+  all_pose_preds->clear();
+  
+  if (share_pose) {
+    CHECK_EQ(num_pose_classes, 1);
+  }
+  // for each image 
+  for (int i = 0; i < num; ++i) {
+    // all pose preds is a vector of pose_preds
+    // pose_preds is 
+    // The map[int] -> is map[label] -> vector of  pose preds for that label
+    // all pose 
+    map< int, vector< vector<float> > > pose_preds;
+    for (int p = 0; p < num_priors; ++p) { 
+      int start_idx = p * num_pose_classes * num_poses;
+      for (int c = 0; c < num_pose_classes; ++c) {
+        int label = share_pose ? -1 : c;
+        vector<float> pred;
+        pred.resize(num_poses);
+        for (int n=0; n< num_poses; n++) {
+          pred[n] =  pose_reg_data[start_idx + c * num_poses+ n];
+        }
+        pose_preds[label].push_back(pred);
+      }
+    }
+    
+    pose_reg_data += num_priors * num_pose_classes * num_poses;
+    all_pose_preds->push_back(pose_preds);
+  }
+}
 
+// Explicit initialization.
+template void GetPoseRegPredictions(const float* pose_reg_data, const int num,
+      const int num_priors, const int num_pose_classes, const bool share_pose, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds);
 
+template void GetPoseRegPredictions(const double* pose_reg_data, const int num,
+      const int num_priors, const int num_pose_classes, const bool share_pose, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds);
 
 
 template <typename Dtype>
@@ -854,12 +993,14 @@ void GetDetectionPoseResults(const Dtype* det_data, const int num_det,
       map<int, map<int, vector<NormalizedBBox> > >* all_detections) {
   all_detections->clear();
   for (int i = 0; i < num_det; ++i) {
-    int start_idx = i * 9; // RIC 
-    // TODO or should this be 8?
+    int start_idx = i * 12; // RIC 
     int item_id = det_data[start_idx];
     int label = det_data[start_idx + 1];
     // Ric
     int pose_label = det_data[start_idx+7];
+    float eOne = det_data[start_idx+9];
+    float eTwo = det_data[start_idx+10];
+    float eThree = det_data[start_idx+11];
     //LOG(INFO) << "id " << item_id;
     //LOG(INFO) << "label " << label;
     //LOG(INFO) << "pose label " << pose_label;
@@ -872,8 +1013,12 @@ void GetDetectionPoseResults(const Dtype* det_data, const int num_det,
     bbox.set_ymin(det_data[start_idx + 4]);
     bbox.set_xmax(det_data[start_idx + 5]);
     bbox.set_ymax(det_data[start_idx + 6]);
-    bbox.set_azilabel(pose_label);
-    // TODO RIC set azi score
+    
+    bbox.set_pose(pose_label);
+    bbox.set_eone(eOne);
+    bbox.set_etwo(eTwo);
+    bbox.set_ethree(eThree);
+
     float bbox_size = BBoxSize(bbox);
     bbox.set_size(bbox_size);
     (*all_detections)[item_id][label].push_back(bbox);

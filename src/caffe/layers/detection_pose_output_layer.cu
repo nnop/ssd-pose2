@@ -24,7 +24,8 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
   const Dtype* conf_data = bottom[1]->gpu_data();
   const Dtype* pose_data = bottom[2]->cpu_data();
   //const Dtype* pose_data = bottom[2]->gpu_data();
-  const Dtype* prior_data = bottom[3]->gpu_data();
+  const Dtype* pose_reg_data = bottom[3]->cpu_data();
+  const Dtype* prior_data = bottom[4]->gpu_data();
   const int num = bottom[0]->num();
 
   //LOG(INFO) << "pose data num " << bottom[2]->num();
@@ -37,14 +38,15 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
   //LOG(INFO) << "num pose classes " << num_pose_classes_;
 
 
-  //map<int, map<int, vector<vector<float> > > > all_pose_preds;
-  vector< map<int, vector<vector<float> > > > all_pose_preds;
-  GetPosePredictions(pose_data, num, num_poses_, num_priors_, num_pose_classes_, 
-                    share_pose_, &all_pose_preds);
-  
-  //const int pose_count = pose_data.count();
-  //GetPoseGPU<Dtype>(pose_count, pose_data, num, num_poses_, num_priors_, num_pose_classes_, 
-  //  share_pose_, &all_pose_preds);
+  // Retrieve all discrete pose predictions.
+  vector<map<int, vector<vector<float> > > > all_pose_preds;
+  GetPosePredictions(pose_data, num, num_poses_, num_priors_, &all_pose_preds);
+
+  // Retrieve all pose regression predictions
+  vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
+  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_poses_, share_pose_, 
+      &all_pose_reg_preds);
+
 
 
   // Decode predictions.
@@ -140,7 +142,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
   
   vector<int> top_shape(2, 1);
   top_shape.push_back(num_kept);
-  top_shape.push_back(9);
+  top_shape.push_back(12);
   top[0]->Reshape(top_shape);
   Dtype* top_data = top[0]->mutable_cpu_data();
 
@@ -151,6 +153,8 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
   for (int i = 0; i < num; ++i) {
     //map<int, vector<vector<float> > >& pose_preds = all_pose_preds.find(i)->second;
     map<int, vector<vector<float> > >& pose_preds = all_pose_preds[i];
+    map<int, vector<vector<float> > >& pose_reg_preds = all_pose_reg_preds[i];
+
     int start_idx = i * num_classes_ * num_priors_;
     for (int c = 0; c < num_classes_; ++c) {
       if (all_indices[i].find(c) == all_indices[i].end()) {
@@ -164,38 +168,57 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
 
       int label = c;
 
-      int pose_label = share_pose_ ? -1 : label;
+      int pose_label = -1;
+      //LOG(INFO) << "Pose label is " << pose_label;
+      // Check this label 
       if (pose_preds.find(pose_label) == pose_preds.end()) {
         // Something bad happened if there are no predictions for current label.
         LOG(FATAL) << "Could not find Pose predictions for " << pose_label;
         continue;
       }
       const vector<vector<float> >& poses = pose_preds.find(pose_label)->second;
+
+      /*
+      * Should be performing a similar check for the pose regression 
+      * but the label we use is the predicted pose bin, which we dont know yet
+      * instead we are going to hackily check that the 14th pose bin is present
+      */
+      int pose_reg_label = share_pose_ ? -1 : 14;
+      if (pose_reg_preds.find(pose_reg_label) == pose_reg_preds.end()) {
+        // Could be there are not 15 bins... 
+        LOG(FATAL) << "Could not find pose angle for pose bin " << pose_reg_label;
+      }
       
       // Retrieve detection data.
       bool clip_bbox = true;
       for (int j = 0; j < indices.size(); ++j) {
         int idx = indices[j];
-        top_data[j * 9] = i;
-        top_data[j * 9 + 1] = label;
-        top_data[j * 9 + 2] = conf_cpu_data[start_idx + label * num_priors_ + idx];
+        top_data[j * 12] = i;
+        top_data[j * 12 + 1] = label;
+        top_data[j * 12 + 2] = conf_cpu_data[start_idx + label * num_priors_ + idx];
         if (clip_bbox) {
           for (int k = 0; k < 4; ++k) {
-          top_data[j * 9 + 3 + k] = std::max(
+          top_data[j * 12 + 3 + k] = std::max(
                 std::min(bbox_cpu_data[idx * 4 + k], Dtype(1)), Dtype(0));
           }
         } else {
           for (int k = 0; k < 4; ++k) {
-            top_data[j * 9 + 3 + k] = bbox_cpu_data[idx * 4 + k];
+            top_data[j * 12 + 3 + k] = bbox_cpu_data[idx * 4 + k];
           }
         }
 
         vector<float> target_pose= poses[idx];
         vector<float>::iterator result;
         result = max_element(target_pose.begin(), target_pose.end());
-        // fix this 
-        top_data[j * 9 + 7] = distance(target_pose.begin(), result);
-        top_data[j * 9 + 8] = *(result);
+        int pose_bin = distance(target_pose.begin(), result); 
+        top_data[j * 12 + 7] = pose_bin;
+        top_data[j * 12 + 8] = *(result);
+
+        vector<vector<float> >& pose_reg = pose_reg_preds.find(pose_bin)->second;
+        vector<float> pose_reg_out = pose_reg[idx];
+        top_data[j * 12 + 9] = pose_reg_out[0];
+        top_data[j * 12 + 10] = pose_reg_out[1];
+        top_data[j * 12 + 11] = pose_reg_out[2];
 
       }
       if (!share_location_) {
@@ -241,7 +264,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
           detections_.push_back(std::make_pair("", cur_det));
         }
       }
-      top_data += indices.size() * 9;
+      top_data += indices.size() * 12;
     }
     if (share_location_) {
       bbox_cpu_data += num_priors_ * 4;

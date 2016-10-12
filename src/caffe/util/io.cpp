@@ -413,9 +413,18 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     // Get iscrowd.
     iscrowd = object.get<int>("iscrowd", 0);
 
-    // RIC get aziLabel
-    int azilabel = object.get<int>("aziLabel", -1);
-    int azilabelflip = object.get<int>("aziLabelFlip", -1);
+    // RIC get pose information
+    int pose = object.get<int>("pose", -1);
+    int poseflip = object.get<int>("poseFlip", -1);
+    
+    float eOne = object.get<float>("eone", 0.0);
+    float eOneFlip = object.get<float>("eoneflip", 0.0);
+
+    float eTwo = object.get<float>("etwo", 0.0);
+    float eTwoFlip = object.get<float>("etwoflip", 0.0);
+    
+    float eThree = object.get<float>("ethree", 0.0);
+    float eThreeFlip = object.get<float>("ethreeflip", 0.0);
 
     // Get bbox.
     vector<float> bbox_items;
@@ -455,9 +464,19 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     bbox->set_xmax(xmax / width);
     bbox->set_ymax(ymax / height);
     bbox->set_difficult(iscrowd);
-    // Ric todo
-    bbox->set_azilabel(azilabel);
-    bbox->set_azilabelflip(azilabelflip);
+
+    // Store pose info
+    bbox->set_pose(pose);
+    bbox->set_poseflip(poseflip);
+
+    bbox->set_eone(eOne);
+    bbox->set_eoneflip(eOneFlip);
+
+    bbox->set_etwo(eTwo);
+    bbox->set_etwoflip(eTwoFlip);
+
+    bbox->set_ethree(eThree);
+    bbox->set_ethreeflip(eThreeFlip);
   }
   return true;
 }

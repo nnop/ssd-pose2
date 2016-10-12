@@ -151,10 +151,24 @@ void GetLocPredictions(const Dtype* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
       const bool share_location, vector<LabelBBox>* loc_preds);
 
+// Added by Ric
+// TODO document
+template <typename Dtype>
+void GetPosePredictions(const Dtype* pose_data, const int num, 
+      const int num_poses, const int num_priors, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds);
+
+template <typename Dtype>
+void GetPoseRegPredictions(const Dtype* pose_reg_data, const int num,
+      const int num_priors, const int num_pose_classes, const bool share_pose, 
+      vector<  map<int, vector< vector<float> > > >* all_pose_preds);
+
+/*
 template <typename Dtype>
 void GetPosePredictions(const Dtype* pose_data, const int num, const int num_poses,
       const int num_preds_per_class, const int num_pose_classes,
       const bool share_pose, vector< map< int, vector< vector<float> > > >* all_pose_preds);
+*/
 
 // Get confidence predictions from conf_data.
 //    conf_data: num x num_preds_per_class * num_classes blob.

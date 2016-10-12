@@ -11,6 +11,14 @@
 
 #include "caffe/layers/detection_pose_output_layer.hpp"
 
+/*
+Pose ouptut was a 9 dimensional vector with 
+previous version
+[batch_id, label, cls_score, xmin, ymin, xmax, ymax, pose_label, pose_score]
+Updated to 12 dimensional vector
+[batch_id, label, cls_score, xmin, ymin, xmax, ymax, pose_label, pose_score, e1, e2, e3]
+*/
+
 namespace caffe {
 
 template <typename Dtype>
@@ -27,7 +35,7 @@ void DetectionPoseOutputLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bot
   CHECK(detection_pose_output_param.has_num_poses()) << "Must specify num_poses";
   num_poses_ = detection_pose_output_param.num_poses();
   share_pose_ = detection_pose_output_param.share_pose();
-  num_pose_classes_ = share_pose_ ? 1 : num_classes_;
+  num_pose_classes_ = share_pose_ ? 1 : num_poses_;
   
   
   background_label_id_ = detection_pose_output_param.background_label_id();
@@ -144,13 +152,14 @@ void DetectionPoseOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom
   }
   
   CHECK_EQ(bottom[0]->num(), bottom[1]->num());
-  num_priors_ = bottom[3]->height() / 4;
+  num_priors_ = bottom[4]->height() / 4;
   CHECK_EQ(num_priors_ * num_loc_classes_ * 4, bottom[0]->channels())
       << "Number of priors must match number of location predictions.";
   CHECK_EQ(num_priors_ * num_classes_, bottom[1]->channels())
       << "Number of priors must match number of confidence predictions.";
-  CHECK_EQ(num_priors_ * num_pose_classes_ * num_poses_, bottom[2]->channels())
-      << "Number of priors must match number of pose predictions.";
+  // TODO THIS Should be changed. Num_priors should be one per location  
+  //CHECK_EQ(num_priors_ * num_pose_classes_ * num_poses_, bottom[2]->channels())
+  //    << "Number of priors must match number of pose predictions.";
 
 
   // num() and channels() are 1.
@@ -158,9 +167,12 @@ void DetectionPoseOutputLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom
   // Since the number of bboxes to be kept is unknown before nms, we manually
   // set it to (fake) 1.
   top_shape.push_back(1);
-  // Each row is a 9 dimension vector, which stores
+  // Each row is now a 9 dimension vector, which stores
+  // was
   // [image_id, label, confidence, xmin, ymin, xmax, ymax, pose, pose_confidence]
-  top_shape.push_back(9);
+  // now 
+  // [batch_id, label, cls_score, xmin, ymin, xmax, ymax, pose_label, pose_score, e1, e2, e3]
+  top_shape.push_back(12);
   top[0]->Reshape(top_shape);
 }
 
@@ -168,22 +180,35 @@ template <typename Dtype>
 void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
 
+  /*
   const Dtype* loc_data = bottom[0]->cpu_data();
   const Dtype* conf_data = bottom[1]->cpu_data();
   const Dtype* pose_data = bottom[2]->cpu_data();
   const Dtype* prior_data = bottom[3]->cpu_data();
   const int num = bottom[0]->num();
+  */
+  const Dtype* loc_data = bottom[0]->cpu_data();
+  const Dtype* conf_data = bottom[1]->cpu_data();
+  const Dtype* pose_data = bottom[2]->cpu_data();
+  const Dtype* pose_reg_data = bottom[3]->cpu_data();
+  const Dtype* prior_data = bottom[4]->cpu_data();
+  const Dtype* gt_data = bottom[5]->cpu_data();
+  const int num = bottom[0]->num();
+
 
   // Retrieve all location predictions.
   vector<LabelBBox> all_loc_preds;
   GetLocPredictions(loc_data, num, num_priors_, num_loc_classes_,
                     share_location_, &all_loc_preds);
 
-  // Retrieve all pose predictions.
+  // Retrieve all discrete pose predictions.
   vector<map<int, vector<vector<float> > > > all_pose_preds;
-  GetPosePredictions(pose_data, num, num_poses_, num_priors_, num_pose_classes_, 
-                    share_pose_, &all_pose_preds);
+  GetPosePredictions(pose_data, num, num_poses_, num_priors_, &all_pose_preds);
 
+  // Retrieve all pose regression predictions
+  vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
+  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_poses_, share_pose_, 
+      &all_pose_reg_preds);
 
   // Retrieve all confidences.
   vector<map<int, vector<float> > > all_conf_scores;
@@ -285,7 +310,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
   // Now we know how many predictions are being kept
   vector<int> top_shape(2, 1);
   top_shape.push_back(num_kept);
-  top_shape.push_back(9);
+  top_shape.push_back(12);
   top[0]->Reshape(top_shape);
   Dtype* top_data = top[0]->mutable_cpu_data();
 
@@ -294,7 +319,9 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
   for (int i = 0; i < num; ++i) {
     map<int, vector<float> >& conf_scores = all_conf_scores[i];
     const LabelBBox& decode_bboxes = all_decode_bboxes[i];
-    map<int, vector<vector<float> > >& pose_preds = all_pose_preds[i]; // Get pose predictions for the im in this batch
+    // Get pose predictions for the im in this batch
+    map<int, vector<vector<float> > >& pose_preds = all_pose_preds[i];
+    map<int, vector<vector<float> > >& pose_reg_preds = all_pose_reg_preds[i]; 
 
     for (map<int, vector<int> >::iterator it = all_indices[i].begin();
          it != all_indices[i].end(); ++it) {
@@ -310,7 +337,8 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
         LOG(FATAL) << "Could not find location predictions for " << loc_label;
         continue;
       }
-      int pose_label = share_pose_ ? -1 : label;
+      //int pose_label = share_pose_ ? -1 : label;
+      int pose_label = -1;
       //LOG(INFO) << "Pose label is " << pose_label;
       // Check this label 
       if (pose_preds.find(pose_label) == pose_preds.end()) {
@@ -318,10 +346,21 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
         LOG(FATAL) << "Could not find Pose predictions for " << pose_label;
         continue;
       }
+      /*
+      * Should be performing a similar check for the pose regression 
+      * but the label we use is the predicted pose bin, which we dont know yet
+      * instead we are going to hackily check that the 14th pose bin is present
+      */
+      int pose_reg_label = share_pose_ ? -1 : 14;
+      if (pose_reg_preds.find(pose_reg_label) == pose_reg_preds.end()) {
+        // Could be there are not 15 bins... 
+        LOG(FATAL) << "Could not find pose angle for pose bin " << pose_reg_label;
+      }
 
       const vector<NormalizedBBox>& bboxes =
           decode_bboxes.find(loc_label)->second;
       const vector<vector<float> >& poses = pose_preds.find(pose_label)->second;
+
 
       vector<int>& indices = it->second;
       std::ofstream outfile;
@@ -340,20 +379,30 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
       }
       for (int j = 0; j < indices.size(); ++j) {
         int idx = indices[j];
-        top_data[count * 9] = i;
-        top_data[count * 9 + 1] = label;
-        top_data[count * 9 + 2] = conf_scores[label][idx];
+        top_data[count * 12] = i;
+        top_data[count * 12 + 1] = label;
+        top_data[count * 12 + 2] = conf_scores[label][idx];
         NormalizedBBox clip_bbox;
         ClipBBox(bboxes[idx], &clip_bbox);
-        top_data[count * 9 + 3] = clip_bbox.xmin();
-        top_data[count * 9 + 4] = clip_bbox.ymin();
-        top_data[count * 9 + 5] = clip_bbox.xmax();
-        top_data[count * 9 + 6] = clip_bbox.ymax();
+        top_data[count * 12 + 3] = clip_bbox.xmin();
+        top_data[count * 12 + 4] = clip_bbox.ymin();
+        top_data[count * 12 + 5] = clip_bbox.xmax();
+        top_data[count * 12 + 6] = clip_bbox.ymax();
+        
         vector<float> target_pose= poses[idx];
         vector<float>::iterator result;
         result = max_element(target_pose.begin(), target_pose.end());
-        top_data[count * 9 + 7] = distance(target_pose.begin(), result);
-        top_data[count * 9 + 8] = *(result);
+        int pred_pose_bin = distance(target_pose.begin(), result);
+        top_data[count * 12 + 7] = pred_pose_bin;
+        top_data[count * 12 + 8] = *(result);
+
+        int pose_bin = share_pose_ ? -1 : pred_pose_bin;
+
+        vector<vector<float> >& pose_reg = pose_reg_preds.find(pose_bin)->second;
+        vector<float> pose_reg_out = pose_reg[idx];
+        top_data[count * 12 + 9] = pose_reg_out[0];
+        top_data[count * 12 + 10] = pose_reg_out[1];
+        top_data[count * 12 + 11] = pose_reg_out[2];
 
         //LOG(INFO) << "label is " << label;
         //LOG(INFO) << "label confidence is " << top_data[count * 9 + 2];

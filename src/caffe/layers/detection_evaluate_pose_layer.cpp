@@ -52,10 +52,10 @@ void DetectionEvaluatePoseLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bott
   CHECK_EQ(bottom[0]->channels(), 1);
   //LOG(INFO) << "test " << bottom[0]->width();
   //LOG(INFO) << "yo" << bottom[0];
-  CHECK_EQ(bottom[0]->width(), 9);   // Ric changed
+  CHECK_EQ(bottom[0]->width(), 12);   // Ric changed
   CHECK_EQ(bottom[1]->num(), 1);
   CHECK_EQ(bottom[1]->channels(), 1);
-  CHECK_EQ(bottom[1]->width(), 9); // RIC-changed 
+  CHECK_EQ(bottom[1]->width(), 12); // RIC-changed 
 
   // num() and channels() are 1.
   vector<int> top_shape(2, 1);
@@ -207,8 +207,8 @@ void DetectionEvaluatePoseLayer<Dtype>::Forward_cpu(
                   (!evaluate_difficult_gt_ && !gt_bboxes[jmax].difficult())) {
                 if (!visited[jmax]) {
                   //int pred_bbox = floor(bboxes[i].azilabel() / 2);
-                  int pred_bbox = bboxes[i].azilabel();
-                  if(gt_bboxes[jmax].azilabel() == pred_bbox) {
+                  int pred_bbox = bboxes[i].pose();
+                  if(gt_bboxes[jmax].pose() == pred_bbox) {
                     // true positive.
                     top_data[num_det * 5 + 3] = 1;
                     top_data[num_det * 5 + 4] = 0;

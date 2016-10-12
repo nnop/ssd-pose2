@@ -88,9 +88,24 @@ class MultiBoxPoseLossLayer : public LossLayer<Dtype> {
   // pose loss.
   Blob<Dtype> pose_loss_;
 
+  // The internal pose regression loss layer
+  shared_ptr<Layer<Dtype> > pose_reg_loss_layer_;
+  // it is a regression loss
+  LocLossType pose_reg_loss_type_;
+  // bottom vector holder used in Forward function.
+  vector<Blob<Dtype>*> pose_reg_bottom_vec_;
+  // top vector holder used in Forward function.
+  vector<Blob<Dtype>*> pose_reg_top_vec_;
+  // blob which stores the pose prediction.
+  Blob<Dtype> pose_reg_pred_;
+  // blob which stores the corresponding ground truth label.
+  Blob<Dtype> pose_reg_gt_;
+  // pose loss.
+  Blob<Dtype> pose_reg_loss_;
 
 
 
+  float pose_reg_weight_;
   float pose_weight_;
   int num_classes_;
   int num_poses_;
@@ -118,7 +133,7 @@ class MultiBoxPoseLossLayer : public LossLayer<Dtype> {
   int num_conf_;
   vector<map<int, vector<int> > > all_match_indices_;
   vector<vector<int> > all_neg_indices_;
-  map<int, vector<NormalizedBBox> > all_gt_bboxes;
+  map<int, vector<NormalizedBBox> > all_gt_bboxes_;
 
   // How to normalize the loss.
   LossParameter_NormalizationMode normalization_;

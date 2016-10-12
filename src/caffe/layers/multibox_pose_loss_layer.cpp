@@ -13,7 +13,9 @@ template <typename Dtype>
 void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   LossLayer<Dtype>::LayerSetUp(bottom, top);
+  // TODO change this
   if (this->layer_param_.propagate_down_size() == 0) {
+    this->layer_param_.add_propagate_down(true);
     this->layer_param_.add_propagate_down(true);
     this->layer_param_.add_propagate_down(true);
     this->layer_param_.add_propagate_down(true);
@@ -24,7 +26,8 @@ void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom
       this->layer_param_.multibox_pose_loss_param();
 
   num_ = bottom[0]->num();
-  num_priors_ = bottom[2]->height() / 4;
+  num_priors_ = bottom[4]->height() / 4;
+
   // Get other parameters.
   CHECK(multibox_pose_loss_param.has_num_classes()) << "Must provide num_classes.";
   num_classes_ = multibox_pose_loss_param.num_classes();
@@ -34,13 +37,11 @@ void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom
   num_poses_ = multibox_pose_loss_param.num_poses();
   CHECK_GE(num_poses_, 1) << "num_poses should not be less than 1.";
 
-  
-  
   share_location_ = multibox_pose_loss_param.share_location();
   loc_classes_ = share_location_ ? 1 : num_classes_;
     
   share_pose_ = multibox_pose_loss_param.share_pose();
-  pose_classes_ = share_pose_ ? 1 : num_classes_; 
+  pose_classes_ = share_pose_ ? 1 : num_poses_; 
 
   match_type_ = multibox_pose_loss_param.match_type();
   overlap_threshold_ = multibox_pose_loss_param.overlap_threshold();
@@ -106,6 +107,9 @@ void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom
   } else {
     LOG(FATAL) << "Unknown localization loss type.";
   }
+
+
+
   // Set up confidence loss layer.
   conf_loss_type_ = multibox_pose_loss_param.conf_loss_type();
   conf_bottom_vec_.push_back(&conf_pred_);
@@ -146,7 +150,7 @@ void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom
   }
 
 
-  // Set up pose loss layer.
+  // Set up discrete pose classification layer
   // Assume pose loss layer use softmax + cross_entropy
   pose_bottom_vec_.push_back(&pose_pred_);
   pose_bottom_vec_.push_back(&pose_gt_);
@@ -170,6 +174,40 @@ void MultiBoxPoseLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom
     pose_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
     pose_loss_layer_->SetUp(pose_bottom_vec_, pose_top_vec_);
   }
+
+
+  // Set up pose regression loss layer.
+  pose_reg_weight_ = multibox_pose_loss_param.pose_reg_weight();
+  pose_reg_loss_type_ = multibox_pose_loss_param.pose_reg_loss_type();
+  // fake shape.
+  vector<int> pose_reg_shape(1, 1);
+  pose_reg_shape.push_back(4);
+  pose_reg_pred_.Reshape(pose_reg_shape);
+  pose_reg_gt_.Reshape(pose_reg_shape);
+  
+  pose_reg_bottom_vec_.push_back(&pose_reg_pred_);
+  pose_reg_bottom_vec_.push_back(&pose_reg_gt_);
+
+  pose_reg_loss_.Reshape(pose_reg_shape);
+  pose_reg_top_vec_.push_back(&pose_reg_loss_);
+
+  if (loc_loss_type_ == LocLossType_L2) {
+    LayerParameter layer_param;
+    layer_param.set_name(this->layer_param_.name() + "_l2_loc");
+    layer_param.set_type("EuclideanLoss");
+    layer_param.add_loss_weight(pose_reg_weight_);
+    pose_reg_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
+    pose_reg_loss_layer_->SetUp(pose_reg_bottom_vec_, pose_reg_top_vec_);
+  } else if (loc_loss_type_ == LocLossType_SMOOTH_L1) {
+    LayerParameter layer_param;
+    layer_param.set_name(this->layer_param_.name() + "_smooth_L1_loc");
+    layer_param.set_type("SmoothL1Loss");
+    layer_param.add_loss_weight(pose_reg_weight_);
+    pose_reg_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
+    pose_reg_loss_layer_->SetUp(pose_reg_bottom_vec_, pose_reg_top_vec_);
+  } else {
+    LOG(FATAL) << "Unknown localization loss type.";
+  }
 }
 
 template <typename Dtype>
@@ -177,39 +215,60 @@ void MultiBoxPoseLossLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   LossLayer<Dtype>::Reshape(bottom, top);
   num_ = bottom[0]->num();
-  num_priors_ = bottom[3]->height() / 4;
-  num_gt_ = bottom[4]->height();
+  // TODO update this
+  num_priors_ = bottom[4]->height() / 4;
+  num_gt_ = bottom[5]->height();
   CHECK_EQ(bottom[0]->num(), bottom[1]->num());
   CHECK_EQ(bottom[0]->num(), bottom[2]->num());
   CHECK_EQ(num_priors_ * loc_classes_ * 4, bottom[0]->channels())
       << "Number of priors must match number of location predictions.";
   CHECK_EQ(num_priors_ * num_classes_, bottom[1]->channels())
       << "Number of priors must match number of confidence predictions.";
-  CHECK_EQ(num_priors_ * pose_classes_ * num_poses_, bottom[2]->channels())
+  //CHECK_EQ(num_priors_ * pose_classes_ * num_poses_, bottom[2]->channels())
+  //    << "Number of priors must match number of pose predictions.";
+    CHECK_EQ(num_priors_ * num_poses_, bottom[2]->channels())
       << "Number of priors must match number of pose predictions.";
 }
 
 template <typename Dtype>
 void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
+  // bottom was [loc, conf, pose, priorbox, label]
+  // bottom is now [loc, conf, pose_cls, pose_reg, priorbox, label]
+  /*
   const Dtype* loc_data = bottom[0]->cpu_data();
   const Dtype* conf_data = bottom[1]->cpu_data();
   const Dtype* pose_data = bottom[2]->cpu_data();
   const Dtype* prior_data = bottom[3]->cpu_data();
   const Dtype* gt_data = bottom[4]->cpu_data();
+  */
+  const Dtype* loc_data = bottom[0]->cpu_data();
+  const Dtype* conf_data = bottom[1]->cpu_data();
+  const Dtype* pose_data = bottom[2]->cpu_data();
+  const Dtype* pose_reg_data = bottom[3]->cpu_data();
+  const Dtype* prior_data = bottom[4]->cpu_data();
+  const Dtype* gt_data = bottom[5]->cpu_data();
 
-  // Retrieve all ground truth.
-  //map<int, vector<NormalizedBBox> > all_gt_bboxes;
+  // Retrieve all ground truth --done
   GetGroundTruthPose(gt_data, num_gt_, background_label_id_, use_difficult_gt_,
-                 &all_gt_bboxes);
+                 &all_gt_bboxes_);
+
+  // Retrieve all discrete pose predictions.
+  vector<map<int, vector<vector<float> > > > all_pose_preds;
+  GetPosePredictions(pose_data, num, num_poses_, num_priors_, &all_pose_preds);
+
+  // Retrieve all pose regression predictions
+  vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
+  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_poses_, share_pose_, 
+      &all_pose_reg_preds);
 
   // Retrieve all prior bboxes. It is same within a batch since we assume all
-  // images in a batch are of same dimension.
+  // images in a batch are of same dimension. --dont change
   vector<NormalizedBBox> prior_bboxes;
   vector<vector<float> > prior_variances;
   GetPriorBBoxes(prior_data, num_priors_, &prior_bboxes, &prior_variances);
 
-  // Retrieve all predictions.
+  // Retrieve all predictions. -- dont change. can modify to get regression preds
   vector<LabelBBox> all_loc_preds;
   GetLocPredictions(loc_data, num_, num_priors_, loc_classes_, share_location_,
                     &all_loc_preds);
@@ -228,18 +287,18 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     map<int, vector<int> > match_indices;
     vector<int> neg_indices;
     // Check if there is ground truth for current image.
-    if (all_gt_bboxes.find(i) == all_gt_bboxes.end()) {
+    if (all_gt_bboxes_.find(i) == all_gt_bboxes_.end()) {
       // There is no gt for current image. All predictions are negative.
       all_match_indices_.push_back(match_indices);
       all_neg_indices_.push_back(neg_indices);
       continue;
     }
     // Find match between predictions and ground truth.
-    const vector<NormalizedBBox>& gt_bboxes = all_gt_bboxes.find(i)->second;
+    const vector<NormalizedBBox>& gt_bboxes = all_gt_bboxes_.find(i)->second;
     
     vector<int> labels; 
     labels.resize(num_classes_);
-
+    // get the class labels that appear in the gt
     for (int g=0; g < gt_bboxes.size(); g++) {
         labels[gt_bboxes[g].label()] = 1;
     }
@@ -344,6 +403,17 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     Dtype* loc_pred_data = loc_pred_.mutable_cpu_data();
     Dtype* loc_gt_data = loc_gt_.mutable_cpu_data();
 
+
+    // RIC adding angle regression loss
+    vector<int> pose_reg_shape(2);
+    pose_reg_shape[0] = 1;
+    pose_reg_shape[1] = num_matches_ * 3;
+    pose_reg_pred_.Reshape(pose_reg_shape);
+    pose_reg_gt_.Reshape(pose_reg_shape);
+    Dtype* pose_reg_pred_data = pose_reg_pred_.mutable_cpu_data();
+    Dtype* pose_reg_gt_data = pose_reg_gt_.mutable_cpu_data();
+
+
     // Form data to pass on to pose_loss_layer_.
     // Assume pose loss layer is softmax - crossentropy
     // RIC changing to mach loc_shape style above
@@ -369,10 +439,17 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     for (int i = 0; i < num_; ++i) {
       for (map<int, vector<int> >::iterator it = all_match_indices_[i].begin();
            it != all_match_indices_[i].end(); ++it) {
+        
         const int label = it->first;
         const vector<int>& match_index = it->second;
+        
         CHECK(all_loc_preds[i].find(label) != all_loc_preds[i].end());
+
         const vector<NormalizedBBox>& loc_pred = all_loc_preds[i][label];
+
+        const vector<vector<float> >& poses = pose_preds.find(-1)->second;
+        map<int, vector<vector<float> > >& pose_reg_preds = all_pose_reg_preds[i]; 
+
         for (int j = 0; j < match_index.size(); ++j) {
           if (match_index[j] == -1) {
             continue;
@@ -383,11 +460,14 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
           loc_pred_data[count * 4 + 1] = loc_pred[j].ymin();
           loc_pred_data[count * 4 + 2] = loc_pred[j].xmax();
           loc_pred_data[count * 4 + 3] = loc_pred[j].ymax();
+
           // Store encoded ground truth.
           const int gt_idx = match_index[j];
-          CHECK(all_gt_bboxes.find(i) != all_gt_bboxes.end());
-          CHECK_LT(gt_idx, all_gt_bboxes[i].size());
-          const NormalizedBBox& gt_bbox = all_gt_bboxes[i][gt_idx];
+          
+          CHECK(all_gt_bboxes_.find(i) != all_gt_bboxes_.end());
+          CHECK_LT(gt_idx, all_gt_bboxes_[i].size());
+
+          const NormalizedBBox& gt_bbox = all_gt_bboxes_[i][gt_idx];
           NormalizedBBox gt_encode;
           CHECK_LT(j, prior_bboxes.size());
           EncodeBBox(prior_bboxes[j], prior_variances[j], code_type_,
@@ -403,12 +483,33 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
               loc_gt_data[count * 4 + k] /= prior_variances[j][k];
             }
           }
+
+          // Copy pose predictions
+          for (int k = 0; k < num_poses_; ++k) {
+            pose_pred_data[count * num_poses_ + k] = poses[j][k];
+          }
+
+          // Get pose regression predictions
+          int pose_bin = share_pose_ ? -1 : gt_bbox.pose();
+          vector<vector<float> >& pose_reg = pose_reg_preds.find(pose_bin)->second;
+          vector<float> pose_reg_out = pose_reg[j];
+          pose_reg_pred_data[count*3] = pose_reg_out[0];
+          pose_reg_pred_data[count*3 + 1] = pose_reg_out[1];
+          pose_reg_pred_data[count*3 + 2] = pose_reg_out[2]; 
+
           
-          const int ricLabel = all_gt_bboxes[i][gt_idx].label();
           // Store pose ground truth.
-          pose_gt_data[count] = gt_bbox.azilabel();
-          int offset = num_poses_ * pose_classes_;
-          const int label_off = share_pose_? 0 : ricLabel;
+          pose_gt_data[count] = gt_bbox.pose();
+          const int poseLabel = gt_bbox.pose();
+          pose_reg_gt_data[count * 3] = gt_bbox.eone();
+          pose_reg_gt_data[count * 3 + 1] = gt_bbox.etwo();
+          pose_reg_gt_data[count * 3 + 2] = gt_bbox.ethree();
+
+          
+          // We are going to use same pose for each class
+          // share pose will control the regression targets
+          //const int label_off = share_pose_? 0 : ricLabel;
+          //int offset = num_poses_ * pose_classes_;
 
           //LOG(INFO) << "label off " << label_off;
           //LOG(INFO) << "offset is " << offset;
@@ -416,20 +517,33 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
           //LOG(INFO) << "ric label is " << ricLabel;
           //LOG(INFO) << "count is " << count;
           //std::cin.ignore();
+          /*
 
-          caffe_copy<Dtype>(num_poses_, pose_data + j * offset + label_off*num_poses_,
+          caffe_copy<Dtype>(num_poses_, pose_data + j * num_poses_,
                                 pose_pred_data + count * num_poses_);
+
+          const int label_off_reg = share_pose_? 0 : poseLabel;
+          const int offset = num_poses_ * 3; // euler angles
+
+          caffe_copy<Dtype>(3, pose_reg_data + j * offset + label_off_reg*3,
+                                pose_reg_pred_data + count * 3);
+          */
 
           ++count;
         }
       }
-      pose_data += num_priors_* num_poses_ * pose_classes_; 
+      //pose_data += num_priors_* num_poses_ * pose_classes_;
+      //pose_data += num_priors_* num_poses_; 
+      //pose_gt_data += num_priors_ * 3 * pose_classes_;
     }
     loc_loss_layer_->Reshape(loc_bottom_vec_, loc_top_vec_);
     loc_loss_layer_->Forward(loc_bottom_vec_, loc_top_vec_);
 
     pose_loss_layer_->Reshape(pose_bottom_vec_, pose_top_vec_);
     pose_loss_layer_->Forward(pose_bottom_vec_, pose_top_vec_);
+
+    pose_reg_loss_layer_->Reshape(pose_reg_bottom_vec_, pose_reg_top_vec_);
+    pose_reg_loss_layer_->Forward(pose_reg_bottom_vec_, pose_reg_top_vec_);
   }
 
   // Form data to pass on to conf_loss_layer_.
@@ -466,7 +580,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     caffe_set(conf_gt_.count(), Dtype(background_label_id_), conf_gt_data);
     int count = 0;
     for (int i = 0; i < num_; ++i) {
-      if (all_gt_bboxes.find(i) != all_gt_bboxes.end()) {
+      if (all_gt_bboxes_.find(i) != all_gt_bboxes_.end()) {
         // Save matched (positive) bboxes scores and labels.
         const map<int, vector<int> >& match_indices = all_match_indices_[i];
         for (int j = 0; j < num_priors_; ++j) {
@@ -479,7 +593,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
             }
             const int gt_label = map_object_to_agnostic_ ?
                 background_label_id_ + 1 :
-                all_gt_bboxes[i][match_index[j]].label();
+                all_gt_bboxes_[i][match_index[j]].label();
             int idx = do_neg_mining_ ? count : j;
             switch (conf_loss_type_) {
               case ConfLossType_SOFTMAX:
@@ -555,6 +669,14 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     top[0]->mutable_cpu_data()[0] += temp;
     LOG(INFO) << "Multibox Loss ( Pose loss ): " << temp;
   }
+
+    if (this->layer_param_.propagate_down(3)) {
+    Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
+        normalization_, num_, num_priors_, num_matches_);
+    Dtype temp = pose_reg_weight_ * pose_reg_loss_.cpu_data()[0] / normalizer;
+    top[0]->mutable_cpu_data()[0] += temp;
+    LOG(INFO) << "Multibox Loss ( Pose Regression loss ): " << temp;
+  }
    
 }
 
@@ -562,11 +684,11 @@ template <typename Dtype>
 void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
-  if (propagate_down[3]) {
+  if (propagate_down[4]) {
     LOG(FATAL) << this->type()
         << " Layer cannot backpropagate to prior inputs.";
   }
-  if (propagate_down[4]) {
+  if (propagate_down[5]) {
     LOG(FATAL) << this->type()
         << " Layer cannot backpropagate to label inputs.";
   }
@@ -668,6 +790,7 @@ void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
       }
     }
   }
+
   // Back propagate on pose prediction.
   if (propagate_down[2]) {
     Dtype* pose_bottom_diff = bottom[2]->mutable_cpu_diff();
@@ -699,12 +822,15 @@ void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
               continue;
             }
 
-            const int gt_idx = match_index[j];
-            const int ricLabel = all_gt_bboxes[i][gt_idx].label();
-            const int label = share_pose_ ? 0 : ricLabel;
+            //const int gt_idx = match_index[j];
+            //const int ricLabel = all_gt_bboxes_[i][gt_idx].label();
+            //const int label = share_pose_ ? 0 : ricLabel;
 
             // Copy the diff to the right place.
-            int start_idx = pose_classes_ * num_poses_ * j + label * num_poses_;
+            //int start_idx = pose_classes_ * num_poses_ * j + label * num_poses_;
+            //caffe_copy<Dtype>(num_poses_, pose_pred_diff + count * num_poses_,
+            //                  pose_bottom_diff + start_idx);
+            int start_idx = num_poses_ * j;
             caffe_copy<Dtype>(num_poses_, pose_pred_diff + count * num_poses_,
                               pose_bottom_diff + start_idx);
 
@@ -712,6 +838,54 @@ void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
           }
         }
         pose_bottom_diff += bottom[2]->offset(1);
+      }
+    }
+  }
+
+    // Back propagate on pose regression
+  if (propagate_down[3]) {
+    Dtype* pose_reg_bottom_diff = bottom[3]->mutable_cpu_diff();
+    caffe_set(bottom[3]->count(), Dtype(0), pose_reg_bottom_diff);
+    if (num_matches_ >= 1) {
+      vector<bool> pose_reg_propagate_down;
+      // Only back propagate on prediction, not ground truth.
+      pose_reg_propagate_down.push_back(true);
+      pose_reg_propagate_down.push_back(false);
+      pose_reg_loss_layer_->Backward(pose_reg_top_vec_, pose_reg_propagate_down,
+                                pose_reg_bottom_vec_);
+      // Scale gradient.
+      Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
+          normalization_, num_, num_priors_, num_matches_);
+      Dtype loss_weight = top[0]->cpu_diff()[0] / normalizer;
+      caffe_scal(pose_reg_pred_.count(), loss_weight, pose_reg_pred_.mutable_cpu_diff());
+      // Copy gradient back to bottom[0].
+      const Dtype* pose_reg_pred_diff = pose_reg_pred_.cpu_diff();
+      int count = 0;
+      for (int i = 0; i < num_; ++i) {
+        for (map<int, vector<int> >::iterator it =
+             all_match_indices_[i].begin();
+             it != all_match_indices_[i].end(); ++it) {
+
+          //const int label = share_location_ ? 0 : it->first;
+          const vector<int>& match_index = it->second;
+          for (int j = 0; j < match_index.size(); ++j) {
+            if (match_index[j] == -1) {
+              continue;
+            }
+
+            const int gt_idx = match_index[j];
+            const int gt_pose = all_gt_bboxes_[i][gt_idx].pose();
+
+            const int diff_label_off = share_pose_ ? 0 : gt_pose;
+
+            // Copy the diff to the right place.
+            int start_idx = pose_classes_ * 3 * j + diff_label_off * 3;
+            caffe_copy<Dtype>(3, pose_reg_pred_diff + count * 3,
+                              pose_reg_bottom_diff + start_idx);
+            ++count;
+          }
+        }
+        pose_reg_bottom_diff += bottom[3]->offset(1);
       }
     }
   }
