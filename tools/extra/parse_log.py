@@ -16,6 +16,7 @@ from collections import OrderedDict
 
 def parse_log(path_to_log):
     """Parse log file
+<<<<<<< HEAD
     Returns (train_dict_list, train_dict_names, test_dict_list, test_dict_names)
 
     train_dict_list and test_dict_list are lists of dicts that define the table
@@ -23,6 +24,12 @@ def parse_log(path_to_log):
 
     train_dict_names and test_dict_names are ordered tuples of the column names
     for the two dict_lists
+=======
+    Returns (train_dict_list, test_dict_list)
+
+    train_dict_list and test_dict_list are lists of dicts that define the table
+    rows
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     """
 
     regex_iteration = re.compile('Iteration (\d+)')

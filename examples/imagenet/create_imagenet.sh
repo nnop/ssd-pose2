@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 # Create the imagenet lmdb inputs
 # N.B. set the path to the imagenet train + val data dirs
+<<<<<<< HEAD
+=======
+set -e
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 EXAMPLE=examples/imagenet
 DATA=data/ilsvrc12

@@ -59,7 +59,11 @@ class PriorBoxLayer : public Layer<Dtype> {
   /// @brief Not implemented
   virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+<<<<<<< HEAD
     NOT_IMPLEMENTED;
+=======
+    return;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 
   float min_size_;

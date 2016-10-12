@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 // The main caffe test code. Your test cpp code should include this hpp
 // to allow a main function to be compiled into the binary.
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #include "caffe/caffe.hpp"
 #include "caffe/test/test_caffe_main.hpp"
 

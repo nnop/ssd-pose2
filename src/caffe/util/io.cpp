@@ -144,7 +144,11 @@ cv::Mat ReadImageToCVMat(const string& filename) {
 // Do the file extension and encoding match?
 static bool matchExt(const std::string & fn,
                      std::string en) {
+<<<<<<< HEAD
   size_t p = fn.rfind('.');
+=======
+  size_t p = fn.rfind('.') + 1;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   std::string ext = p != fn.npos ? fn.substr(p) : fn;
   std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
   std::transform(en.begin(), en.end(), en.begin(), ::tolower);
@@ -163,7 +167,11 @@ bool ReadImageToDatum(const string& filename, const int label,
   if (cv_img.data) {
     if (encoding.size()) {
       if ( (cv_img.channels() == 3) == is_color && !height && !width &&
+<<<<<<< HEAD
           matchExt(filename, encoding) )
+=======
+          !min_dim && !max_dim && matchExt(filename, encoding) )
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         return ReadFileToDatum(filename, label, datum);
       EncodeCVMatToDatum(cv_img, encoding, datum);
       datum->set_label(label);
@@ -187,6 +195,7 @@ void GetImageSize(const string& filename, int* height, int* width) {
   *width = cv_img.cols;
 }
 
+<<<<<<< HEAD
 #endif  // USE_OPENCV
 
 bool ReadFileToDatum(const string& filename, const int label,
@@ -209,6 +218,8 @@ bool ReadFileToDatum(const string& filename, const int label,
   }
 }
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 bool ReadRichImageToAnnotatedDatum(const string& filename,
     const string& labelfile, const int height, const int width,
     const int min_dim, const int max_dim, const bool is_color,
@@ -236,6 +247,12 @@ bool ReadRichImageToAnnotatedDatum(const string& filename,
       } else if (labeltype == "json") {
         return ReadJSONToAnnotatedDatum(labelfile, ori_height, ori_width,
                                         name_to_label, anno_datum);
+<<<<<<< HEAD
+=======
+      } else if (labeltype == "txt") {
+        return ReadTxtToAnnotatedDatum(labelfile, ori_height, ori_width,
+                                       anno_datum);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       } else {
         LOG(FATAL) << "Unknown label file type.";
         return false;
@@ -247,6 +264,31 @@ bool ReadRichImageToAnnotatedDatum(const string& filename,
   }
 }
 
+<<<<<<< HEAD
+=======
+#endif  // USE_OPENCV
+
+bool ReadFileToDatum(const string& filename, const int label,
+    Datum* datum) {
+  std::streampos size;
+
+  fstream file(filename.c_str(), ios::in|ios::binary|ios::ate);
+  if (file.is_open()) {
+    size = file.tellg();
+    std::string buffer(size, ' ');
+    file.seekg(0, ios::beg);
+    file.read(&buffer[0], size);
+    file.close();
+    datum->set_data(buffer);
+    datum->set_label(label);
+    datum->set_encoded(true);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Parse VOC/ILSVRC detection annotation.
 bool ReadXMLToAnnotatedDatum(const string& labelfile, const int img_height,
     const int img_width, const std::map<string, int>& name_to_label,
@@ -413,6 +455,7 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     // Get iscrowd.
     iscrowd = object.get<int>("iscrowd", 0);
 
+<<<<<<< HEAD
     // RIC get pose information
     int pose = object.get<int>("pose", -1);
     int poseflip = object.get<int>("poseFlip", -1);
@@ -426,6 +469,8 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     float eThree = object.get<float>("ethree", 0.0);
     float eThreeFlip = object.get<float>("ethreeflip", 0.0);
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     // Get bbox.
     vector<float> bbox_items;
     BOOST_FOREACH(ptree::value_type& v2, object.get_child("bbox")) {
@@ -442,6 +487,7 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     LOG_IF(WARNING, ymin > height) << labelfile <<
         " bounding box exceeds image boundary.";
     LOG_IF(WARNING, xmax > width) << labelfile <<
+<<<<<<< HEAD
         " bounding box exceeds image boundary. Xmax > width " << xmax << " > " << width;
     LOG_IF(WARNING, ymax > height) << labelfile <<
         " bounding box exceeds image boundary. ymax > height" << ymax << " > " << height;
@@ -453,6 +499,19 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
         " bounding box exceeds image boundary. xmax < 0" << xmax;
     LOG_IF(WARNING, ymax < 0) << labelfile <<
         " bounding box exceeds image boundary. ymax < 0" << ymax;
+=======
+        " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymax > height) << labelfile <<
+        " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, xmin < 0) << labelfile <<
+        " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymin < 0) << labelfile <<
+        " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, xmax < 0) << labelfile <<
+        " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymax < 0) << labelfile <<
+        " bounding box exceeds image boundary.";
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     LOG_IF(WARNING, xmin > xmax) << labelfile <<
         " bounding box irregular.";
     LOG_IF(WARNING, ymin > ymax) << labelfile <<
@@ -464,6 +523,7 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     bbox->set_xmax(xmax / width);
     bbox->set_ymax(ymax / height);
     bbox->set_difficult(iscrowd);
+<<<<<<< HEAD
 
     // Store pose info
     bbox->set_pose(pose);
@@ -477,6 +537,74 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
 
     bbox->set_ethree(eThree);
     bbox->set_ethreeflip(eThreeFlip);
+=======
+  }
+  return true;
+}
+
+// Parse plain txt detection annotation: label_id, xmin, ymin, xmax, ymax.
+bool ReadTxtToAnnotatedDatum(const string& labelfile, const int height,
+    const int width, AnnotatedDatum* anno_datum) {
+  std::ifstream infile(labelfile.c_str());
+  if (!infile.good()) {
+    LOG(INFO) << "Cannot open " << labelfile;
+    return false;
+  }
+  int label;
+  float xmin, ymin, xmax, ymax;
+  while (infile >> label >> xmin >> ymin >> xmax >> ymax) {
+    Annotation* anno = NULL;
+    int instance_id = 0;
+    bool found_group = false;
+    for (int g = 0; g < anno_datum->annotation_group_size(); ++g) {
+      AnnotationGroup* anno_group = anno_datum->mutable_annotation_group(g);
+      if (label == anno_group->group_label()) {
+        if (anno_group->annotation_size() == 0) {
+          instance_id = 0;
+        } else {
+          instance_id = anno_group->annotation(
+              anno_group->annotation_size() - 1).instance_id() + 1;
+        }
+        anno = anno_group->add_annotation();
+        found_group = true;
+      }
+    }
+    if (!found_group) {
+      // If there is no such annotation_group, create a new one.
+      AnnotationGroup* anno_group = anno_datum->add_annotation_group();
+      anno_group->set_group_label(label);
+      anno = anno_group->add_annotation();
+      instance_id = 0;
+    }
+    anno->set_instance_id(instance_id++);
+    LOG_IF(WARNING, xmin > width) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymin > height) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, xmax > width) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymax > height) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, xmin < 0) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymin < 0) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, xmax < 0) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, ymax < 0) << labelfile <<
+      " bounding box exceeds image boundary.";
+    LOG_IF(WARNING, xmin > xmax) << labelfile <<
+      " bounding box irregular.";
+    LOG_IF(WARNING, ymin > ymax) << labelfile <<
+      " bounding box irregular.";
+    // Store the normalized bounding box.
+    NormalizedBBox* bbox = anno->mutable_bbox();
+    bbox->set_xmin(xmin / width);
+    bbox->set_ymin(ymin / height);
+    bbox->set_xmax(xmax / width);
+    bbox->set_ymax(ymax / height);
+    bbox->set_difficult(false);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
   return true;
 }
@@ -652,6 +780,12 @@ void EncodeCVMatToDatum(const cv::Mat& cv_img, const string& encoding,
   cv::imencode("."+encoding, cv_img, buf);
   datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),
                               buf.size()));
+<<<<<<< HEAD
+=======
+  datum->set_channels(cv_img.channels());
+  datum->set_height(cv_img.rows);
+  datum->set_width(cv_img.cols);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   datum->set_encoded(true);
 }
 

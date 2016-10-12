@@ -37,6 +37,10 @@ class CuDNNSigmoidLayer : public SigmoidLayer<Dtype> {
   cudnnHandle_t             handle_;
   cudnnTensorDescriptor_t bottom_desc_;
   cudnnTensorDescriptor_t top_desc_;
+<<<<<<< HEAD
+=======
+  cudnnActivationDescriptor_t activ_desc_;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 };
 #endif
 

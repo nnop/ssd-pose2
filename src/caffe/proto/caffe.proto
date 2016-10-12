@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 
+=======
+syntax = "proto2";
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 package caffe;
 
@@ -126,6 +130,7 @@ message NormalizedBBox {
   optional bool difficult = 6;
   optional float score = 7;
   optional float size = 8;
+<<<<<<< HEAD
   optional int32 pose = 9;
   optional int32 poseflip = 10;
   optional float eone = 11;
@@ -134,6 +139,8 @@ message NormalizedBBox {
   optional float eoneflip = 14;
   optional float etwoflip = 15;
   optional float ethreeflip = 16;
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 // Annotation for each object instance.
@@ -350,7 +357,11 @@ message SolverParameter {
 
   // RMSProp decay value
   // MeanSquare(t) = rms_decay*MeanSquare(t-1) + (1-rms_decay)*SquareGradient(t)
+<<<<<<< HEAD
   optional float rms_decay = 38;
+=======
+  optional float rms_decay = 38 [default = 0.99];
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   // If true, print information about the state of the net that may help with
   // debugging learning problems.
@@ -437,7 +448,11 @@ message ParamSpec {
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
+<<<<<<< HEAD
 // LayerParameter next available layer-specific ID: 145 (last added: crop_param)
+=======
+// LayerParameter next available layer-specific ID: 147 (last added: recurrent_param)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 message LayerParameter {
   optional string name = 1; // the layer name
   optional string type = 2; // the layer type
@@ -501,7 +516,10 @@ message LayerParameter {
   optional DataParameter data_param = 107;
   optional DetectionEvaluateParameter detection_evaluate_param = 205;
   optional DetectionOutputParameter detection_output_param = 204;
+<<<<<<< HEAD
   optional DetectionPoseOutputParameter detection_pose_output_param = 208;
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   optional DropoutParameter dropout_param = 108;
   optional DummyDataParameter dummy_data_param = 109;
   optional EltwiseParameter eltwise_param = 110;
@@ -520,15 +538,25 @@ message LayerParameter {
   optional LRNParameter lrn_param = 118;
   optional MemoryDataParameter memory_data_param = 119;
   optional MultiBoxLossParameter multibox_loss_param = 201;
+<<<<<<< HEAD
   optional MultiBoxPoseLossParameter multibox_pose_loss_param = 209;
   optional MVNParameter mvn_param = 120;
   optional NormalizeParameter norm_param = 206;
+=======
+  optional MVNParameter mvn_param = 120;
+  optional NormalizeParameter norm_param = 206;
+  optional ParameterParameter parameter_param = 145;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   optional PermuteParameter permute_param = 202;
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
   optional PReLUParameter prelu_param = 131;
   optional PriorBoxParameter prior_box_param = 203;
   optional PythonParameter python_param = 130;
+<<<<<<< HEAD
+=======
+  optional RecurrentParameter recurrent_param = 146;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   optional ReductionParameter reduction_param = 136;
   optional ReLUParameter relu_param = 123;
   optional ReshapeParameter reshape_param = 133;
@@ -898,7 +926,10 @@ message DataParameter {
 message DetectionEvaluateParameter {
   // Number of classes that are actually predicted. Required!
   optional uint32 num_classes = 1;
+<<<<<<< HEAD
   optional uint32 num_poses = 6;
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   // Label id for background class. Needed for sanity check so that
   // background class is neither in the ground truth nor the detections.
   optional uint32 background_label_id = 2 [default = 0];
@@ -976,6 +1007,7 @@ message DetectionOutputParameter {
   optional float visualize_threshold = 11;
 }
 
+<<<<<<< HEAD
 // Message that store parameters used by DetectionOutputLayer
 message DetectionPoseOutputParameter {
   // Number of classes to be predicted. Required!
@@ -1009,6 +1041,8 @@ message DetectionPoseOutputParameter {
   optional float visualize_threshold = 11;
 }
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 message DropoutParameter {
   optional float dropout_ratio = 1 [default = 0.5]; // dropout ratio
 }
@@ -1215,6 +1249,7 @@ message MemoryDataParameter {
   optional uint32 width = 4;
 }
 
+<<<<<<< HEAD
 
 // Localization loss type.
 enum LocLossType {
@@ -1288,6 +1323,22 @@ message MultiBoxLossParameter {
   optional LocLossType loc_loss_type = 1 [default = LocLossType_SMOOTH_L1];
   // Confidence loss type.
   optional ConfLossType conf_loss_type = 2 [default = ConfLossType_SOFTMAX];
+=======
+// Message that store parameters used by MultiBoxLossLayer
+message MultiBoxLossParameter {
+  // Localization loss type.
+  enum LocLossType {
+    L2 = 0;
+    SMOOTH_L1 = 1;
+  }
+  optional LocLossType loc_loss_type = 1 [default = SMOOTH_L1];
+  // Confidence loss type.
+  enum ConfLossType {
+    SOFTMAX = 0;
+    LOGISTIC = 1;
+  }
+  optional ConfLossType conf_loss_type = 2 [default = SOFTMAX];
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   // Weight for localization loss.
   optional float loc_weight = 3 [default = 1.0];
   // Number of classes to be predicted. Required!
@@ -1295,8 +1346,16 @@ message MultiBoxLossParameter {
   // If true, bounding box are shared among different classes.
   optional bool share_location = 5 [default = true];
   // Matching method during training.
+<<<<<<< HEAD
   optional MatchType match_type = 6 [default = MatchType_PER_PREDICTION];
 
+=======
+  enum MatchType {
+    BIPARTITE = 0;
+    PER_PREDICTION = 1;
+  }
+  optional MatchType match_type = 6 [default = PER_PREDICTION];
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   // If match_type is PER_PREDICTION, use overlap_threshold to
   // determine the extra matching bboxes.
   optional float overlap_threshold = 7 [default = 0.5];
@@ -1344,6 +1403,13 @@ message NormalizeParameter {
   optional float eps = 4 [default = 1e-10];
 }
 
+<<<<<<< HEAD
+=======
+message ParameterParameter {
+  optional BlobShape shape = 1;
+}
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 message PermuteParameter {
   // The new orders of the axes of data. Notice it should be with
   // in the same range as the input data, and it starts from 0.
@@ -1425,6 +1491,28 @@ message PythonParameter {
   optional bool share_in_parallel = 4 [default = false];
 }
 
+<<<<<<< HEAD
+=======
+// Message that stores parameters used by RecurrentLayer
+message RecurrentParameter {
+  // The dimension of the output (and usually hidden state) representation --
+  // must be explicitly set to non-zero.
+  optional uint32 num_output = 1 [default = 0];
+
+  optional FillerParameter weight_filler = 2; // The filler for the weight
+  optional FillerParameter bias_filler = 3; // The filler for the bias
+
+  // Whether to enable displaying debug_info in the unrolled recurrent net.
+  optional bool debug_info = 4 [default = false];
+
+  // Whether to add as additional inputs (bottoms) the initial hidden state
+  // blobs, and add as additional outputs (tops) the final timestep hidden state
+  // blobs.  The number of additional bottom/top blobs required depends on the
+  // recurrent architecture -- e.g., 1 for RNNs, 2 for LSTMs.
+  optional bool expose_hidden = 5 [default = false];
+}
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Message that stores parameters used by ReductionLayer
 message ReductionParameter {
   enum ReductionOp {
@@ -1489,7 +1577,11 @@ message ReshapeParameter {
   //   reshape_param { shape { dim:  2  dim: 2  dim:  4 } }
   //   reshape_param { shape { dim:  0  dim: 2  dim:  4 } }
   //   reshape_param { shape { dim:  0  dim: 2  dim: -1 } }
+<<<<<<< HEAD
   //   reshape_param { shape { dim: -1  dim: 0  dim:  2 } }
+=======
+  //   reshape_param { shape { dim:  0  dim:-1  dim:  4 } }
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   //
   optional BlobShape shape = 1;
 
@@ -1632,9 +1724,17 @@ message ThresholdParameter {
 message VideoDataParameter{
   enum VideoType {
     WEBCAM = 0;
+<<<<<<< HEAD
   }
   optional VideoType video_type = 1 [default = WEBCAM];
   optional int32 device_id = 2 [default = 0];
+=======
+    VIDEO = 1;
+  }
+  optional VideoType video_type = 1 [default = WEBCAM];
+  optional int32 device_id = 2 [default = 0];
+  optional string video_file = 3;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 message WindowDataParameter {

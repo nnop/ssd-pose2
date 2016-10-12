@@ -76,14 +76,22 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   loc_bottom_vec_.push_back(&loc_gt_);
   loc_loss_.Reshape(loss_shape);
   loc_top_vec_.push_back(&loc_loss_);
+<<<<<<< HEAD
   if (loc_loss_type_ == LocLossType_L2) {
+=======
+  if (loc_loss_type_ == MultiBoxLossParameter_LocLossType_L2) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     LayerParameter layer_param;
     layer_param.set_name(this->layer_param_.name() + "_l2_loc");
     layer_param.set_type("EuclideanLoss");
     layer_param.add_loss_weight(loc_weight_);
     loc_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
     loc_loss_layer_->SetUp(loc_bottom_vec_, loc_top_vec_);
+<<<<<<< HEAD
   } else if (loc_loss_type_ == LocLossType_SMOOTH_L1) {
+=======
+  } else if (loc_loss_type_ == MultiBoxLossParameter_LocLossType_SMOOTH_L1) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     LayerParameter layer_param;
     layer_param.set_name(this->layer_param_.name() + "_smooth_L1_loc");
     layer_param.set_type("SmoothL1Loss");
@@ -99,7 +107,11 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   conf_bottom_vec_.push_back(&conf_gt_);
   conf_loss_.Reshape(loss_shape);
   conf_top_vec_.push_back(&conf_loss_);
+<<<<<<< HEAD
   if (conf_loss_type_ == ConfLossType_SOFTMAX) {
+=======
+  if (conf_loss_type_ == MultiBoxLossParameter_ConfLossType_SOFTMAX) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     LayerParameter layer_param;
     layer_param.set_name(this->layer_param_.name() + "_softmax_conf");
     layer_param.set_type("SoftmaxWithLoss");
@@ -115,7 +127,11 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     conf_pred_.Reshape(conf_shape);
     conf_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
     conf_loss_layer_->SetUp(conf_bottom_vec_, conf_top_vec_);
+<<<<<<< HEAD
   } else if (conf_loss_type_ == ConfLossType_LOGISTIC) {
+=======
+  } else if (conf_loss_type_ == MultiBoxLossParameter_ConfLossType_LOGISTIC) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     LayerParameter layer_param;
     layer_param.set_name(this->layer_param_.name() + "_logistic_conf");
     layer_param.set_type("SigmoidCrossEntropyLoss");
@@ -335,6 +351,11 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     }
     loc_loss_layer_->Reshape(loc_bottom_vec_, loc_top_vec_);
     loc_loss_layer_->Forward(loc_bottom_vec_, loc_top_vec_);
+<<<<<<< HEAD
+=======
+  } else {
+    loc_loss_.mutable_cpu_data()[0] = 0;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 
   // Form data to pass on to conf_loss_layer_.
@@ -346,12 +367,20 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   if (num_conf_ >= 1) {
     // Reshape the confidence data.
     vector<int> conf_shape;
+<<<<<<< HEAD
     if (conf_loss_type_ == ConfLossType_SOFTMAX) {
+=======
+    if (conf_loss_type_ == MultiBoxLossParameter_ConfLossType_SOFTMAX) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       conf_shape.push_back(num_conf_);
       conf_gt_.Reshape(conf_shape);
       conf_shape.push_back(num_classes_);
       conf_pred_.Reshape(conf_shape);
+<<<<<<< HEAD
     } else if (conf_loss_type_ == ConfLossType_LOGISTIC) {
+=======
+    } else if (conf_loss_type_ == MultiBoxLossParameter_ConfLossType_LOGISTIC) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       conf_shape.push_back(1);
       conf_shape.push_back(num_conf_);
       conf_shape.push_back(num_classes_);
@@ -387,10 +416,17 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
                 all_gt_bboxes[i][match_index[j]].label();
             int idx = do_neg_mining_ ? count : j;
             switch (conf_loss_type_) {
+<<<<<<< HEAD
               case ConfLossType_SOFTMAX:
                 conf_gt_data[idx] = gt_label;
                 break;
               case ConfLossType_LOGISTIC:
+=======
+              case MultiBoxLossParameter_ConfLossType_SOFTMAX:
+                conf_gt_data[idx] = gt_label;
+                break;
+              case MultiBoxLossParameter_ConfLossType_LOGISTIC:
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
                 conf_gt_data[idx * num_classes_ + gt_label] = 1;
                 break;
               default:
@@ -412,10 +448,17 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
             caffe_copy<Dtype>(num_classes_, conf_data + j * num_classes_,
                               conf_pred_data + count * num_classes_);
             switch (conf_loss_type_) {
+<<<<<<< HEAD
               case ConfLossType_SOFTMAX:
                 conf_gt_data[count] = background_label_id_;
                 break;
               case ConfLossType_LOGISTIC:
+=======
+              case MultiBoxLossParameter_ConfLossType_SOFTMAX:
+                conf_gt_data[count] = background_label_id_;
+                break;
+              case MultiBoxLossParameter_ConfLossType_LOGISTIC:
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
                 conf_gt_data[count * num_classes_ + background_label_id_] = 1;
                 break;
               default:
@@ -434,6 +477,11 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     }
     conf_loss_layer_->Reshape(conf_bottom_vec_, conf_top_vec_);
     conf_loss_layer_->Forward(conf_bottom_vec_, conf_top_vec_);
+<<<<<<< HEAD
+=======
+  } else {
+    conf_loss_.mutable_cpu_data()[0] = 0;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 
   top[0]->mutable_cpu_data()[0] = 0;
@@ -569,11 +617,14 @@ void MultiBoxLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
   all_neg_indices_.clear();
 }
 
+<<<<<<< HEAD
 
 #ifdef CPU_ONLY
 STUB_GPU(MultiBoxLossLayer);
 #endif
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 INSTANTIATE_CLASS(MultiBoxLossLayer);
 REGISTER_LAYER_CLASS(MultiBoxLoss);
 

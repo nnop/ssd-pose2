@@ -10,8 +10,13 @@ endif()
 project(Caffe C CXX)
 
 # ---[ Caffe version
+<<<<<<< HEAD
 set(CAFFE_TARGET_VERSION "1.0.0-rc3")
 set(CAFFE_TARGET_SOVERSION "1.0.0-rc3")
+=======
+set(CAFFE_TARGET_VERSION "1.0.0-rc3" CACHE STRING "Caffe logical version")
+set(CAFFE_TARGET_SOVERSION "1.0.0-rc3" CACHE STRING "Caffe soname version")
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 add_definitions(-DCAFFE_VERSION=${CAFFE_TARGET_VERSION})
 
 # ---[ Using cmake scripts and modules

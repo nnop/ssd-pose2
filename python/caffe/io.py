@@ -46,7 +46,11 @@ def array_to_blobproto(arr, diff=None):
     return blob
 
 
+<<<<<<< HEAD
 def arraylist_to_blobprotovecor_str(arraylist):
+=======
+def arraylist_to_blobprotovector_str(arraylist):
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     """Converts a list of arrays to a serialized blobprotovec, which could be
     then passed to a network for processing.
     """

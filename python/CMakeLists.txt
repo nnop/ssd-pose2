@@ -22,6 +22,7 @@ if(UNIX OR APPLE)
 endif()
 
 # ---[ Install
+<<<<<<< HEAD
 file(GLOB files1 *.py requirements.txt)
 install(FILES ${files1} DESTINATION python)
 
@@ -31,4 +32,21 @@ install(TARGETS pycaffe  DESTINATION python/caffe)
 install(DIRECTORY caffe/imagenet caffe/proto caffe/test DESTINATION python/caffe)
 
 
+=======
+# scripts
+file(GLOB python_files *.py requirements.txt)
+install(FILES ${python_files} DESTINATION python)
+
+# module
+install(DIRECTORY caffe
+    DESTINATION python
+    FILES_MATCHING
+    PATTERN "*.py"
+    PATTERN "ilsvrc_2012_mean.npy"
+    PATTERN "test" EXCLUDE
+    )
+
+# _caffe.so
+install(TARGETS pycaffe  DESTINATION python/caffe)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 

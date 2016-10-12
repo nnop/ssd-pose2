@@ -82,6 +82,7 @@ __device__ void ClipBBoxGPU(const Dtype* bbox, Dtype* clip_bbox) {
 template __device__ void ClipBBoxGPU(const float* bbox, float* clip_bbox);
 template __device__ void ClipBBoxGPU(const double* bbox, double* clip_bbox);
 
+<<<<<<< HEAD
 
 template <typename Dtype>
 void GetPoseGPU(const int nthreads,
@@ -107,6 +108,8 @@ template void GetPoseGPU(const int nthreads,
 
 
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 template <typename Dtype>
 __global__ void DecodeBBoxesKernel(const int nthreads,
           const Dtype* loc_data, const Dtype* prior_data,
@@ -387,7 +390,10 @@ void ApplyNMSGPU(const double* bbox_data, const double* conf_data,
           const int num_bboxes, const float confidence_threshold,
           const int top_k, const float nms_threshold, vector<int>* indices);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 template <typename Dtype>
 __global__ void GetDetectionsKernel(const int nthreads,
           const Dtype* bbox_data, const Dtype* conf_data, const int image_id,

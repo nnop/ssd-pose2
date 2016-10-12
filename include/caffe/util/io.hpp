@@ -184,6 +184,11 @@ bool DecodeDatumNative(Datum* datum);
 bool DecodeDatum(Datum* datum, bool is_color);
 
 
+<<<<<<< HEAD
+=======
+void GetImageSize(const string& filename, int* height, int* width);
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 bool ReadRichImageToAnnotatedDatum(const string& filename,
     const string& labelname, const int height, const int width,
     const int min_dim, const int max_dim, const bool is_color,
@@ -209,6 +214,12 @@ bool ReadJSONToAnnotatedDatum(const string& labelname, const int img_height,
     const int img_width, const std::map<string, int>& name_to_label,
     AnnotatedDatum* anno_datum);
 
+<<<<<<< HEAD
+=======
+bool ReadTxtToAnnotatedDatum(const string& labelname, const int height,
+    const int width, AnnotatedDatum* anno_datum);
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 bool ReadLabelFileToLabelMap(const string& filename, bool include_background,
     const string& delimiter, LabelMap* map);
 
@@ -270,8 +281,11 @@ void EncodeCVMatToDatum(const cv::Mat& cv_img, const string& encoding,
                         Datum* datum);
 
 void CVMatToDatum(const cv::Mat& cv_img, Datum* datum);
+<<<<<<< HEAD
 
 void GetImageSize(const string& filename, int* height, int* width);
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #endif  // USE_OPENCV
 
 }  // namespace caffe

@@ -77,9 +77,13 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
         // cpu_data and gpu_data for consistent prefetch thread. Thus we make
         // sure there is at least one bbox.
         label_shape[2] = std::max(num_bboxes, 1);
+<<<<<<< HEAD
         // TODO Change here to 9?
         // Ric
         label_shape[3] = 12;
+=======
+        label_shape[3] = 8;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       } else {
         LOG(FATAL) << "Unknown annotation type.";
       }
@@ -194,13 +198,21 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
     if (anno_type_ == AnnotatedDatum_AnnotationType_BBOX) {
       label_shape[0] = 1;
       label_shape[1] = 1;
+<<<<<<< HEAD
       // Ric Changed
       label_shape[3] = 12;
+=======
+      label_shape[3] = 8;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       if (num_bboxes == 0) {
         // Store all -1 in the label.
         label_shape[2] = 1;
         batch->label_.Reshape(label_shape);
+<<<<<<< HEAD
         caffe_set<Dtype>(12, -1, batch->label_.mutable_cpu_data());
+=======
+        caffe_set<Dtype>(8, -1, batch->label_.mutable_cpu_data());
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       } else {
         // Reshape the label and store the annotation.
         label_shape[2] = num_bboxes;
@@ -222,12 +234,15 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
               top_label[idx++] = bbox.xmax();
               top_label[idx++] = bbox.ymax();
               top_label[idx++] = bbox.difficult();
+<<<<<<< HEAD
               top_label[idx++] = bbox.pose();
               top_label[idx++] = bbox.eone();
               top_label[idx++] = bbox.etwo();
               top_label[idx++] = bbox.ethree();
               //LOG(INFO) << bbox.azilabel();
               // TODO add bbox.aziLabel here
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
             }
           }
         }

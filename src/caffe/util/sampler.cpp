@@ -84,7 +84,11 @@ void SampleBBox(const Sampler& sampler, NormalizedBBox* sampled_bbox) {
   // Get random scale.
   CHECK_GE(sampler.max_scale(), sampler.min_scale());
   CHECK_GT(sampler.min_scale(), 0.);
+<<<<<<< HEAD
   CHECK_LE(sampler.min_scale(), 1.);
+=======
+  CHECK_LE(sampler.max_scale(), 1.);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   float scale;
   caffe_rng_uniform(1, sampler.min_scale(), sampler.max_scale(), &scale);
 

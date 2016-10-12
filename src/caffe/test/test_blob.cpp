@@ -51,6 +51,17 @@ TYPED_TEST(BlobSimpleTest, TestReshape) {
   EXPECT_EQ(this->blob_->count(), 120);
 }
 
+<<<<<<< HEAD
+=======
+TYPED_TEST(BlobSimpleTest, TestReshapeZero) {
+  vector<int> shape(2);
+  shape[0] = 0;
+  shape[1] = 5;
+  this->blob_->Reshape(shape);
+  EXPECT_EQ(this->blob_->count(), 0);
+}
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 TYPED_TEST(BlobSimpleTest, TestLegacyBlobProtoShapeEquals) {
   BlobProto blob_proto;
 

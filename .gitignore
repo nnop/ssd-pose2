@@ -47,6 +47,12 @@
 # PyCharm files
 .idea
 
+<<<<<<< HEAD
+=======
+# Visual Studio Code files
+.vscode
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 # OSX dir files
 .DS_Store
 
@@ -58,7 +64,11 @@ Makefile.config
 # Data and models are either
 # 1. reference, and not casually committed
 # 2. custom, and live on their own unless they're deliberated contributed
+<<<<<<< HEAD
 #data/*
+=======
+data/*
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 models/*
 *.caffemodel
 *.caffemodel.h5
@@ -98,6 +108,7 @@ MANIFEST-*
 jobs
 temp
 examples/*/*lmdb
+<<<<<<< HEAD
 
 
 models
@@ -125,3 +136,5 @@ notebooks
 structure.txt
 data/scenes
 data/pascal3D
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be

@@ -10,7 +10,12 @@ import matplotlib.legend as lgd
 import matplotlib.markers as mks
 
 def get_log_parsing_script():
+<<<<<<< HEAD
     dirname = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+=======
+    dirname = os.path.dirname(os.path.abspath(inspect.getfile(
+        inspect.currentframe())))
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     return dirname + '/parse_log.sh'
 
 def get_log_file_suffix():
@@ -61,16 +66,27 @@ def get_data_file_type(chart_type):
     return data_file_type
 
 def get_data_file(chart_type, path_to_log):
+<<<<<<< HEAD
     return os.path.basename(path_to_log) + '.' + get_data_file_type(chart_type).lower()
+=======
+    return (os.path.basename(path_to_log) + '.' +
+            get_data_file_type(chart_type).lower())
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 def get_field_descriptions(chart_type):
     description = get_chart_type_description(chart_type).split(
         get_chart_type_description_separator())
     y_axis_field = description[0]
     x_axis_field = description[1]
+<<<<<<< HEAD
     return x_axis_field, y_axis_field    
 
 def get_field_indecies(x_axis_field, y_axis_field):    
+=======
+    return x_axis_field, y_axis_field
+
+def get_field_indices(x_axis_field, y_axis_field):
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     data_file_type = get_data_file_type(chart_type)
     fields = create_field_index()[0][data_file_type]
     return fields[x_axis_field], fields[y_axis_field]
@@ -111,7 +127,11 @@ def plot_chart(chart_type, path_to_png, path_to_log_list):
         os.system('%s %s' % (get_log_parsing_script(), path_to_log))
         data_file = get_data_file(chart_type, path_to_log)
         x_axis_field, y_axis_field = get_field_descriptions(chart_type)
+<<<<<<< HEAD
         x, y = get_field_indecies(x_axis_field, y_axis_field)
+=======
+        x, y = get_field_indices(x_axis_field, y_axis_field)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         data = load_data(data_file, x, y)
         ## TODO: more systematic color cycle for lines
         color = [random.random(), random.random(), random.random()]
@@ -138,8 +158,13 @@ def plot_chart(chart_type, path_to_png, path_to_log_list):
     plt.legend(loc = legend_loc, ncol = 1) # ajust ncol to fit the space
     plt.title(get_chart_type_description(chart_type))
     plt.xlabel(x_axis_field)
+<<<<<<< HEAD
     plt.ylabel(y_axis_field)  
     plt.savefig(path_to_png)     
+=======
+    plt.ylabel(y_axis_field)
+    plt.savefig(path_to_png)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     plt.show()
 
 def print_help():
@@ -160,28 +185,50 @@ Supported chart types:""" % (len(get_supported_chart_types()) - 1,
     num = len(supported_chart_types)
     for i in xrange(num):
         print '    %d: %s' % (i, supported_chart_types[i])
+<<<<<<< HEAD
     exit
 
 def is_valid_chart_type(chart_type):
     return chart_type >= 0 and chart_type < len(get_supported_chart_types())
   
+=======
+    sys.exit()
+
+def is_valid_chart_type(chart_type):
+    return chart_type >= 0 and chart_type < len(get_supported_chart_types())
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         print_help()
     else:
         chart_type = int(sys.argv[1])
         if not is_valid_chart_type(chart_type):
+<<<<<<< HEAD
+=======
+            print '%s is not a valid chart type.' % chart_type
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
             print_help()
         path_to_png = sys.argv[2]
         if not path_to_png.endswith('.png'):
             print 'Path must ends with png' % path_to_png
+<<<<<<< HEAD
             exit            
+=======
+            sys.exit()
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         path_to_logs = sys.argv[3:]
         for path_to_log in path_to_logs:
             if not os.path.exists(path_to_log):
                 print 'Path does not exist: %s' % path_to_log
+<<<<<<< HEAD
                 exit
             if not path_to_log.endswith(get_log_file_suffix()):
+=======
+                sys.exit()
+            if not path_to_log.endswith(get_log_file_suffix()):
+                print 'Log file must end in %s.' % get_log_file_suffix()
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
                 print_help()
         ## plot_chart accpets multiple path_to_logs
         plot_chart(chart_type, path_to_png, path_to_logs)

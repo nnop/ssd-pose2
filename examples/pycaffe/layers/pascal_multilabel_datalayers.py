@@ -20,7 +20,11 @@ from tools import SimpleTransformer
 class PascalMultilabelDataLayerSync(caffe.Layer):
 
     """
+<<<<<<< HEAD
     This is a simple syncronous datalayer for training a multilabel model on
+=======
+    This is a simple synchronous datalayer for training a multilabel model on
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     PASCAL.
     """
 
@@ -33,7 +37,11 @@ class PascalMultilabelDataLayerSync(caffe.Layer):
         # params is a python dictionary with layer parameters.
         params = eval(self.param_str)
 
+<<<<<<< HEAD
         # Check the paramameters for validity.
+=======
+        # Check the parameters for validity.
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         check_params(params)
 
         # store input as class variables
@@ -207,7 +215,11 @@ def check_params(params):
 
 def print_info(name, params):
     """
+<<<<<<< HEAD
     Ouput some info regarding the class
+=======
+    Output some info regarding the class
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     """
     print "{} initialized for split: {}, with bs: {}, im_shape: {}.".format(
         name,

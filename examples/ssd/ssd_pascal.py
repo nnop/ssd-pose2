@@ -1,6 +1,9 @@
 from __future__ import print_function
+<<<<<<< HEAD
 import sys
 sys.path.append('/playpen/poirson/ssd/caffe/python/')
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 import caffe
 from caffe.model_libs import *
 from google.protobuf import text_format
@@ -10,6 +13,10 @@ import os
 import shutil
 import stat
 import subprocess
+<<<<<<< HEAD
+=======
+import sys
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Add extra layers on top of a "base" network (e.g. VGGNet or Inception).
 def AddExtraLayers(net, use_batchnorm=True):
@@ -55,9 +62,15 @@ resume_training = True
 remove_old_models = False
 
 # The database file for training data. Created by data/VOC0712/create_data.sh
+<<<<<<< HEAD
 train_data = "data/3Dpascal/pascal3D/lmdb/pascal3D_train_lmdb"
 # The database file for testing data. Created by data/VOC0712/create_data.sh
 test_data = "data/3Dpascal/pascal3D/lmdb/pascal3D_val_lmdb"
+=======
+train_data = "examples/VOC0712/VOC0712_trainval_lmdb"
+# The database file for testing data. Created by data/VOC0712/create_data.sh
+test_data = "examples/VOC0712/VOC0712_test_lmdb"
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 # Specify the batch sampler.
 resize_width = 300
 resize_height = 300
@@ -184,7 +197,11 @@ test_transform_param = {
 use_batchnorm = False
 # Use different initial learning rate.
 if use_batchnorm:
+<<<<<<< HEAD
     base_lr = 0.04
+=======
+    base_lr = 0.0004
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 else:
     # A learning rate for batch_size = 1, num_gpus = 1.
     base_lr = 0.00004
@@ -192,16 +209,28 @@ else:
 # Modify the job name if you want.
 job_name = "SSD_{}".format(resize)
 # The name of the model. Modify it if you want.
+<<<<<<< HEAD
 model_name = "VGG_Pascal3D_{}".format(job_name)
+=======
+model_name = "VGG_VOC0712_{}".format(job_name)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Directory which stores the model .prototxt file.
 save_dir = "models/VGGNet/VOC0712/{}".format(job_name)
 # Directory which stores the snapshot of models.
+<<<<<<< HEAD
 snapshot_dir = "models/VGGNet/Pascal3D/{}".format(job_name)
 # Directory which stores the job script and log file.
 job_dir = "jobs/VGGNet/Pascal3D/{}".format(job_name)
 # Directory which stores the detection results.
 output_result_dir = "data/3Dpascal/pascal3D/results/{}/Main".format(job_name)
+=======
+snapshot_dir = "models/VGGNet/VOC0712/{}".format(job_name)
+# Directory which stores the job script and log file.
+job_dir = "jobs/VGGNet/VOC0712/{}".format(job_name)
+# Directory which stores the detection results.
+output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}/Main".format(os.environ['HOME'], job_name)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # model definition files.
 train_net_file = "{}/train.prototxt".format(save_dir)
@@ -218,7 +247,11 @@ name_size_file = "data/VOC0712/test_name_size.txt"
 # The pretrained model. We use the Fully convolutional reduced (atrous) VGGNet.
 pretrain_model = "models/VGGNet/VGG_ILSVRC_16_layers_fc_reduced.caffemodel"
 # Stores LabelMapItem.
+<<<<<<< HEAD
 label_map_file = "data/3Dpascal/pascal3D//labelmap_3D.prototxt"
+=======
+label_map_file = "data/VOC0712/labelmap_voc.prototxt"
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # MultiBoxLoss parameters.
 num_classes = 21
@@ -283,7 +316,11 @@ clip = True
 
 # Solver parameters.
 # Defining which GPUs to use.
+<<<<<<< HEAD
 gpus = "0"
+=======
+gpus = "0,1,2,3"
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 gpulist = gpus.split(",")
 num_gpus = len(gpulist)
 
@@ -300,6 +337,7 @@ if num_gpus > 0:
   solver_mode = P.Solver.GPU
   device_id = int(gpulist[0])
 
+<<<<<<< HEAD
 if normalization_mode == P.Loss.BATCH_SIZE:
   base_lr /= iter_size
 elif normalization_mode == P.Loss.NONE:
@@ -310,6 +348,16 @@ elif normalization_mode == P.Loss.FULL:
   # Roughly there are 2000 prior bboxes per image.
   # TODO(weiliu89): Estimate the exact # of priors.
   base_lr *= 2000. / iter_size
+=======
+if normalization_mode == P.Loss.NONE:
+  base_lr /= batch_size_per_device
+elif normalization_mode == P.Loss.VALID:
+  base_lr *= 25. / loc_weight
+elif normalization_mode == P.Loss.FULL:
+  # Roughly there are 2000 prior bboxes per image.
+  # TODO(weiliu89): Estimate the exact # of priors.
+  base_lr *= 2000.
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Which layers to freeze (no backward) during training.
 freeze_layers = ['conv1_1', 'conv1_2', 'conv2_1', 'conv2_2']
@@ -410,6 +458,10 @@ net[name] = L.MultiBoxLoss(*mbox_layers, multibox_loss_param=multibox_loss_param
 with open(train_net_file, 'w') as f:
     print('name: "{}_train"'.format(model_name), file=f)
     print(net.to_proto(), file=f)
+<<<<<<< HEAD
+=======
+shutil.copy(train_net_file, job_dir)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create test net.
 net = caffe.NetSpec()
@@ -452,6 +504,10 @@ net.detection_eval = L.DetectionEvaluate(net.detection_out, net.label,
 with open(test_net_file, 'w') as f:
     print('name: "{}_test"'.format(model_name), file=f)
     print(net.to_proto(), file=f)
+<<<<<<< HEAD
+=======
+shutil.copy(test_net_file, job_dir)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create deploy net.
 # Remove the first and last layer from test net.
@@ -466,6 +522,10 @@ with open(deploy_net_file, 'w') as f:
     net_param.input_shape.extend([
         caffe_pb2.BlobShape(dim=[1, 3, resize_height, resize_width])])
     print(net_param, file=f)
+<<<<<<< HEAD
+=======
+shutil.copy(deploy_net_file, job_dir)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create solver.
 solver = caffe_pb2.SolverParameter(
@@ -476,6 +536,10 @@ solver = caffe_pb2.SolverParameter(
 
 with open(solver_file, 'w') as f:
     print(solver, file=f)
+<<<<<<< HEAD
+=======
+shutil.copy(solver_file, job_dir)
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 max_iter = 0
 # Find most recent snapshot.

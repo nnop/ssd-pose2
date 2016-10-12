@@ -49,7 +49,11 @@ void DetectionEvaluateLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   CHECK_EQ(bottom[0]->width(), 7);
   CHECK_EQ(bottom[1]->num(), 1);
   CHECK_EQ(bottom[1]->channels(), 1);
+<<<<<<< HEAD
   CHECK_EQ(bottom[1]->width(), 9); // RIC-changed 
+=======
+  CHECK_EQ(bottom[1]->width(), 8);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   // num() and channels() are 1.
   vector<int> top_shape(2, 1);

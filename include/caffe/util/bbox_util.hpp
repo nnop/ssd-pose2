@@ -22,11 +22,18 @@ namespace caffe {
 
 typedef EmitConstraint_EmitType EmitType;
 typedef PriorBoxParameter_CodeType CodeType;
+<<<<<<< HEAD
 /*
 typedef MultiBoxLossParameter_MatchType MatchType;
 typedef MultiBoxLossParameter_LocLossType LocLossType;
 typedef MultiBoxLossParameter_ConfLossType ConfLossType;
 */
+=======
+typedef MultiBoxLossParameter_MatchType MatchType;
+typedef MultiBoxLossParameter_LocLossType LocLossType;
+typedef MultiBoxLossParameter_ConfLossType ConfLossType;
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 typedef map<int, vector<NormalizedBBox> > LabelBBox;
 
 // Function used to sort NormalizedBBox, stored in STL container (e.g. vector),
@@ -104,6 +111,18 @@ void DecodeBBoxes(const vector<NormalizedBBox>& prior_bboxes,
     const vector<NormalizedBBox>& bboxes,
     vector<NormalizedBBox>* decode_bboxes);
 
+<<<<<<< HEAD
+=======
+// Decode all bboxes in a batch.
+void DecodeBBoxesAll(const vector<LabelBBox>& all_loc_pred,
+    const vector<NormalizedBBox>& prior_bboxes,
+    const vector<vector<float> >& prior_variances,
+    const int num, const bool share_location,
+    const int num_loc_classes, const int background_label_id,
+    const CodeType code_type, const bool variance_encoded_in_target,
+    vector<LabelBBox>* all_decode_bboxes);
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Match prediction bboxes with ground truth bboxes.
 void MatchBBox(const vector<NormalizedBBox>& gt,
     const vector<NormalizedBBox>& pred_bboxes, const int label,
@@ -127,6 +146,7 @@ void GetGroundTruth(const Dtype* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, LabelBBox>* all_gt_bboxes);
 
+<<<<<<< HEAD
 template <typename Dtype>
 void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
@@ -137,6 +157,8 @@ void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, LabelBBox>* all_gt_bboxes);
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Get location predictions from loc_data.
 //    loc_data: num x num_preds_per_class * num_loc_classes * 4 blob.
 //    num: the number of images.
@@ -151,6 +173,7 @@ void GetLocPredictions(const Dtype* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
       const bool share_location, vector<LabelBBox>* loc_preds);
 
+<<<<<<< HEAD
 // Added by Ric
 // TODO document
 template <typename Dtype>
@@ -169,7 +192,7 @@ void GetPosePredictions(const Dtype* pose_data, const int num, const int num_pos
       const int num_preds_per_class, const int num_pose_classes,
       const bool share_pose, vector< map< int, vector< vector<float> > > >* all_pose_preds);
 */
-
+=======
 // Get confidence predictions from conf_data.
 //    conf_data: num x num_preds_per_class * num_classes blob.
 //    num: the number of images.
@@ -181,6 +204,29 @@ template <typename Dtype>
 void GetConfidenceScores(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_scores);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+
+// Get confidence predictions from conf_data.
+//    conf_data: num x num_preds_per_class * num_classes blob.
+//    num: the number of images.
+//    num_preds_per_class: number of predictions per class.
+//    num_classes: number of classes.
+<<<<<<< HEAD
+=======
+//    class_major: if true, data layout is
+//      num x num_classes x num_preds_per_class; otherwise, data layerout is
+//      num x num_preds_per_class * num_classes.
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//    conf_preds: stores the confidence prediction, where each item contains
+//      confidence prediction for an image.
+template <typename Dtype>
+void GetConfidenceScores(const Dtype* conf_data, const int num,
+      const int num_preds_per_class, const int num_classes,
+<<<<<<< HEAD
+      vector<map<int, vector<float> > >* conf_scores);
+=======
+      const bool class_major, vector<map<int, vector<float> > >* conf_scores);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 // Get max confidence scores for each prior from conf_data.
 //    conf_data: num x num_preds_per_class * num_classes blob.
@@ -218,11 +264,14 @@ void GetDetectionResults(const Dtype* det_data, const int num_det,
       const int background_label_id,
       map<int, LabelBBox>* all_detections);
 
+<<<<<<< HEAD
 template <typename Dtype>
 void GetDetectionPoseResults(const Dtype* det_data, const int num_det,
       const int background_label_id,
       map<int, map<int, vector<NormalizedBBox> > >* all_detections);
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Get top_k scores with corresponding indices.
 //    scores: a set of scores.
 //    top_k: if -1, keep all; otherwise, keep at most top_k.
@@ -230,6 +279,17 @@ void GetDetectionPoseResults(const Dtype* det_data, const int num_det,
 void GetTopKScoreIndex(const vector<float>& scores, const int top_k,
                          vector<pair<float, int> >* score_index_vec);
 
+<<<<<<< HEAD
+=======
+// Get max scores with corresponding indices.
+//    scores: a set of scores.
+//    threshold: only consider scores higher than the threshold.
+//    top_k: if -1, keep all; otherwise, keep at most top_k.
+//    score_index_vec: store the sorted (score, index) pair.
+void GetMaxScoreIndex(const vector<float>& scores, const float threshold,
+      const int top_k, vector<pair<float, int> >* score_index_vec);
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Do non maximum suppression given bboxes and scores.
 //    bboxes: a set of bounding boxes.
 //    scores: a set of corresponding confidences.
@@ -246,6 +306,22 @@ void ApplyNMS(const vector<NormalizedBBox>& bboxes, const vector<float>& scores,
 
 void ApplyNMS(const bool* overlapped, const int num, vector<int>* indices);
 
+<<<<<<< HEAD
+=======
+// Do non maximum suppression given bboxes and scores.
+// Inspired by Piotr Dollar's NMS implementation in EdgeBox.
+// https://goo.gl/jV3JYS
+//    bboxes: a set of bounding boxes.
+//    scores: a set of corresponding confidences.
+//    score_threshold: a threshold used to filter detection results.
+//    nms_threshold: a threshold used in non maximum suppression.
+//    top_k: if not -1, keep at most top_k picked indices.
+//    indices: the kept indices of bboxes after nms.
+void ApplyNMSFast(const vector<NormalizedBBox>& bboxes,
+      const vector<float>& scores, const float score_threshold,
+      const float nms_threshold, const int top_k, vector<int>* indices);
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Compute cumsum of a set of pairs.
 void CumSum(const vector<pair<float, int> >& pairs, vector<int>* cumsum);
 

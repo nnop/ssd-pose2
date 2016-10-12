@@ -1,14 +1,25 @@
 #include <algorithm>
+<<<<<<< HEAD
+=======
+#include <csignal>
+#include <ctime>
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
+<<<<<<< HEAD
 // TODO REmove
 #include <iostream>
 
 #include "boost/iterator/counting_iterator.hpp"
 
 #include "caffe/3rdparty/hungarian.h"
+=======
+
+#include "boost/iterator/counting_iterator.hpp"
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #include "caffe/util/bbox_util.hpp"
 
 namespace caffe {
@@ -98,6 +109,10 @@ void ClipBBox(const NormalizedBBox& bbox, NormalizedBBox* clip_bbox) {
   clip_bbox->set_ymax(std::max(std::min(bbox.ymax(), 1.f), 0.f));
   clip_bbox->clear_size();
   clip_bbox->set_size(BBoxSize(*clip_bbox));
+<<<<<<< HEAD
+=======
+  clip_bbox->set_difficult(bbox.difficult());
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 void ScaleBBox(const NormalizedBBox& bbox, const int height, const int width,
@@ -110,6 +125,7 @@ void ScaleBBox(const NormalizedBBox& bbox, const int height, const int width,
   bool normalized = !(width > 1 || height > 1);
   scale_bbox->set_size(BBoxSize(*scale_bbox, normalized));
   scale_bbox->set_difficult(bbox.difficult());
+<<<<<<< HEAD
 
   // set pose info
   scale_bbox->set_pose(bbox.pose());
@@ -123,6 +139,8 @@ void ScaleBBox(const NormalizedBBox& bbox, const int height, const int width,
 
   scale_bbox->set_ethree(bbox.ethree());
   scale_bbox->set_ethreeflip(bbox.ethreeflip());
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 void LocateBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
@@ -134,6 +152,7 @@ void LocateBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
   loc_bbox->set_xmax(src_bbox.xmin() + bbox.xmax() * src_width);
   loc_bbox->set_ymax(src_bbox.ymin() + bbox.ymax() * src_height);
   loc_bbox->set_difficult(bbox.difficult());
+<<<<<<< HEAD
   
   // set pose info
   loc_bbox->set_pose(bbox.pose());
@@ -147,6 +166,8 @@ void LocateBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
 
   loc_bbox->set_ethree(bbox.ethree());
   loc_bbox->set_ethreeflip(bbox.ethreeflip());
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 bool ProjectBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
@@ -162,6 +183,7 @@ bool ProjectBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
   proj_bbox->set_xmax((bbox.xmax() - src_bbox.xmin()) / src_width);
   proj_bbox->set_ymax((bbox.ymax() - src_bbox.ymin()) / src_height);
   proj_bbox->set_difficult(bbox.difficult());
+<<<<<<< HEAD
   
   // set pose info
   proj_bbox->set_pose(bbox.pose());
@@ -177,6 +199,8 @@ bool ProjectBBox(const NormalizedBBox& src_bbox, const NormalizedBBox& bbox,
   proj_bbox->set_ethreeflip(bbox.ethreeflip());
 
   
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   ClipBBox(*proj_bbox, proj_bbox);
   if (BBoxSize(*proj_bbox) > 0) {
     return true;
@@ -386,6 +410,41 @@ void DecodeBBoxes(
   }
 }
 
+<<<<<<< HEAD
+=======
+void DecodeBBoxesAll(const vector<LabelBBox>& all_loc_preds,
+    const vector<NormalizedBBox>& prior_bboxes,
+    const vector<vector<float> >& prior_variances,
+    const int num, const bool share_location,
+    const int num_loc_classes, const int background_label_id,
+    const CodeType code_type, const bool variance_encoded_in_target,
+    vector<LabelBBox>* all_decode_bboxes) {
+  CHECK_EQ(all_loc_preds.size(), num);
+  all_decode_bboxes->clear();
+  all_decode_bboxes->resize(num);
+  for (int i = 0; i < num; ++i) {
+    // Decode predictions into bboxes.
+    LabelBBox& decode_bboxes = (*all_decode_bboxes)[i];
+    for (int c = 0; c < num_loc_classes; ++c) {
+      int label = share_location ? -1 : c;
+      if (label == background_label_id) {
+        // Ignore background class.
+        continue;
+      }
+      if (all_loc_preds[i].find(label) == all_loc_preds[i].end()) {
+        // Something bad happened if there are no predictions for current label.
+        LOG(FATAL) << "Could not find location predictions for label " << label;
+      }
+      const vector<NormalizedBBox>& label_loc_preds =
+          all_loc_preds[i].find(label)->second;
+      DecodeBBoxes(prior_bboxes, prior_variances,
+                   code_type, variance_encoded_in_target,
+                   label_loc_preds, &(decode_bboxes[label]));
+    }
+  }
+}
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
     const vector<NormalizedBBox>& pred_bboxes, const int label,
     const MatchType match_type, const float overlap_threshold,
@@ -475,10 +534,17 @@ void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
   }
 
   switch (match_type) {
+<<<<<<< HEAD
     case MatchType_BIPARTITE:
       // Already done.
       break;
     case MatchType_PER_PREDICTION:
+=======
+    case MultiBoxLossParameter_MatchType_BIPARTITE:
+      // Already done.
+      break;
+    case MultiBoxLossParameter_MatchType_PER_PREDICTION:
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       // Get most overlaped for the rest prediction bboxes.
       for (map<int, map<int, float> >::iterator it = overlaps.begin();
            it != overlaps.end(); ++it) {
@@ -525,10 +591,17 @@ void GetGroundTruth(const Dtype* gt_data, const int num_gt,
       map<int, vector<NormalizedBBox> >* all_gt_bboxes) {
   all_gt_bboxes->clear();
   for (int i = 0; i < num_gt; ++i) {
+<<<<<<< HEAD
     int start_idx = i * 9; // RIC-changed
     int item_id = gt_data[start_idx];
     if (item_id == -1) {
       break;
+=======
+    int start_idx = i * 8;
+    int item_id = gt_data[start_idx];
+    if (item_id == -1) {
+      continue;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     }
     int label = gt_data[start_idx + 1];
     CHECK_NE(background_label_id, label)
@@ -565,8 +638,12 @@ void GetGroundTruth(const Dtype* gt_data, const int num_gt,
       map<int, LabelBBox>* all_gt_bboxes) {
   all_gt_bboxes->clear();
   for (int i = 0; i < num_gt; ++i) {
+<<<<<<< HEAD
     int start_idx = i * 9; // RIC-changed
     //int start_idx = i * 10; // RIC-changed
+=======
+    int start_idx = i * 8;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     int item_id = gt_data[start_idx];
     if (item_id == -1) {
       break;
@@ -599,6 +676,7 @@ template void GetGroundTruth(const double* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, LabelBBox>* all_gt_bboxes);
 
+<<<<<<< HEAD
 
 template <typename Dtype>
 void GetGroundTruthPose(const Dtype* gt_data, const int num_gt,
@@ -708,6 +786,8 @@ template void GetGroundTruthPose(const double* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, LabelBBox>* all_gt_bboxes);
 
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 template <typename Dtype>
 void GetLocPredictions(const Dtype* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
@@ -716,12 +796,19 @@ void GetLocPredictions(const Dtype* loc_data, const int num,
   if (share_location) {
     CHECK_EQ(num_loc_classes, 1);
   }
+<<<<<<< HEAD
   for (int i = 0; i < num; ++i) {
     LabelBBox label_bbox;
+=======
+  loc_preds->resize(num);
+  for (int i = 0; i < num; ++i) {
+    LabelBBox& label_bbox = (*loc_preds)[i];
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     for (int p = 0; p < num_preds_per_class; ++p) {
       int start_idx = p * num_loc_classes * 4;
       for (int c = 0; c < num_loc_classes; ++c) {
         int label = share_location ? -1 : c;
+<<<<<<< HEAD
         NormalizedBBox bbox;
         bbox.set_xmin(loc_data[start_idx + c * 4]);
         bbox.set_ymin(loc_data[start_idx + c * 4 + 1]);
@@ -732,6 +819,18 @@ void GetLocPredictions(const Dtype* loc_data, const int num,
     }
     loc_data += num_preds_per_class * num_loc_classes * 4;
     loc_preds->push_back(label_bbox);
+=======
+        if (label_bbox.find(label) == label_bbox.end()) {
+          label_bbox[label].resize(num_preds_per_class);
+        }
+        label_bbox[label][p].set_xmin(loc_data[start_idx + c * 4]);
+        label_bbox[label][p].set_ymin(loc_data[start_idx + c * 4 + 1]);
+        label_bbox[label][p].set_xmax(loc_data[start_idx + c * 4 + 2]);
+        label_bbox[label][p].set_ymax(loc_data[start_idx + c * 4 + 3]);
+      }
+    }
+    loc_data += num_preds_per_class * num_loc_classes * 4;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 }
 
@@ -743,6 +842,7 @@ template void GetLocPredictions(const double* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
       const bool share_location, vector<LabelBBox>* loc_preds);
 
+<<<<<<< HEAD
 
 
 // removed. updated version below
@@ -864,10 +964,28 @@ void GetPoseRegPredictions(const Dtype* pose_reg_data, const int num,
     
     pose_reg_data += num_priors * num_pose_classes * num_poses;
     all_pose_preds->push_back(pose_preds);
+=======
+template <typename Dtype>
+void GetConfidenceScores(const Dtype* conf_data, const int num,
+      const int num_preds_per_class, const int num_classes,
+      vector<map<int, vector<float> > >* conf_preds) {
+  conf_preds->clear();
+  conf_preds->resize(num);
+  for (int i = 0; i < num; ++i) {
+    map<int, vector<float> >& label_scores = (*conf_preds)[i];
+    for (int p = 0; p < num_preds_per_class; ++p) {
+      int start_idx = p * num_classes;
+      for (int c = 0; c < num_classes; ++c) {
+        label_scores[c].push_back(conf_data[start_idx + c]);
+      }
+    }
+    conf_data += num_preds_per_class * num_classes;
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 }
 
 // Explicit initialization.
+<<<<<<< HEAD
 template void GetPoseRegPredictions(const float* pose_reg_data, const int num,
       const int num_priors, const int num_pose_classes, const bool share_pose, 
       vector<  map<int, vector< vector<float> > > >* all_pose_preds);
@@ -876,10 +994,19 @@ template void GetPoseRegPredictions(const double* pose_reg_data, const int num,
       const int num_priors, const int num_pose_classes, const bool share_pose, 
       vector<  map<int, vector< vector<float> > > >* all_pose_preds);
 
+=======
+template void GetConfidenceScores(const float* conf_data, const int num,
+      const int num_preds_per_class, const int num_classes,
+      vector<map<int, vector<float> > >* conf_preds);
+template void GetConfidenceScores(const double* conf_data, const int num,
+      const int num_preds_per_class, const int num_classes,
+      vector<map<int, vector<float> > >* conf_preds);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 template <typename Dtype>
 void GetConfidenceScores(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
+<<<<<<< HEAD
       vector<map<int, vector<float> > >* conf_preds) {
   conf_preds->clear();
   for (int i = 0; i < num; ++i) {
@@ -892,16 +1019,44 @@ void GetConfidenceScores(const Dtype* conf_data, const int num,
     }
     conf_data += num_preds_per_class * num_classes;
     conf_preds->push_back(label_scores);
+=======
+      const bool class_major, vector<map<int, vector<float> > >* conf_preds) {
+  conf_preds->clear();
+  conf_preds->resize(num);
+  for (int i = 0; i < num; ++i) {
+    map<int, vector<float> >& label_scores = (*conf_preds)[i];
+    if (class_major) {
+      for (int c = 0; c < num_classes; ++c) {
+        label_scores[c].assign(conf_data, conf_data + num_preds_per_class);
+        conf_data += num_preds_per_class;
+      }
+    } else {
+      for (int p = 0; p < num_preds_per_class; ++p) {
+        int start_idx = p * num_classes;
+        for (int c = 0; c < num_classes; ++c) {
+          label_scores[c].push_back(conf_data[start_idx + c]);
+        }
+      }
+      conf_data += num_preds_per_class * num_classes;
+    }
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 }
 
 // Explicit initialization.
 template void GetConfidenceScores(const float* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
+<<<<<<< HEAD
       vector<map<int, vector<float> > >* conf_preds);
 template void GetConfidenceScores(const double* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_preds);
+=======
+      const bool class_major, vector<map<int, vector<float> > >* conf_preds);
+template void GetConfidenceScores(const double* conf_data, const int num,
+      const int num_preds_per_class, const int num_classes,
+      const bool class_major, vector<map<int, vector<float> > >* conf_preds);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 template <typename Dtype>
 void GetMaxConfidenceScores(const Dtype* conf_data, const int num,
@@ -922,14 +1077,22 @@ void GetMaxConfidenceScores(const Dtype* conf_data, const int num,
           maxval_pos = std::max<Dtype>(conf_data[start_idx + c], maxval_pos);
         }
       }
+<<<<<<< HEAD
       if (loss_type == ConfLossType_SOFTMAX) {
+=======
+      if (loss_type == MultiBoxLossParameter_ConfLossType_SOFTMAX) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         // Compute softmax probability.
         Dtype sum = 0.;
         for (int c = 0; c < num_classes; ++c) {
           sum += std::exp(conf_data[start_idx + c] - maxval);
         }
         maxval_pos = std::exp(maxval_pos - maxval) / sum;
+<<<<<<< HEAD
       } else if (loss_type == ConfLossType_LOGISTIC) {
+=======
+      } else if (loss_type == MultiBoxLossParameter_ConfLossType_LOGISTIC) {
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         maxval_pos = 1. / (1. + exp(-maxval_pos));
       } else {
         LOG(FATAL) << "Unknown conf loss type.";
@@ -988,6 +1151,7 @@ template void GetPriorBBoxes(const double* prior_data, const int num_priors,
       vector<vector<float> >* prior_variances);
 
 template <typename Dtype>
+<<<<<<< HEAD
 void GetDetectionPoseResults(const Dtype* det_data, const int num_det,
       const int background_label_id,
       map<int, map<int, vector<NormalizedBBox> > >* all_detections) {
@@ -1035,6 +1199,8 @@ template void GetDetectionPoseResults(const double* det_data, const int num_det,
 
 
 template <typename Dtype>
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 void GetDetectionResults(const Dtype* det_data, const int num_det,
       const int background_label_id,
       map<int, map<int, vector<NormalizedBBox> > >* all_detections) {
@@ -1042,6 +1208,12 @@ void GetDetectionResults(const Dtype* det_data, const int num_det,
   for (int i = 0; i < num_det; ++i) {
     int start_idx = i * 7;
     int item_id = det_data[start_idx];
+<<<<<<< HEAD
+=======
+    if (item_id == -1) {
+      continue;
+    }
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     int label = det_data[start_idx + 1];
     CHECK_NE(background_label_id, label)
         << "Found background label in the detection results.";
@@ -1184,6 +1356,60 @@ void ApplyNMS(const bool* overlapped, const int num, vector<int>* indices) {
   }
 }
 
+<<<<<<< HEAD
+=======
+void GetMaxScoreIndex(const vector<float>& scores, const float threshold,
+      const int top_k, vector<pair<float, int> >* score_index_vec) {
+  // Generate index score pairs.
+  for (int i = 0; i < scores.size(); ++i) {
+    if (scores[i] > threshold) {
+      score_index_vec->push_back(std::make_pair(scores[i], i));
+    }
+  }
+
+  // Sort the score pair according to the scores in descending order
+  std::stable_sort(score_index_vec->begin(), score_index_vec->end(),
+                   SortScorePairDescend<int>);
+
+  // Keep top_k scores if needed.
+  if (top_k > -1 && top_k < score_index_vec->size()) {
+    score_index_vec->resize(top_k);
+  }
+}
+
+void ApplyNMSFast(const vector<NormalizedBBox>& bboxes,
+      const vector<float>& scores, const float score_threshold,
+      const float nms_threshold, const int top_k, vector<int>* indices) {
+  // Sanity check.
+  CHECK_EQ(bboxes.size(), scores.size())
+      << "bboxes and scores have different size.";
+
+  // Get top_k scores (with corresponding indices).
+  vector<pair<float, int> > score_index_vec;
+  GetMaxScoreIndex(scores, score_threshold, top_k, &score_index_vec);
+
+  // Do nms.
+  indices->clear();
+  while (score_index_vec.size() != 0) {
+    const int idx = score_index_vec.front().second;
+    bool keep = true;
+    for (int k = 0; k < indices->size(); ++k) {
+      if (keep) {
+        const int kept_idx = (*indices)[k];
+        float overlap = JaccardOverlap(bboxes[idx], bboxes[kept_idx]);
+        keep = overlap <= nms_threshold;
+      } else {
+        break;
+      }
+    }
+    if (keep) {
+      indices->push_back(idx);
+    }
+    score_index_vec.erase(score_index_vec.begin());
+  }
+}
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 void CumSum(const vector<pair<float, int> >& pairs, vector<int>* cumsum) {
   // Sort the pairs based on first item of the pair.
   vector<pair<float, int> > sort_pairs = pairs;
@@ -1209,8 +1435,12 @@ void ComputeAP(const vector<pair<float, int> >& tp, const int num_pos,
   // Make sure that tp and fp have complement value.
   for (int i = 0; i < num; ++i) {
     CHECK_LE(fabs(tp[i].first - fp[i].first), eps);
+<<<<<<< HEAD
     CHECK_GE(tp[i].second, 0);
     CHECK_GE(fp[i].second, 0);
+=======
+    CHECK_EQ(tp[i].second, 1 - fp[i].second);
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
   prec->clear();
   rec->clear();
@@ -1338,6 +1568,11 @@ vector<cv::Scalar> GetColors(const int n) {
   return colors;
 }
 
+<<<<<<< HEAD
+=======
+static clock_t start_clock = clock();
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 template <typename Dtype>
 void VisualizeBBox(const vector<cv::Mat>& images, const Blob<Dtype>* detections,
                    const float threshold, const vector<cv::Scalar>& colors,
@@ -1349,6 +1584,13 @@ void VisualizeBBox(const vector<cv::Mat>& images, const Blob<Dtype>* detections,
   if (num_det == 0 || num_img == 0) {
     return;
   }
+<<<<<<< HEAD
+=======
+  // Comute FPS.
+  float fps = num_img / (static_cast<double>(clock() - start_clock) /
+          CLOCKS_PER_SEC);
+
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   const Dtype* detections_data = detections->cpu_data();
   const int width = images[0].cols;
   const int height = images[0].rows;
@@ -1370,8 +1612,28 @@ void VisualizeBBox(const vector<cv::Mat>& images, const Blob<Dtype>* detections,
     all_detections[img_idx][label].push_back(bbox);
   }
 
+<<<<<<< HEAD
   for (int i = 0; i < num_img; ++i) {
     cv::Mat image = images[i];
+=======
+  int fontface = cv::FONT_HERSHEY_SIMPLEX;
+  double scale = 1;
+  int thickness = 2;
+  int baseline = 0;
+  char buffer[50];
+  for (int i = 0; i < num_img; ++i) {
+    cv::Mat image = images[i];
+    // Show FPS.
+    snprintf(buffer, sizeof(buffer), "FPS: %.2f", fps);
+    cv::Size text = cv::getTextSize(buffer, fontface, scale, thickness,
+                                    &baseline);
+    cv::rectangle(image, cv::Point(0, 0),
+                  cv::Point(text.width, text.height + baseline),
+                  CV_RGB(255, 255, 255), CV_FILLED);
+    cv::putText(image, buffer, cv::Point(0, text.height + baseline / 2.),
+                fontface, scale, CV_RGB(0, 0, 0), thickness, 8);
+    // Draw bboxes.
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     for (map<int, vector<NormalizedBBox> >::iterator it =
          all_detections[i].begin(); it != all_detections[i].end(); ++it) {
       int label = it->first;
@@ -1387,11 +1649,14 @@ void VisualizeBBox(const vector<cv::Mat>& images, const Blob<Dtype>* detections,
         cv::Point bottom_right_pt(bboxes[j].xmax(), bboxes[j].ymax());
         cv::rectangle(image, top_left_pt, bottom_right_pt, color, 4);
         cv::Point bottom_left_pt(bboxes[j].xmin(), bboxes[j].ymax());
+<<<<<<< HEAD
         int fontface = cv::FONT_HERSHEY_SIMPLEX;
         double scale = 1;
         int thickness = 2;
         int baseline = 0;
         char buffer[50];
+=======
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         snprintf(buffer, sizeof(buffer), "%s: %.2f", label_name.c_str(),
                  bboxes[j].score());
         cv::Size text = cv::getTextSize(buffer, fontface, scale, thickness,
@@ -1406,9 +1671,16 @@ void VisualizeBBox(const vector<cv::Mat>& images, const Blob<Dtype>* detections,
     }
     cv::imshow("detections", image);
     if (cv::waitKey(1) == 27) {
+<<<<<<< HEAD
       exit(-1);
     }
   }
+=======
+      raise(SIGINT);
+    }
+  }
+  start_clock = clock();
+>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 template
