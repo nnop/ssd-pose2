@@ -44,7 +44,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
 
   // Retrieve all pose regression predictions
   vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
-  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_poses_, share_pose_, 
+  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_pose_classes_, share_pose_, 
       &all_pose_reg_preds);
 
 
@@ -206,14 +206,15 @@ void DetectionPoseOutputLayer<Dtype>::Forward_gpu(
             top_data[j * 12 + 3 + k] = bbox_cpu_data[idx * 4 + k];
           }
         }
-
         vector<float> target_pose= poses[idx];
         vector<float>::iterator result;
         result = max_element(target_pose.begin(), target_pose.end());
-        int pose_bin = distance(target_pose.begin(), result); 
-        top_data[j * 12 + 7] = pose_bin;
+        int pose_pred = distance(target_pose.begin(), result); 
+        top_data[j * 12 + 7] = pose_pred;
         top_data[j * 12 + 8] = *(result);
 
+        //LOG(INFO) << "made it here";
+        int pose_bin = share_pose_ ? -1 : pose_pred;
         vector<vector<float> >& pose_reg = pose_reg_preds.find(pose_bin)->second;
         vector<float> pose_reg_out = pose_reg[idx];
         top_data[j * 12 + 9] = pose_reg_out[0];

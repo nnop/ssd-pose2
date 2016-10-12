@@ -207,7 +207,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
 
   // Retrieve all pose regression predictions
   vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
-  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_poses_, share_pose_, 
+  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_pose_classes_, share_pose_, 
       &all_pose_reg_preds);
 
   // Retrieve all confidences.

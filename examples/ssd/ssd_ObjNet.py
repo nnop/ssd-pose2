@@ -181,7 +181,7 @@ def makeBatchSampler(args):
     return batch_sampler
 
 
-class P3DSSD:
+class O3DSSD:
 
     def run_main(self, args):
         ### Modify the following parameters accordingly ###
@@ -192,7 +192,7 @@ class P3DSSD:
 
         share_pose = args.get_opts('share_pose')
         # Ric-change
-        num_classes = 12
+        num_classes = 101
         num_poses = args.get_opts('num_bins')
 
         # Set true if you want to start training right after generating all files.
@@ -216,8 +216,8 @@ class P3DSSD:
         num_gpus = len(gpulist)
 
         #train_data = args.get_opts('train_lmdb')
-        train_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_db_name_stem('train')
-        val_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_db_name_stem('val')
+        train_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_objnet_db_stem('train')
+        val_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_objnet_db_stem('val')
         #test_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_db_name_stem('test')
 
         resize_width = args.get_opts('size')
@@ -402,6 +402,7 @@ class P3DSSD:
         #num_test_image = args.get_opts('num_test')
         test_batch_size = 1
         test_iter = num_test_image / test_batch_size
+        test_iter = 5000
 
         train_solver_param = {
             # Train parameters

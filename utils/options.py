@@ -65,6 +65,10 @@ class Options:
 		out = '%s_bins=%d_scene=%d' % (split, self.get_opts('num_bins'), self.get_opts('scene'))
 		return out
 
+	def get_objnet_db_stem(self, split):
+		out = '%s_bins=%d' % (split, self.get_opts('num_bins'))
+		return out
+
 
 	def add_kv(self, key, val):
 		self.opts[key] = val

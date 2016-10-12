@@ -259,7 +259,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
 
   // Retrieve all pose regression predictions
   vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
-  GetPoseRegPredictions(pose_reg_data, num_, num_priors_, num_poses_, share_pose_, 
+  GetPoseRegPredictions(pose_reg_data, num_, num_priors_, pose_classes_, share_pose_, 
       &all_pose_reg_preds);
 
   // Retrieve all prior bboxes. It is same within a batch since we assume all

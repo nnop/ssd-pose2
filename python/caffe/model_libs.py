@@ -786,28 +786,39 @@ def CreateMultiBoxPoseHead(net, data_layer="data", num_classes=[], num_poses=[],
 
         # Create pose prediction layer.
         name = "{}_mbox_pose{}".format(from_layer, pose_postfix)
-        num_pose_output = num_priors_per_location * num_poses;
+        #num_pose_output = num_priors_per_location * num_poses
+        num_pose_output = num_poses
         #if not share_pose: 
         #    num_pose_output *= num_classes
         ConvBNLayer(net, from_layer, name, use_bn=use_batchnorm, use_relu=False,
             num_output=num_pose_output, kernel_size=kernel_size, pad=pad, stride=1)
         permute_name = "{}_perm".format(name)
         net[permute_name] = L.Permute(net[name], order=[0, 2, 3, 1])
+        # testing this now
+        tile_name = "{}_tile".format(name)
+        net[tile_name] = L.Tile(net[permute_name], tiles=num_priors_per_location, axis=3)
         flatten_name = "{}_flat".format(name)
-        net[flatten_name] = L.Flatten(net[permute_name], axis=1)
+        # good
+        #net[flatten_name] = L.Flatten(net[permute_name], axis=1)
+        net[flatten_name] = L.Flatten(net[tile_name], axis=1)
         pose_layers.append(net[flatten_name])
 
         # Create pose regression layer.
         name = "{}_mbox_pose_regress{}".format(from_layer, pose_postfix)
-        num_pose_output = num_priors_per_location * 3;
+        #num_pose_output = num_priors_per_location * 3
+        num_pose_output = 3
         if not share_pose: 
             num_pose_output *= num_poses
         ConvBNLayer(net, from_layer, name, use_bn=use_batchnorm, use_relu=False,
             num_output=num_pose_output, kernel_size=kernel_size, pad=pad, stride=1)
         permute_name = "{}_perm".format(name)
         net[permute_name] = L.Permute(net[name], order=[0, 2, 3, 1])
+        tile_name = "{}_tile".format(name)
+        net[tile_name] = L.Tile(net[permute_name], tiles=num_priors_per_location, axis=3)
+
         flatten_name = "{}_flat".format(name)
-        net[flatten_name] = L.Flatten(net[permute_name], axis=1)
+        #net[flatten_name] = L.Flatten(net[permute_name], axis=1)
+        net[flatten_name] = L.Flatten(net[tile_name], axis=1)
         pose_regress_layers.append(net[flatten_name])
 
         # Create prior generation layer.

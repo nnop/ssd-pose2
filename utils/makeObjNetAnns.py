@@ -15,6 +15,7 @@ from random import shuffle
 This script preprocesses the annotations for ObjectNet3D
 ''' 
 
+BIN_2_ANG = {}
 class MakeAnns:
 
     def __init__(self, opt):
@@ -26,15 +27,14 @@ class MakeAnns:
 
         if not osp.exists(osp.join(base_path, 'all_anns.json')):
             makeAllAnns()
-        '''
 
         data = json.load(open('data/ObjectNet3D/all_anns.json', 'r'))
         if not osp.exists('data/ObjectNet3D/map.txt'):
             createLabelMap(data)
 
-        train_dir = self.opt.get_db_name_stem('train')
-        val_dir = self.opt.get_db_name_stem('val')
-        tes_dir = self.opt.get_db_name_stem('test')
+        train_dir = self.opt.get_objnet_db_stem('train')
+        val_dir = self.opt.get_objnet_db_stem('val')
+        tes_dir = self.opt.get_objnet_db_stem('test')
         
         if not osp.exists(osp.join(base_path, 'cache/')):
             os.mkdir(osp.join(base_path, 'cache/'))
@@ -51,8 +51,8 @@ class MakeAnns:
         print train_dir
 
         # always filter difficult ?
-        if not self.opt.get_opts('difficult'):
-            filterDifficult(data)
+        #if not self.opt.get_opts('difficult'):
+        #    filterDifficult(data)
 
         if not osp.exists(osp.join(base_path, 'cache', train_dir, 'train.txt')):
             tr = True
@@ -66,28 +66,23 @@ class MakeAnns:
             teList = []
             test = True
 
-        rot = self.opt.get_opts('rotate')
         bins = self.opt.get_opts('num_bins')
-        imnet = self.opt.get_opts('imagenet')
-        npascal = self.opt.get_opts('num_pascal')
+        if bins != 36:
+            print 'currently only support 36 bins :('
+            sys.exit()
+
         
         for idx, ann in data.iteritems():
             annLoc = osp.join(getAnnPath(ann, train_dir, val_dir, tes_dir), idx + '.json')
             output = getImPath(ann) + ' ' + annLoc + '\n'
 
 
-            binAngles(ann, bins, rot)
+            #binAngles(ann, bins, rot)
 
             json.dump(ann, open(annLoc, 'w'))
 
             if ann['split'] == 'train' and tr:
-                # append to train list
-                if ann['database'] == 'ImageNet':
-                    if imnet:
-                        trList.append(output)
-                else:
-                    for _ in xrange(npascal):
-                        trList.append(output)
+                trList.append(output)
             elif ann['split'] == 'val' and val:
                 # append to val list
                 vaList.append(output)
@@ -110,9 +105,8 @@ class MakeAnns:
                 shuffle(teList)
                 for line in teList:
                     outfile.write(line)
-        '''
 
-
+'''
 def filterDifficult(data):
     keysToRemove = []
     count = 0
@@ -128,10 +122,10 @@ def filterDifficult(data):
     
     for rem in keysToRemove:
         del data[rem]
-
+'''
 
 def createLabelMap(data):
-    objClasses = set([obj['category_id'] for ann in data.itervalues() for obj in ann['annotation'] if 'viewpoint' in obj and obj['category_id'] != 'bottle' ])
+    objClasses = set([obj['class'] for ann in data.itervalues() for obj in ann['annotation'] ])
     labelToCls = dict((idx+1, cls) for idx, cls in enumerate(objClasses))
     f = open('data/ObjectNet3D/map.txt', 'w')
     for label, name in labelToCls.iteritems():
@@ -155,26 +149,148 @@ def getAnnPath(ann, train_dir, val_dir, tes_dir):
     return path
 
 
-def binAngles(ann, bins, rotate=False):
-    offset = 0
-    if rotate:
-        offset = 360 / (bins * 2)
-    for obj in ann['annotation']:
-        if 'viewpoint' in obj:
-            azi = obj['viewpoint']['azimuth_coarse']
-            
-            if 'azimuth' in obj['viewpoint'] and obj['viewpoint']['distance'] != 0.0:
-                azi = obj['viewpoint']['azimuth']
+def binAngles(data):
+
+    for ann in data.itervalues():
+        for obj in ann['annotation']:
+            if 'viewpoint' in obj:
+                azi, ele, the = getAngle(obj)
+                
+                bins, angs = getBins(azi, ele, the)
+                oneBin = combineBins(bins)
+                obj['pose'] = oneBin
+                if oneBin not in BIN_2_ANG:
+                    BIN_2_ANG[oneBin] = angs
+                else:
+                    if not BIN_2_ANG[oneBin] == angs:
+                        print 'something not good'
+                        sys.exit()
+                e1, e2, e3 = getOffsets(angs, (azi, ele, the))
+                obj['eone'] = e1
+                obj['etwo'] = e2
+                obj['ethree'] = e3
+
+                # lets get angle flips
+                bins, angs = getBins(-azi, -ele, -the)
+                oneBin = combineBins(bins)
+                obj['poseFlip'] = oneBin
+                if oneBin not in BIN_2_ANG:
+                    BIN_2_ANG[oneBin] = angs
+                else:
+                    if not BIN_2_ANG[oneBin] == angs:
+                        print 'something not good'
+                        sys.exit()
+                e1, e2, e3 = getOffsets(angs, (-azi, -ele, -the))
+                obj['eoneflip'] = e1
+                obj['etwoflip'] = e2
+                obj['ethreeflip'] = e3
+
+            else:
+                print 'woah where yo angle'
+
+def getOffsets(angs, gt):
+    az_p, el_p, th_p = angs
+    azgt, elgt, thgt = gt
+
+    if thgt > 90:
+        thgt = 90
+    if thgt < -90:
+        thgt = -90
+
+    az_off = (azgt - az_p)
+    el_off = (elgt - el_p)
+    th_off = (thgt - th_p)
+    # edge case 
+    # TODO: check
+    if az_off < -45 or az_off > 45:
+        az_off = az_off % 180
+    
+    # put in [0, 1] range
+    az_off += 45
+    az_off = float(az_off) / 90.0
+    el_off += 30
+    el_off = float(el_off) / 60.0 
+    th_off += 30
+    th_off = float(th_off) / 60.0
+
+    # lets be safe
+    if az_off < 0 or az_off > 1:
+        print 'azimuth'
+        print angs
+        print gt
+        print az_off
+    if el_off < 0 or el_off > 1:
+        print 'elevation'
+        print angs
+        print gt
+        print el_off
+    if th_off< 0 or th_off > 1:
+        print 'theta'
+        print angs
+        print gt
+        print th_off
+
+    return az_off, el_off, th_off 
 
 
-            # bin = int(azi / (360/bins))
-            bin = int(((azi + offset) % 360) / (360/bins))
-            obj['aziLabel'] = bin
-            flipAzi = 360 - azi
-            obj['aziLabelFlip'] = int(((flipAzi + offset) % 360) / (360/bins))
-        else:
-            print 'woah where yo angle'
 
+def combineBins(bins):
+    az, el, th = bins
+    return az + 4*el + th*4*3
+
+
+def getBins(az, el, th):
+    # lets be stupid ...
+    if az > -45 and az <= 45:
+        pred_az = 0
+        az_bin = 0
+    elif az > 45 and az <= 135:
+        pred_az = 90
+        az_bin = 1
+    elif az > 135 or az <= -135:
+        pred_az = 180
+        az_bin = 2
+    else:
+        pred_az = -90
+        az_bin = 3
+
+    if el < -30:
+        pred_el = -60
+        el_bin = 0
+    elif el < 30:
+        pred_el = 0
+        el_bin = 1
+    else:
+        pred_el = 60
+        el_bin = 2
+
+    if th < -30:
+        pred_th = -60
+        th_bin = 0
+    elif th < 30:
+        pred_th = 0
+        th_bin = 1
+    else:
+        pred_th = 60
+        th_bin = 2
+    bins = (az_bin, el_bin, th_bin)
+    angs = (pred_az, pred_el, pred_th)
+    return bins, angs
+
+
+def getAngle(obj):
+    the = obj['viewpoint']['theta']
+
+    if 'azimuth' not in obj['viewpoint'] or obj['viewpoint']['azimuth'] == []:
+        azi = obj['viewpoint']['azimuth_coarse']
+    else:
+        azi = obj['viewpoint']['azimuth']
+
+    if 'elevation' not in obj['viewpoint'] or obj['viewpoint']['elevation'] == []:
+        ele = obj['viewpoint']['elevation_coarse']
+    else:
+        ele = obj['viewpoint']['elevation']
+    return azi, ele, the
 
 
 def makeAllAnns():
@@ -185,6 +301,7 @@ def makeAllAnns():
     for idx, ann in enumerate(anns):
         if idx  % 1000 == 0: 
             print 'processing file %d/%d' %(idx, len(anns))
+            #break
 
         data = sio.loadmat(osp.join(base_path, 'Annotations', ann), squeeze_me=True, struct_as_record=False)
         cur_ann = get_im_info(data)
@@ -198,7 +315,8 @@ def makeAllAnns():
             all_anns[fi[:-4]] = cur_ann
 
     all_anns = splitData(all_anns)
-    #convertBbox(all_anns)
+    binAngles(all_anns)
+    convertBbox(all_anns)
 
     json.dump(all_anns, open(osp.join(base_path, 'all_anns.json'), 'w'))
     print 'json dumped'
@@ -314,6 +432,7 @@ def get_obj_info(data):
                     if isinstance(field_val, np.asarray([]).__class__):
                         field_val = []
                 objects[field] = field_val
+        objects['category_id'] = objects['class']
         if 'viewpoint' in objects:
             list_obj.append(objects)
     

@@ -79,7 +79,7 @@ void AnnotatedDataLayer<Dtype>::DataLayerSetUp(
         label_shape[2] = std::max(num_bboxes, 1);
         // TODO Change here to 9?
         // Ric
-        label_shape[3] = 9;
+        label_shape[3] = 12;
       } else {
         LOG(FATAL) << "Unknown annotation type.";
       }
@@ -195,12 +195,12 @@ void AnnotatedDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
       label_shape[0] = 1;
       label_shape[1] = 1;
       // Ric Changed
-      label_shape[3] = 9;
+      label_shape[3] = 12;
       if (num_bboxes == 0) {
         // Store all -1 in the label.
         label_shape[2] = 1;
         batch->label_.Reshape(label_shape);
-        caffe_set<Dtype>(9, -1, batch->label_.mutable_cpu_data());
+        caffe_set<Dtype>(12, -1, batch->label_.mutable_cpu_data());
       } else {
         // Reshape the label and store the annotation.
         label_shape[2] = num_bboxes;
