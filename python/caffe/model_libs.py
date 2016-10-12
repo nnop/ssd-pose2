@@ -727,6 +727,7 @@ def CreateMultiBoxPoseHead(net, data_layer="data", num_classes=[], num_poses=[],
     loc_layers = []
     conf_layers = []
     pose_layers = []
+    pose_regress_layers = []
     objectness_layers = []
     for i in range(0, num):
         from_layer = from_layers[i]
@@ -786,8 +787,8 @@ def CreateMultiBoxPoseHead(net, data_layer="data", num_classes=[], num_poses=[],
         # Create pose prediction layer.
         name = "{}_mbox_pose{}".format(from_layer, pose_postfix)
         num_pose_output = num_priors_per_location * num_poses;
-        if not share_pose: 
-            num_pose_output *= num_classes
+        #if not share_pose: 
+        #    num_pose_output *= num_classes
         ConvBNLayer(net, from_layer, name, use_bn=use_batchnorm, use_relu=False,
             num_output=num_pose_output, kernel_size=kernel_size, pad=pad, stride=1)
         permute_name = "{}_perm".format(name)
@@ -795,6 +796,20 @@ def CreateMultiBoxPoseHead(net, data_layer="data", num_classes=[], num_poses=[],
         flatten_name = "{}_flat".format(name)
         net[flatten_name] = L.Flatten(net[permute_name], axis=1)
         pose_layers.append(net[flatten_name])
+
+        # Create pose regression layer.
+        name = "{}_mbox_pose_regress{}".format(from_layer, pose_postfix)
+        num_pose_output = num_priors_per_location * 3;
+        if not share_pose: 
+            num_pose_output *= num_poses
+        ConvBNLayer(net, from_layer, name, use_bn=use_batchnorm, use_relu=False,
+            num_output=num_pose_output, kernel_size=kernel_size, pad=pad, stride=1)
+        permute_name = "{}_perm".format(name)
+        net[permute_name] = L.Permute(net[name], order=[0, 2, 3, 1])
+        flatten_name = "{}_flat".format(name)
+        net[flatten_name] = L.Flatten(net[permute_name], axis=1)
+        pose_regress_layers.append(net[flatten_name])
+
         # Create prior generation layer.
         name = "{}_mbox_priorbox".format(from_layer)
         if max_sizes and max_sizes[i]:
@@ -838,6 +853,9 @@ def CreateMultiBoxPoseHead(net, data_layer="data", num_classes=[], num_poses=[],
     net[name] = L.Concat(*pose_layers, axis=1)
     mbox_layers.append(net[name])
 
+    name = "mbox_pose_reg"
+    net[name] = L.Concat(*pose_regress_layers, axis=1)
+    mbox_layers.append(net[name])
 
     name = "mbox_priorbox"
     net[name] = L.Concat(*priorbox_layers, axis=2)

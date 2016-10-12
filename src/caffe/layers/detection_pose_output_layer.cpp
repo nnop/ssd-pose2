@@ -192,7 +192,7 @@ void DetectionPoseOutputLayer<Dtype>::Forward_cpu(
   const Dtype* pose_data = bottom[2]->cpu_data();
   const Dtype* pose_reg_data = bottom[3]->cpu_data();
   const Dtype* prior_data = bottom[4]->cpu_data();
-  const Dtype* gt_data = bottom[5]->cpu_data();
+  //const Dtype* gt_data = bottom[5]->cpu_data();
   const int num = bottom[0]->num();
 
 

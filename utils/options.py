@@ -15,6 +15,7 @@ class Options:
 		'share_pose': True,\
 		'imagenet': True,\
 		'pose_weight': 1.0,\
+		'pose_reg_weight':1.0,\
 		'stepsize': 11000,\
 		'rotate': True,\
 		'gpu':'0',\

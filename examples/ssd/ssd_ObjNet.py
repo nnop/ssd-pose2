@@ -215,20 +215,11 @@ class P3DSSD:
         gpulist = gpus.split(",")
         num_gpus = len(gpulist)
 
-        # The database file for training data. Created by data/VOC0712/create_data.sh
         #train_data = args.get_opts('train_lmdb')
-        train_data = 'data/pascal3D/lmdb/%s_lmdb' % args.get_db_name_stem('train')
-        val_data = 'data/pascal3D/lmdb/%s_lmdb' % args.get_db_name_stem('val')
-        test_data = 'data/pascal3D/lmdb/%s_lmdb' % args.get_db_name_stem('test')
-        # The database file for testing data. Created by data/VOC0712/create_data.sh
-        #test_data = "data/3Dpascal/pascal3D/lmdb/pascal3D_val_lmdb"
-        #val_data = args.get_opts('val_lmdb']
-        #val_data = args.get_opts('test_lmdb')
+        train_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_db_name_stem('train')
+        val_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_db_name_stem('val')
+        #test_data = 'data/ObjectNet3D/lmdb/%s_lmdb' % args.get_db_name_stem('test')
 
-        #test_data = args.get_opts('test_lmdb')
-
-
-        # Specify the batch sampler.
         resize_width = args.get_opts('size')
         resize_height = args.get_opts('size')
         resize = "{}x{}".format(resize_width, resize_height)
@@ -278,27 +269,22 @@ class P3DSSD:
             #base_lr = 0.0000004
 
 
-        # Modify the job name if you want.
-        #job_name = "SSD_{}".format(resize)
         if share_pose:
-            #job_name = "SSD_share_pose_{}_{}_bins_{}".format(resize, num_poses, idx)
             job_name = "SSD_share_pose_{}".format(idx)
         else:
-            #job_name = "SSD_seperate_pose_{}_{}_bins_{}".format(resize, num_poses, idx)
             job_name = "SSD_seperate_pose_{}".format(idx)
         # The name of the model. Modify it if you want.
-        model_name = "VGG_Pascal3D_{}".format(job_name)
-
+        model_name = "VGG_ObjectNet3D_{}".format(job_name)
 
 
         # Directory which stores the model .prototxt file.
-        save_dir = "models/VGGNet/Pascal3D/{}".format(job_name)
+        save_dir = "models/VGGNet/ObjectNet3D/{}".format(job_name)
         # Directory which stores the snapshot of models.
-        snapshot_dir = "models/VGGNet/Pascal3D/{}".format(job_name)
+        snapshot_dir = "models/VGGNet/ObjectNet3D/{}".format(job_name)
         # Directory which stores the job script and log file.
-        job_dir = "jobs/VGGNet/Pascal3D/{}".format(job_name)
+        job_dir = "jobs/VGGNet/ObjectNet3D/{}".format(job_name)
         # Directory which stores the detection results.
-        output_result_dir = "data/3Dpascal/pascal3D/results/{}/Main".format(job_name)
+        output_result_dir = "data/ObjectNet3D/results/{}/Main".format(job_name)
 
         # model definition files.
         train_net_file = "{}/train.prototxt".format(save_dir)
@@ -312,15 +298,13 @@ class P3DSSD:
         # job script path.
         job_file = "{}/{}.sh".format(job_dir, model_name)
 
-        # Stores the test image names and sizes. Created by data/VOC0712/create_list.sh
-        #name_size_file = "data/VOC0712/test_name_size.txt"
+
         # The pretrained model. We use the Fully convolutional reduced (atrous) VGGNet.
         pretrain_model = "models/VGGNet/VGG_ILSVRC_16_layers_fc_reduced.caffemodel"
         # Stores LabelMapItem.
-        label_map_file = "data/pascal3D//labelmap_3D.prototxt"
+        label_map_file = "data/ObjectNet3D/labelmap.prototxt"
 
         # MultiBoxLoss parameters.
-
         share_location = True
         #share_pose = True
         background_label_id=0
@@ -335,6 +319,7 @@ class P3DSSD:
             'conf_loss_type':caffe_pb2.ConfLossType.Value('ConfLossType_SOFTMAX'),
             'loc_weight': loc_weight,
             'pose_weight': args.get_opts('pose_weight'),
+            'pose_reg_weight': args.get_opts('pose_reg_weight'),
             'num_classes': num_classes,
             'num_poses': num_poses,
             'share_location': share_location,
@@ -355,7 +340,6 @@ class P3DSSD:
 
         # parameters for generating priors.
         # minimum dimension of input image
-        # TODO ASK WEI
         min_dim = args.get_opts('size')
         # conv4_3 ==> 38 x 38
         # fc7 ==> 19 x 19
@@ -414,8 +398,8 @@ class P3DSSD:
         freeze_layers = ['conv1_1', 'conv1_2', 'conv2_1', 'conv2_2']
 
         # Evaluate on whole test set.
-        #num_test_image = args.get_opts('num_val')
-        num_test_image = args.get_opts('num_test')
+        num_test_image = args.get_opts('num_val')
+        #num_test_image = args.get_opts('num_test')
         test_batch_size = 1
         test_iter = num_test_image / test_batch_size
 
@@ -440,13 +424,14 @@ class P3DSSD:
             # Test parameters
             'test_iter': [test_iter],
             #'test_iter': [500],
-            'test_interval': 1000,
+            'test_interval': 2000,
             'eval_type': "detection",
             'ap_version': "11point",
             'test_initialization': False,
             }
+        '''
         test_solver_param = {
-            # Train parameters
+            # Test parameters
             'base_lr': base_lr,
             'weight_decay': 0.0005,
             'lr_policy': "step",
@@ -471,6 +456,9 @@ class P3DSSD:
             'ap_version': "11point",
             'test_initialization': False,
             }
+        '''
+
+
         # parameters for generating detection output.
         det_out_param = {
             'num_classes': num_classes,
@@ -479,14 +467,15 @@ class P3DSSD:
             'share_pose': share_pose,
             'background_label_id': background_label_id,
             'nms_param': {'nms_threshold': 0.45, 'top_k': 400},
-            'save_output_param': {
-                'output_directory': output_result_dir,
-                'output_name_prefix': "comp4_det_test_",
-                'output_format': "VOC",
-                'label_map_file': label_map_file,
+            # Maybe have to uncomment?
+            #'save_output_param': {
+            #    'output_directory': output_result_dir,
+            #    'output_name_prefix': "comp4_det_test_",
+            #    'output_format': "VOC",
+            #    'label_map_file': label_map_file,
                 #'name_size_file': name_size_file,
-                'num_test_image': num_test_image,
-                },
+            #    'num_test_image': num_test_image,
+            #   },
             'keep_top_k': 200,
             'confidence_threshold': 0.01,
             'code_type': code_type,
@@ -499,14 +488,13 @@ class P3DSSD:
             'background_label_id': background_label_id,
             'overlap_threshold': 0.5,
             'evaluate_difficult_gt': False,
-            #'name_size_file': name_size_file,
             }
 
         ### Hopefully you don't need to change the following ###
         # Check file.
         check_if_exist(train_data)
         check_if_exist(val_data)
-        check_if_exist(test_data)
+        #check_if_exist(test_data)
         check_if_exist(label_map_file)
         check_if_exist(pretrain_model)
         make_if_not_exist(save_dir)
@@ -597,6 +585,7 @@ class P3DSSD:
             print('name: "{}_test"'.format(model_name), file=f)
             print(net.to_proto(), file=f)
 
+        '''
         # Create test net.
         net = caffe.NetSpec()
         net.data, net.label = CreateAnnotatedDataLayer(test_data, batch_size=test_batch_size,
@@ -650,6 +639,8 @@ class P3DSSD:
         with open(test_net_file, 'w') as f:
             print('name: "{}_test"'.format(model_name), file=f)
             print(net.to_proto(), file=f)
+        '''
+
         # Create deploy net.
         # Remove the first and last layer from test net.
         deploy_net = net
@@ -670,18 +661,21 @@ class P3DSSD:
                 test_net=[val_net_file],
                 snapshot_prefix=snapshot_prefix,
                 **train_solver_param)
-            # Create solver.
+        
+        with open(train_solver_file, 'w') as f:
+            print(train_solver, file=f)
+        '''    
+        # Create solver.
         test_solver = caffe_pb2.SolverParameter(
                 train_net=train_net_file,
                 test_net=[test_net_file],
                 snapshot_prefix=snapshot_prefix,
                 **test_solver_param)
 
-        with open(train_solver_file, 'w') as f:
-            print(train_solver, file=f)
-        
         with open(test_solver_file, 'w') as f:
             print(test_solver, file=f)
+        '''
+
 
         max_iter = 0
         # Find most recent snapshot.
@@ -697,26 +691,10 @@ class P3DSSD:
           if max_iter > 0:
             train_src_param = '--snapshot="{}_iter_{}.solverstate" \\\n'.format(snapshot_prefix, max_iter)
 
-        '''
-        if remove_old_models:
-          # Remove any snapshots smaller than max_iter.
-          for file in os.listdir(snapshot_dir):
-            if file.endswith(".solverstate"):
-              basename = os.path.splitext(file)[0]
-              iter = int(basename.split("{}_iter_".format(model_name))[1])
-              if max_iter > iter:
-                os.remove("{}/{}".format(snapshot_dir, file))
-            if file.endswith(".caffemodel"):
-              basename = os.path.splitext(file)[0]
-              iter = int(basename.split("{}_iter_".format(model_name))[1])
-              if max_iter > iter:
-                os.remove("{}/{}".format(snapshot_dir, file))
-        '''
-
         # Create job file.
         # figure out where to tee
         opt = ''
-        if osp.isfile(osp.join('/home/poirson/logs/', model_name + '.log')):
+        if osp.isfile(osp.join('/home/poirson/logs/', 'obj3d', model_name + '.log')):
             opt = '-a'
         with open(job_file, 'w') as f:
           f.write('cd {}\n'.format(caffe_root))
@@ -732,41 +710,23 @@ class P3DSSD:
         py_file = os.path.abspath(__file__)
         shutil.copy(py_file, job_dir)
 
+        #sys.exit()
         # Run the job.
         os.chmod(job_file, stat.S_IRWXU)
         if run_soon:
           subprocess.call(job_file, shell=True)
 
 
-    '''
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create SSD model files ")
-    parser.add_argument('--train_lmdb', type=str, help='path to train lmdb')
-    parser.add_argument('--val_lmdb', type=str, help='path to val lmdb')
-    parser.add_argument('--test_lmdb', type=str, help='path to test lmdb')
-    parser.add_argument('--num_val', type=int, help='number of validation images')
-    parser.add_argument('--num_test', type=int, help='number of test images')
-    parser.add_argument('--pose_weight', default=1.0, type=float, help='weight the pose')
-    parser.add_argument('--stepsize', default=20000, type=int, help='step size ')
-
-    parser.add_argument('--sampler', action='store_true', help='include full sampler')
-    parser.add_argument('--share_pose', action='store_true', help='share pose = class agnostic pose estimation')
-
-    parser.add_argument('--idx', type=str, help='model id')
-    parser.add_argument('--gpu', default='0', type=str, help='which gpus to use seperated by commas')
-    #parser.add_argument('--gpu1', default=0, type=int, help='which gpu to train on')
-    #parser.add_argument('--gpu2', default=-1, type=int, help='which gpu to train on')
-    parser.add_argument('--num_bins', default=8, type=int, help='number of pose classes')
-    parser.add_argument('--size', default=300, type=int, help='height and width of images')
-    parser.add_argument('--max_iter', default=60000, type=int, help='maximum number of iterations')
-    parser.add_argument('--base_lr', default=0.00004, type=float, help='base learning rate')
-    parser.add_argument('--resume', default=True, type=bool, help='resume training')
-    parser.add_argument('--remove', default=False, type=bool, help='remove old models')
-
+    parser.add_argument('--opt_dir', type=str, help='path to options file')
 
     args = parser.parse_args()
     params = vars(args)
-    main(params)
-    '''
+
+    from utils import options
+    opt = options.Options(params['opt_dir'])
+
+    mod = P3DSSD()
+    mod.run_main(opt)
 

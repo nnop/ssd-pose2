@@ -255,11 +255,11 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
 
   // Retrieve all discrete pose predictions.
   vector<map<int, vector<vector<float> > > > all_pose_preds;
-  GetPosePredictions(pose_data, num, num_poses_, num_priors_, &all_pose_preds);
+  GetPosePredictions(pose_data, num_, num_poses_, num_priors_, &all_pose_preds);
 
   // Retrieve all pose regression predictions
   vector<  map<int, vector< vector<float> > > > all_pose_reg_preds;
-  GetPoseRegPredictions(pose_reg_data, num, num_priors_, num_poses_, share_pose_, 
+  GetPoseRegPredictions(pose_reg_data, num_, num_priors_, num_poses_, share_pose_, 
       &all_pose_reg_preds);
 
   // Retrieve all prior bboxes. It is same within a batch since we assume all
@@ -447,7 +447,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
 
         const vector<NormalizedBBox>& loc_pred = all_loc_preds[i][label];
 
-        const vector<vector<float> >& poses = pose_preds.find(-1)->second;
+        const vector<vector<float> >& poses = all_pose_preds[i].find(-1)->second;
         map<int, vector<vector<float> > >& pose_reg_preds = all_pose_reg_preds[i]; 
 
         for (int j = 0; j < match_index.size(); ++j) {
@@ -500,7 +500,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
           
           // Store pose ground truth.
           pose_gt_data[count] = gt_bbox.pose();
-          const int poseLabel = gt_bbox.pose();
+          //const int poseLabel = gt_bbox.pose();
           pose_reg_gt_data[count * 3] = gt_bbox.eone();
           pose_reg_gt_data[count * 3 + 1] = gt_bbox.etwo();
           pose_reg_gt_data[count * 3 + 2] = gt_bbox.ethree();
