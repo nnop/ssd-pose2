@@ -34,8 +34,6 @@ DEFINE_string(solver, "",
     "The solver definition protocol buffer text file.");
 DEFINE_string(model, "",
     "The model definition protocol buffer text file.");
-<<<<<<< HEAD
-=======
 DEFINE_string(phase, "",
     "Optional; network phase (TRAIN or TEST). Only used for 'time'.");
 DEFINE_int32(level, 0,
@@ -43,7 +41,6 @@ DEFINE_int32(level, 0,
 DEFINE_string(stage, "",
     "Optional; network stages (not to be confused with phase), "
     "separated by ','.");
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 DEFINE_string(snapshot, "",
     "Optional; the snapshot solver state to resume training.");
 DEFINE_string(weights, "",
@@ -111,8 +108,6 @@ static void get_gpus(vector<int>* gpus) {
   }
 }
 
-<<<<<<< HEAD
-=======
 // Parse phase from flags
 caffe::Phase get_phase_from_flags(caffe::Phase default_value) {
   if (FLAGS_phase == "")
@@ -132,7 +127,6 @@ vector<string> get_stages_from_flags() {
   return stages;
 }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // caffe commands to call by
 //     caffe <command> <args>
 //
@@ -188,22 +182,16 @@ int train() {
   CHECK(!FLAGS_snapshot.size() || !FLAGS_weights.size())
       << "Give a snapshot to resume training or weights to finetune "
       "but not both.";
-<<<<<<< HEAD
-=======
   vector<string> stages = get_stages_from_flags();
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   caffe::SolverParameter solver_param;
   caffe::ReadSolverParamsFromTextFileOrDie(FLAGS_solver, &solver_param);
 
-<<<<<<< HEAD
-=======
   solver_param.mutable_train_state()->set_level(FLAGS_level);
   for (int i = 0; i < stages.size(); i++) {
     solver_param.mutable_train_state()->add_stage(stages[i]);
   }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   // If the gpus flag is not provided, allow the mode and device to be set
   // in the solver prototxt.
   if (FLAGS_gpu.size() == 0
@@ -273,10 +261,7 @@ RegisterBrewFunction(train);
 int test() {
   CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to score.";
   CHECK_GT(FLAGS_weights.size(), 0) << "Need model weights to score.";
-<<<<<<< HEAD
-=======
   vector<string> stages = get_stages_from_flags();
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   // Set device id and mode
   vector<int> gpus;
@@ -295,11 +280,7 @@ int test() {
     Caffe::set_mode(Caffe::CPU);
   }
   // Instantiate the caffe net.
-<<<<<<< HEAD
-  Net<float> caffe_net(FLAGS_model, caffe::TEST);
-=======
   Net<float> caffe_net(FLAGS_model, caffe::TEST, FLAGS_level, &stages);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   caffe_net.CopyTrainedLayersFrom(FLAGS_weights);
   LOG(INFO) << "Running for " << FLAGS_iterations << " iterations.";
 
@@ -352,11 +333,8 @@ RegisterBrewFunction(test);
 // Time: benchmark the execution time of a model.
 int time() {
   CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to time.";
-<<<<<<< HEAD
-=======
   caffe::Phase phase = get_phase_from_flags(caffe::TRAIN);
   vector<string> stages = get_stages_from_flags();
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   // Set device id and mode
   vector<int> gpus;
@@ -370,11 +348,7 @@ int time() {
     Caffe::set_mode(Caffe::CPU);
   }
   // Instantiate the caffe net.
-<<<<<<< HEAD
-  Net<float> caffe_net(FLAGS_model, caffe::TRAIN);
-=======
   Net<float> caffe_net(FLAGS_model, phase, FLAGS_level, &stages);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   // Do a clean forward and backward pass, so that memory allocation are done
   // and future iterations will be more stable.

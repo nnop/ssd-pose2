@@ -292,23 +292,6 @@ def _Net_batch(self, blobs):
                                                  padding])
         yield padded_batch
 
-<<<<<<< HEAD
-
-class _Net_IdNameWrapper:
-    """
-    A simple wrapper that allows the ids propery to be accessed as a dict
-    indexed by names. Used for top and bottom names
-    """
-    def __init__(self, net, func):
-        self.net, self.func = net, func
-
-    def __getitem__(self, name):
-        # Map the layer name to id
-        ids = self.func(self.net, list(self.net._layer_names).index(name))
-        # Map the blob id to name
-        id_to_name = list(self.net.blobs)
-        return [id_to_name[i] for i in ids]
-=======
 def _Net_get_id_name(func, field):
     """
     Generic property that maps func to the layer names into an OrderedDict.
@@ -334,7 +317,6 @@ def _Net_get_id_name(func, field):
             setattr(self, field, res)
         return getattr(self, field)
     return get_id_name
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Attach methods to Net.
 Net.blobs = _Net_blobs
@@ -348,10 +330,5 @@ Net.set_input_arrays = _Net_set_input_arrays
 Net._batch = _Net_batch
 Net.inputs = _Net_inputs
 Net.outputs = _Net_outputs
-<<<<<<< HEAD
-Net.top_names = property(lambda n: _Net_IdNameWrapper(n, Net._top_ids))
-Net.bottom_names = property(lambda n: _Net_IdNameWrapper(n, Net._bottom_ids))
-=======
 Net.top_names = _Net_get_id_name(Net._top_ids, "_top_names")
 Net.bottom_names = _Net_get_id_name(Net._bottom_ids, "_bottom_names")
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be

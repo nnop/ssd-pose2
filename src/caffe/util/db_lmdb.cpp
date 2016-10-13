@@ -62,41 +62,12 @@ void LMDBTransaction::Commit() {
   MDB_CHECK(mdb_txn_begin(mdb_env_, NULL, 0, &mdb_txn));
   MDB_CHECK(mdb_dbi_open(mdb_txn, NULL, 0, &mdb_dbi));
 
-<<<<<<< HEAD
-  bool out_of_memory = false;
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   for (int i = 0; i < keys.size(); i++) {
     mdb_key.mv_size = keys[i].size();
     mdb_key.mv_data = const_cast<char*>(keys[i].data());
     mdb_data.mv_size = values[i].size();
     mdb_data.mv_data = const_cast<char*>(values[i].data());
 
-<<<<<<< HEAD
-    int put_rc = mdb_put(mdb_txn, mdb_dbi, &mdb_key, &mdb_data, 0);
-    if (put_rc == MDB_MAP_FULL) {
-      out_of_memory = true;
-      break;
-    } else {
-      // Failed for some other reason
-      MDB_CHECK(put_rc);
-    }
-  }
-
-  if (!out_of_memory) {
-    // Commit the transaction
-    MDB_CHECK(mdb_txn_commit(mdb_txn));
-    mdb_dbi_close(mdb_env_, mdb_dbi);
-    keys.clear();
-    values.clear();
-  } else {
-    // Double the map size and retry
-    mdb_txn_abort(mdb_txn);
-    mdb_dbi_close(mdb_env_, mdb_dbi);
-    DoubleMapSize();
-    Commit();
-  }
-=======
     // Add data to the transaction
     int put_rc = mdb_put(mdb_txn, mdb_dbi, &mdb_key, &mdb_data, 0);
     if (put_rc == MDB_MAP_FULL) {
@@ -127,7 +98,6 @@ void LMDBTransaction::Commit() {
   mdb_dbi_close(mdb_env_, mdb_dbi);
   keys.clear();
   values.clear();
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 void LMDBTransaction::DoubleMapSize() {

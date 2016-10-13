@@ -34,22 +34,13 @@ class ImageDataLayerTest : public MultiDeviceTest<TypeParam> {
     std::ofstream outfile(filename_.c_str(), std::ofstream::out);
     LOG(INFO) << "Using temporary file " << filename_;
     for (int i = 0; i < 5; ++i) {
-<<<<<<< HEAD
-      outfile << EXAMPLES_SOURCE_DIR "images/cat.jpg " << i;
-=======
       outfile << EXAMPLES_SOURCE_DIR "images/cat.jpg " << i << std::endl;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     }
     outfile.close();
     // Create test input file for images of distinct sizes.
     MakeTempFilename(&filename_reshape_);
     std::ofstream reshapefile(filename_reshape_.c_str(), std::ofstream::out);
     LOG(INFO) << "Using temporary file " << filename_reshape_;
-<<<<<<< HEAD
-    reshapefile << EXAMPLES_SOURCE_DIR "images/cat.jpg " << 0;
-    reshapefile << EXAMPLES_SOURCE_DIR "images/fish-bike.jpg " << 1;
-    reshapefile.close();
-=======
     reshapefile << EXAMPLES_SOURCE_DIR "images/cat.jpg " << 0 << std::endl;
     reshapefile << EXAMPLES_SOURCE_DIR "images/fish-bike.jpg " << 1
                 << std::endl;
@@ -61,7 +52,6 @@ class ImageDataLayerTest : public MultiDeviceTest<TypeParam> {
     spacefile << EXAMPLES_SOURCE_DIR "images/cat.jpg " << 0 << std::endl;
     spacefile << EXAMPLES_SOURCE_DIR "images/cat gray.jpg " << 1 << std::endl;
     spacefile.close();
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
 
   virtual ~ImageDataLayerTest() {
@@ -72,10 +62,7 @@ class ImageDataLayerTest : public MultiDeviceTest<TypeParam> {
   int seed_;
   string filename_;
   string filename_reshape_;
-<<<<<<< HEAD
-=======
   string filename_space_;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   Blob<Dtype>* const blob_top_data_;
   Blob<Dtype>* const blob_top_label_;
   vector<Blob<Dtype>*> blob_bottom_vec_;
@@ -199,8 +186,6 @@ TYPED_TEST(ImageDataLayerTest, TestShuffle) {
   }
 }
 
-<<<<<<< HEAD
-=======
 TYPED_TEST(ImageDataLayerTest, TestSpace) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter param;
@@ -230,6 +215,5 @@ TYPED_TEST(ImageDataLayerTest, TestSpace) {
   EXPECT_EQ(this->blob_top_label_->cpu_data()[0], 1);
 }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }  // namespace caffe
 #endif  // USE_OPENCV

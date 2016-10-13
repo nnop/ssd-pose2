@@ -12,11 +12,7 @@ namespace caffe {
 /**
   * @brief Enumeration of actions that a client of the Solver may request by
   * implementing the Solver's action request function, which a
-<<<<<<< HEAD
-  * a client may optionally provide in order to request early termination
-=======
   * client may optionally provide in order to request early termination
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   * or saving a snapshot without exiting. In the executable caffe, this
   * mechanism is used to allow the snapshot to be saved when stopping
   * execution with a SIGINT (Ctrl-C).

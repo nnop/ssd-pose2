@@ -110,11 +110,7 @@ void DataTransformer<Dtype>::Transform(const Datum& datum,
     for (int h = 0; h < height; ++h) {
       for (int w = 0; w < width; ++w) {
         data_index = (c * datum_height + h_off + h) * datum_width + w_off + w;
-<<<<<<< HEAD
-        if (*do_mirror) { // TODO
-=======
         if (*do_mirror) {
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
           top_index = (c * height + h) * width + (width - 1 - w);
         } else {
           top_index = (c * height + h) * width + w;
@@ -306,15 +302,11 @@ void DataTransformer<Dtype>::TransformAnnotation(
           NormalizedBBox* transformed_bbox = transformed_anno->mutable_bbox();
           transformed_bbox->CopyFrom(proj_bbox);
           if (do_mirror) {
-<<<<<<< HEAD
-            // Todo
             //LOG(INFO) << "flip azilabel "  << transformed_bbox->azilabelflip() << " og azilabel " << transformed_bbox->azilabel();
             transformed_bbox->set_pose(transformed_bbox->poseflip());
             transformed_bbox->set_eone(transformed_bbox->eoneflip());
             transformed_bbox->set_etwo(transformed_bbox->etwoflip());
             transformed_bbox->set_ethree(transformed_bbox->ethreeflip());
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
             Dtype temp = transformed_bbox->xmin();
             transformed_bbox->set_xmin(1 - transformed_bbox->xmax());
             transformed_bbox->set_xmax(1 - temp);
@@ -543,11 +535,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat& cv_img,
     int h_idx = h;
     for (int w = 0; w < width; ++w) {
       int w_idx = w;
-<<<<<<< HEAD
-      if (*do_mirror) { // TODO here
-=======
       if (*do_mirror) {
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         w_idx = (width - 1 - w);
       }
       int h_idx_real = h_idx;
@@ -604,11 +592,7 @@ void DataTransformer<Dtype>::TransformInv(const Dtype* data, cv::Mat* cv_img,
   for (int h = 0; h < height; ++h) {
     uchar* ptr = orig_img.ptr<uchar>(h);
     int img_idx = 0;
-<<<<<<< HEAD
-    for (int w = 0; w < height; ++w) {
-=======
     for (int w = 0; w < width; ++w) {
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       for (int c = 0; c < channels; ++c) {
         int idx = (c * height + h) * width + w;
         if (has_mean_file) {
@@ -778,10 +762,6 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype>* input_blob,
         int top_index_h = (top_index_c + h) * width;
         int data_index_h = (data_index_c + h) * input_width + w_off;
         if (do_mirror) {
-<<<<<<< HEAD
-          // TODO RIC 
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
           int top_index_w = top_index_h + width - 1;
           for (int w = 0; w < width; ++w) {
             transformed_data[top_index_w-w] = input_data[data_index_h + w];

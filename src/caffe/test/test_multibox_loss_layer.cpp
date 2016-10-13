@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 #include <algorithm>
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #include <cmath>
 #include <string>
 #include <vector>
@@ -82,8 +79,6 @@ class MultiBoxLossLayerTest : public MultiDeviceTest<TypeParam> {
     delete blob_top_loss_;
   }
 
-<<<<<<< HEAD
-=======
   void FillItem(Dtype* blob_data, const string values) {
     // Split values to vector of items.
     vector<string> items;
@@ -102,7 +97,6 @@ class MultiBoxLossLayerTest : public MultiDeviceTest<TypeParam> {
     }
   }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   // Fill the bottom blobs.
   void Fill(bool share_location) {
     int loc_classes = share_location ? 1 : num_classes_;
@@ -114,10 +108,7 @@ class MultiBoxLossLayerTest : public MultiDeviceTest<TypeParam> {
     Blob<Dtype>* fake_input = new Blob<Dtype>(num_, 3, 20, 20);
 
     // 1) Fill ground truth.
-<<<<<<< HEAD
-=======
 #ifdef USE_LMDB
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     string filename;
     GetTempDirname(&filename);
     DataParameter_DB backend = DataParameter_DB_LMDB;
@@ -185,8 +176,6 @@ class MultiBoxLossLayerTest : public MultiDeviceTest<TypeParam> {
     fake_top_vec.push_back(blob_bottom_gt_);
     anno_data_layer.SetUp(fake_bottom_vec, fake_top_vec);
     anno_data_layer.Forward(fake_bottom_vec, fake_top_vec);
-<<<<<<< HEAD
-=======
 #else
     FillerParameter filler_param;
     GaussianFiller<Dtype> filler(filler_param);
@@ -201,7 +190,6 @@ class MultiBoxLossLayerTest : public MultiDeviceTest<TypeParam> {
     FillItem(gt_data + 8 * 2, "2 2 0 0.2 0.2 0.4 0.4 0");
     FillItem(gt_data + 8 * 3, "2 2 1 0.6 0.6 0.8 0.9 1");
 #endif  // USE_LMDB
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
     // Fake layer
     PoolingParameter* pooling_param = layer_param.mutable_pooling_param();
@@ -368,10 +356,7 @@ TYPED_TEST(MultiBoxLossLayerTest, TestLocGradient) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   layer_param.add_propagate_down(true);
-<<<<<<< HEAD
-=======
   layer_param.add_propagate_down(false);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   LossParameter* loss_param = layer_param.mutable_loss_param();
   MultiBoxLossParameter* multibox_loss_param =
       layer_param.mutable_multibox_loss_param();

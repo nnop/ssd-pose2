@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-FROM nvidia/cuda:cudnn
-=======
 FROM nvidia/cuda:7.5-cudnn5-devel-ubuntu14.04
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 MAINTAINER caffe-maint@googlegroups.com
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

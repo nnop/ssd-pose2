@@ -25,10 +25,7 @@ class Net {
  public:
   explicit Net(const NetParameter& param, const Net* root_net = NULL);
   explicit Net(const string& param_file, Phase phase,
-<<<<<<< HEAD
-=======
       const int level = 0, const vector<string>* stages = NULL,
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       const Net* root_net = NULL);
   virtual ~Net() {}
 

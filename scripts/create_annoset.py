@@ -3,45 +3,29 @@ import os
 import shutil
 import subprocess
 import sys
-<<<<<<< HEAD
 import os.path as osp
 sys.path.append(osp.join(os.getcwd(), "python"))
 import caffe
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 from caffe.proto import caffe_pb2
 from google.protobuf import text_format
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="Create AnnotatedDatum database")
-<<<<<<< HEAD
   parser.add_argument("--root",
       help="The root directory which contains the images and annotations.")
   parser.add_argument("--listfile",
       help="The file which contains image paths and annotation info.")
   parser.add_argument("--outdir",
       help="The output directory which stores the database file.")
-=======
-  parser.add_argument("root",
-      help="The root directory which contains the images and annotations.")
-  parser.add_argument("listfile",
-      help="The file which contains image paths and annotation info.")
-  parser.add_argument("outdir",
-      help="The output directory which stores the database file.")
-  parser.add_argument("exampledir",
+  parser.add_argument("--exampledir",
       help="The directory to store the link of the database files.")
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   parser.add_argument("--redo", default = False, action = "store_true",
       help="Recreate the database.")
   parser.add_argument("--anno-type", default = "classification",
       help="The type of annotation {classification, detection}.")
   parser.add_argument("--label-type", default = "xml",
-<<<<<<< HEAD
-      help="The type of label file format for detection {xml, json}.")
-=======
       help="The type of label file format for detection {xml, json, txt}.")
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   parser.add_argument("--backend", default = "lmdb",
       help="The backend {lmdb, leveldb} for storing the result")
   parser.add_argument("--check-size", default = False, action = "store_true",
@@ -62,25 +46,16 @@ if __name__ == "__main__":
       help="Height images are resized to.")
   parser.add_argument("--resize-width", default = 0, type = int,
       help="Width images are resized to.")
-<<<<<<< HEAD
   parser.add_argument("--shuffle", default = True, action = "store_true",
       help="Randomly shuffle the order of images and their labels.")
   parser.add_argument("--check-label", default = True, action = "store_true",
-=======
-  parser.add_argument("--shuffle", default = False, action = "store_true",
-      help="Randomly shuffle the order of images and their labels.")
-  parser.add_argument("--check-label", default = False, action = "store_true",
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       help="Check that there is no duplicated name/label.")
 
   args = parser.parse_args()
   root_dir = args.root
   list_file = args.listfile
   out_dir = args.outdir
-<<<<<<< HEAD
-=======
   example_dir = args.exampledir
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
   redo = args.redo
   anno_type = args.anno_type
@@ -99,10 +74,6 @@ if __name__ == "__main__":
   check_label = args.check_label
 
   # check if root directory exists
-<<<<<<< HEAD
-  print root_dir
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   if not os.path.exists(root_dir):
     print "root directory: {} does not exist".format(root_dir)
     sys.exit()
@@ -191,18 +162,10 @@ if __name__ == "__main__":
   process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
   output = process.communicate()[0]
 
-<<<<<<< HEAD
+  # Can uncomment if need to
   #if not os.path.exists(example_dir):
   #  os.makedirs(example_dir)
   #link_dir = os.path.join(example_dir, os.path.basename(out_dir))
   #if os.path.exists(link_dir):
   #  os.unlink(link_dir)
   #os.symlink(out_dir, link_dir)
-=======
-  if not os.path.exists(example_dir):
-    os.makedirs(example_dir)
-  link_dir = os.path.join(example_dir, os.path.basename(out_dir))
-  if os.path.exists(link_dir):
-    os.unlink(link_dir)
-  os.symlink(out_dir, link_dir)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be

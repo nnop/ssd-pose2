@@ -9,10 +9,7 @@
 #include "caffe/common.hpp"
 #include "caffe/filler.hpp"
 #include "caffe/net.hpp"
-<<<<<<< HEAD
-=======
 #include "caffe/util/io.hpp"
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #include "caffe/util/math_functions.hpp"
 
 #include "caffe/test/test_caffe_main.hpp"
@@ -33,8 +30,6 @@ class NetTest : public MultiDeviceTest<TypeParam> {
     net_.reset(new Net<Dtype>(param));
   }
 
-<<<<<<< HEAD
-=======
   virtual void InitNetFromProtoFileWithState(const string& proto,
       Phase phase = caffe::TRAIN, const int level = 0,
       const vector<string>* stages = NULL) {
@@ -46,7 +41,6 @@ class NetTest : public MultiDeviceTest<TypeParam> {
     net_.reset(new Net<Dtype>(param_file, phase, level, stages));
   }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   virtual void CopyNetBlobs(const bool copy_diff,
       vector<shared_ptr<Blob<Dtype> > >* blobs_copy) {
     CHECK(net_);
@@ -789,8 +783,6 @@ class NetTest : public MultiDeviceTest<TypeParam> {
     InitNetFromProtoString(proto);
   }
 
-<<<<<<< HEAD
-=======
   virtual void InitAllInOneNet(Phase phase = caffe::TRAIN,
       const int level = 0, const vector<string>* stages = NULL) {
     string proto =
@@ -847,7 +839,6 @@ class NetTest : public MultiDeviceTest<TypeParam> {
     InitNetFromProtoFileWithState(proto, phase, level, stages);
   }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   int seed_;
   shared_ptr<Net<Dtype> > net_;
 };
@@ -2550,8 +2541,6 @@ TYPED_TEST(NetTest, TestForcePropagateDown) {
   }
 }
 
-<<<<<<< HEAD
-=======
 TYPED_TEST(NetTest, TestAllInOneNetTrain) {
   vector<string> stages;
   stages.push_back("train");
@@ -2612,5 +2601,4 @@ TYPED_TEST(NetTest, TestAllInOneNetDeploy) {
   ASSERT_TRUE(found_data);
 }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }  // namespace caffe

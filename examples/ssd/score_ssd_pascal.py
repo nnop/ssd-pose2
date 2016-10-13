@@ -1,9 +1,6 @@
 from __future__ import print_function
-<<<<<<< HEAD
 import sys
-sys.path.append('/playpen/poirson/ssd/caffe/python/')
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+sys.path.append('../../python/')
 import caffe
 from caffe.model_libs import *
 from google.protobuf import text_format
@@ -13,11 +10,6 @@ import os
 import shutil
 import stat
 import subprocess
-<<<<<<< HEAD
-#import sys
-=======
-import sys
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Add extra layers on top of a "base" network (e.g. VGGNet or Inception).
 def AddExtraLayers(net, use_batchnorm=True):
@@ -190,11 +182,7 @@ test_transform_param = {
 use_batchnorm = False
 # Use different initial learning rate.
 if use_batchnorm:
-<<<<<<< HEAD
-    base_lr = 0.04
-=======
     base_lr = 0.0004
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 else:
     # A learning rate for batch_size = 1, num_gpus = 1.
     base_lr = 0.00004
@@ -323,18 +311,6 @@ if num_gpus > 0:
   solver_mode = P.Solver.GPU
   device_id = int(gpulist[0])
 
-<<<<<<< HEAD
-if normalization_mode == P.Loss.BATCH_SIZE:
-  base_lr /= iter_size
-elif normalization_mode == P.Loss.NONE:
-  base_lr /= batch_size_per_device * iter_size
-elif normalization_mode == P.Loss.VALID:
-  base_lr *= 25. / loc_weight / iter_size
-elif normalization_mode == P.Loss.FULL:
-  # Roughly there are 2000 prior bboxes per image.
-  # TODO(weiliu89): Estimate the exact # of priors.
-  base_lr *= 2000. / iter_size
-=======
 if normalization_mode == P.Loss.NONE:
   base_lr /= batch_size_per_device
 elif normalization_mode == P.Loss.VALID:
@@ -343,7 +319,6 @@ elif normalization_mode == P.Loss.FULL:
   # Roughly there are 2000 prior bboxes per image.
   # TODO(weiliu89): Estimate the exact # of priors.
   base_lr *= 2000.
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Which layers to freeze (no backward) during training.
 freeze_layers = ['conv1_1', 'conv1_2', 'conv2_1', 'conv2_2']
@@ -351,13 +326,9 @@ freeze_layers = ['conv1_1', 'conv1_2', 'conv2_1', 'conv2_2']
 # Evaluate on whole test set.
 num_test_image = 4952
 test_batch_size = 8
-<<<<<<< HEAD
-test_iter = num_test_image / test_batch_size
-=======
 # Ideally test_batch_size should be divisible by num_test_image,
 # otherwise mAP will be slightly off the true value.
 test_iter = int(math.ceil(float(num_test_image) / test_batch_size))
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 solver_param = {
     # Train parameters
@@ -450,10 +421,7 @@ net[name] = L.MultiBoxLoss(*mbox_layers, multibox_loss_param=multibox_loss_param
 with open(train_net_file, 'w') as f:
     print('name: "{}_train"'.format(model_name), file=f)
     print(net.to_proto(), file=f)
-<<<<<<< HEAD
-=======
 shutil.copy(train_net_file, job_dir)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create test net.
 net = caffe.NetSpec()
@@ -496,10 +464,7 @@ net.detection_eval = L.DetectionEvaluate(net.detection_out, net.label,
 with open(test_net_file, 'w') as f:
     print('name: "{}_test"'.format(model_name), file=f)
     print(net.to_proto(), file=f)
-<<<<<<< HEAD
-=======
 shutil.copy(test_net_file, job_dir)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create deploy net.
 # Remove the first and last layer from test net.
@@ -514,10 +479,7 @@ with open(deploy_net_file, 'w') as f:
     net_param.input_shape.extend([
         caffe_pb2.BlobShape(dim=[1, 3, resize_height, resize_width])])
     print(net_param, file=f)
-<<<<<<< HEAD
-=======
 shutil.copy(deploy_net_file, job_dir)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create solver.
 solver = caffe_pb2.SolverParameter(
@@ -528,10 +490,7 @@ solver = caffe_pb2.SolverParameter(
 
 with open(solver_file, 'w') as f:
     print(solver, file=f)
-<<<<<<< HEAD
-=======
 shutil.copy(solver_file, job_dir)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # Create job file.
 with open(job_file, 'w') as f:

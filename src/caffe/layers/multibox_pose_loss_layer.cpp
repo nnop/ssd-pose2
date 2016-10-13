@@ -476,6 +476,14 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
           loc_gt_data[count * 4 + 1] = gt_encode.ymin();
           loc_gt_data[count * 4 + 2] = gt_encode.xmax();
           loc_gt_data[count * 4 + 3] = gt_encode.ymax();
+          
+          /*
+          LOG(INFO) << "box";
+          LOG(INFO) << loc_pred[j].ymax();
+          LOG(INFO) << gt_encode.ymax();
+          LOG(INFO) << "pose cats";
+          */
+
           if (encode_variance_in_target_) {
             for (int k = 0; k < 4; ++k) {
               CHECK_GT(prior_variances[j][k], 0);
@@ -487,7 +495,9 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
           // Copy pose predictions
           for (int k = 0; k < num_poses_; ++k) {
             pose_pred_data[count * num_poses_ + k] = poses[j][k];
+            //LOG(INFO) << poses[j][k];
           }
+          //LOG(INFO) << gt_bbox.pose();
 
           // Get pose regression predictions
           int pose_bin = share_pose_ ? -1 : gt_bbox.pose();
@@ -496,6 +506,9 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
           pose_reg_pred_data[count*3] = pose_reg_out[0];
           pose_reg_pred_data[count*3 + 1] = pose_reg_out[1];
           pose_reg_pred_data[count*3 + 2] = pose_reg_out[2]; 
+          //LOG(INFO) << "pose regress";
+          //LOG(INFO) << pose_reg_out[2];
+          //LOG(INFO) << gt_bbox.ethree(); 
 
           
           // Store pose ground truth.
@@ -544,6 +557,11 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
 
     pose_reg_loss_layer_->Reshape(pose_reg_bottom_vec_, pose_reg_top_vec_);
     pose_reg_loss_layer_->Forward(pose_reg_bottom_vec_, pose_reg_top_vec_);
+  } else {
+    //LOG(INFO) << "here";
+    loc_loss_.mutable_cpu_data()[0] = 0;
+    pose_loss_.mutable_cpu_data()[0] = 0;
+    pose_reg_loss_.mutable_cpu_data()[0] = 0;
   }
 
   // Form data to pass on to conf_loss_layer_.
@@ -553,7 +571,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     num_conf_ = num_ * num_priors_;
   }
   if (num_conf_ >= 1) {
-    // Reshape the confidence data.
+     // Reshape the confidence data.
     vector<int> conf_shape;
     if (conf_loss_type_ == ConfLossType_SOFTMAX) {
       conf_shape.push_back(num_conf_);
@@ -643,6 +661,8 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
     }
     conf_loss_layer_->Reshape(conf_bottom_vec_, conf_top_vec_);
     conf_loss_layer_->Forward(conf_bottom_vec_, conf_top_vec_);
+  } else {
+    conf_loss_.mutable_cpu_data()[0] = 0;
   }
 
   top[0]->mutable_cpu_data()[0] = 0;
@@ -675,7 +695,7 @@ void MultiBoxPoseLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& botto
         normalization_, num_, num_priors_, num_matches_);
     Dtype temp = pose_reg_weight_ * pose_reg_loss_.cpu_data()[0] / normalizer;
     top[0]->mutable_cpu_data()[0] += temp;
-    LOG(INFO) << "Multibox Loss ( Pose Regression loss ): " << temp;
+    LOG(INFO) << "Multibox Loss ( PoseRegression loss ): " << temp;
   }
    
 }
@@ -703,7 +723,7 @@ void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
       loc_propagate_down.push_back(true);
       loc_propagate_down.push_back(false);
       loc_loss_layer_->Backward(loc_top_vec_, loc_propagate_down,
-                                loc_bottom_vec_);
+                               loc_bottom_vec_);
       // Scale gradient.
       Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
           normalization_, num_, num_priors_, num_matches_);
@@ -896,9 +916,9 @@ void MultiBoxPoseLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
 }
 
 
-#ifdef CPU_ONLY
-STUB_GPU(MultiBoxPoseLossLayer);
-#endif
+//#ifdef CPU_ONLY
+//STUB_GPU(MultiBoxPoseLossLayer);
+//#endif
 
 INSTANTIATE_CLASS(MultiBoxPoseLossLayer);
 REGISTER_LAYER_CLASS(MultiBoxPoseLoss);

@@ -1,19 +1,17 @@
 #include <algorithm>
 #include <fstream>  // NOLINT(readability/streams)
 #include <map>
-<<<<<<< HEAD
-#include <sstream>  // NOLINT(readability/streams)
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//<<<<<<< HEAD
+//#include <sstream>  // NOLINT(readability/streams)
+//=======
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "boost/filesystem.hpp"
-<<<<<<< HEAD
-=======
+// Added
 #include "boost/foreach.hpp"
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 #include "caffe/layers/detection_output_layer.hpp"
 
@@ -180,6 +178,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
   vector<vector<float> > prior_variances;
   GetPriorBBoxes(prior_data, num_priors_, &prior_bboxes, &prior_variances);
 
+/*
 <<<<<<< HEAD
   int num_kept = 0;
   vector<map<int, vector<int> > > all_indices;
@@ -209,6 +208,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
     map<int, vector<int> > indices;
     map<int, map<int, map<int, float> > > overlaps;
 =======
+    */
   // Decode all loc predictions to bboxes.
   vector<LabelBBox> all_decode_bboxes;
   DecodeBBoxesAll(all_loc_preds, prior_bboxes, prior_variances, num,
@@ -221,7 +221,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
     const LabelBBox& decode_bboxes = all_decode_bboxes[i];
     const map<int, vector<float> >& conf_scores = all_conf_scores[i];
     map<int, vector<int> > indices;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     int num_det = 0;
     for (int c = 0; c < num_classes_; ++c) {
       if (c == background_label_id_) {
@@ -232,24 +232,26 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         // Something bad happened if there are no predictions for current label.
         LOG(FATAL) << "Could not find confidence predictions for label " << c;
       }
-<<<<<<< HEAD
-=======
+//<<<<<<< HEAD
+//=======
       const vector<float>& scores = conf_scores.find(c)->second;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       int label = share_location_ ? -1 : c;
       if (decode_bboxes.find(label) == decode_bboxes.end()) {
         // Something bad happened if there are no predictions for current label.
         LOG(FATAL) << "Could not find location predictions for label " << label;
         continue;
       }
+/*
 <<<<<<< HEAD
       ApplyNMS(decode_bboxes[label], conf_scores[c], nms_threshold_,
                top_k_, share_location_, &(overlaps[label]), &(indices[c]));
 =======
+*/
       const vector<NormalizedBBox>& bboxes = decode_bboxes.find(label)->second;
       ApplyNMSFast(bboxes, scores, confidence_threshold_, nms_threshold_,
           top_k_, &(indices[c]));
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       num_det += indices[c].size();
     }
     if (keep_top_k_ > -1 && num_det > keep_top_k_) {
@@ -263,6 +265,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
           LOG(FATAL) << "Could not find location predictions for " << label;
           continue;
         }
+/*
 <<<<<<< HEAD
         for (int j = 0; j < label_indices.size(); ++j) {
           int idx = label_indices[j];
@@ -270,13 +273,14 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
           score_index_pairs.push_back(std::make_pair(
                   conf_scores[label][idx], std::make_pair(label, idx)));
 =======
+*/
         const vector<float>& scores = conf_scores.find(label)->second;
         for (int j = 0; j < label_indices.size(); ++j) {
           int idx = label_indices[j];
           CHECK_LT(idx, scores.size());
           score_index_pairs.push_back(std::make_pair(
                   scores[idx], std::make_pair(label, idx)));
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         }
       }
       // Keep top k results per image.
@@ -301,8 +305,8 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
   vector<int> top_shape(2, 1);
   top_shape.push_back(num_kept);
   top_shape.push_back(7);
-<<<<<<< HEAD
-=======
+//<<<<<<< HEAD
+//=======
   if (num_kept == 0) {
     LOG(INFO) << "Couldn't find any detections";
     top_shape[2] = 1;
@@ -310,18 +314,18 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
     caffe_set<Dtype>(top[0]->count(), -1, top[0]->mutable_cpu_data());
     return;
   }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   top[0]->Reshape(top_shape);
   Dtype* top_data = top[0]->mutable_cpu_data();
 
   int count = 0;
   boost::filesystem::path output_directory(output_directory_);
   for (int i = 0; i < num; ++i) {
-<<<<<<< HEAD
-    map<int, vector<float> >& conf_scores = all_conf_scores[i];
-=======
+//<<<<<<< HEAD
+//    map<int, vector<float> >& conf_scores = all_conf_scores[i];
+//=======
     const map<int, vector<float> >& conf_scores = all_conf_scores[i];
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     const LabelBBox& decode_bboxes = all_decode_bboxes[i];
     for (map<int, vector<int> >::iterator it = all_indices[i].begin();
          it != all_indices[i].end(); ++it) {
@@ -331,10 +335,10 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         LOG(FATAL) << "Could not find confidence predictions for " << label;
         continue;
       }
-<<<<<<< HEAD
-=======
+//<<<<<<< HEAD
+//=======
       const vector<float>& scores = conf_scores.find(label)->second;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
       int loc_label = share_location_ ? -1 : label;
       if (decode_bboxes.find(loc_label) == decode_bboxes.end()) {
         // Something bad happened if there are no predictions for current label.
@@ -344,6 +348,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
       const vector<NormalizedBBox>& bboxes =
           decode_bboxes.find(loc_label)->second;
       vector<int>& indices = it->second;
+/*
 <<<<<<< HEAD
       std::ofstream outfile;
       if (need_save_) {
@@ -357,21 +362,22 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
                        std::ofstream::out | std::ofstream::app);
         }
 =======
+*/
       if (need_save_) {
         CHECK(label_to_name_.find(label) != label_to_name_.end())
           << "Cannot find label: " << label << " in the label map.";
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         CHECK_LT(name_count_, names_.size());
       }
       for (int j = 0; j < indices.size(); ++j) {
         int idx = indices[j];
         top_data[count * 7] = i;
         top_data[count * 7 + 1] = label;
-<<<<<<< HEAD
-        top_data[count * 7 + 2] = conf_scores[label][idx];
-=======
+//<<<<<<< HEAD
+//        top_data[count * 7 + 2] = conf_scores[label][idx];
+//=======
         top_data[count * 7 + 2] = scores[idx];
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         NormalizedBBox clip_bbox;
         ClipBBox(bboxes[idx], &clip_bbox);
         top_data[count * 7 + 3] = clip_bbox.xmin();
@@ -382,6 +388,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
           NormalizedBBox scale_bbox;
           ScaleBBox(clip_bbox, sizes_[name_count_].first,
                     sizes_[name_count_].second, &scale_bbox);
+/*
 <<<<<<< HEAD
           if (output_format_ == "VOC") {
             outfile << names_[name_count_];
@@ -423,6 +430,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         outfile.close();
       }
 =======
+*/
           float score = top_data[count * 7 + 2];
           float xmin = scale_bbox.xmin();
           float ymin = scale_bbox.ymin();
@@ -454,14 +462,14 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         }
         ++count;
       }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     }
     if (need_save_) {
       ++name_count_;
       if (name_count_ % num_test_image_ == 0) {
-<<<<<<< HEAD
-        if (output_format_ == "COCO") {
-=======
+//<<<<<<< HEAD
+//        if (output_format_ == "COCO") {
+//=======
         if (output_format_ == "VOC") {
           map<string, std::ofstream*> outfiles;
           for (int c = 0; c < num_classes_; ++c) {
@@ -505,7 +513,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
             delete outfiles[label_name];
           }
         } else if (output_format_ == "COCO") {
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
           boost::filesystem::path output_directory(output_directory_);
           boost::filesystem::path file(output_name_prefix_ + ".json");
           boost::filesystem::path out_file = output_directory / file;
@@ -513,17 +521,18 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
           outfile.open(out_file.string().c_str(), std::ofstream::out);
 
           boost::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
-<<<<<<< HEAD
-          boost::property_tree::ptree output;
-=======
+//<<<<<<< HEAD
+//          boost::property_tree::ptree output;
+//=======
           ptree output;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
           output.add_child("detections", detections_);
           std::stringstream ss;
           write_json(ss, output);
           std::string rv = boost::regex_replace(ss.str(), exp, "$1");
           outfile << rv.substr(rv.find("["), rv.rfind("]") - rv.find("["))
               << std::endl << "]" << std::endl;
+/*
 <<<<<<< HEAD
         }
       }
@@ -534,6 +543,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
     }
   }
 =======
+*/
         } else if (output_format_ == "ILSVRC") {
           boost::filesystem::path output_directory(output_directory_);
           boost::filesystem::path file(output_name_prefix_ + ".txt");
@@ -571,7 +581,7 @@ void DetectionOutputLayer<Dtype>::Forward_cpu(
         label_to_display_name_);
 #endif  // USE_OPENCV
   }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
+//>>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 #ifdef CPU_ONLY

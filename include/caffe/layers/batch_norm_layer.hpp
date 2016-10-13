@@ -13,27 +13,6 @@ namespace caffe {
  * @brief Normalizes the input to have 0-mean and/or unit (1) variance across
  *        the batch.
  *
-<<<<<<< HEAD
- * This layer computes Batch Normalization described in [1].  For
- * each channel in the data (i.e. axis 1), it subtracts the mean and divides
- * by the variance, where both statistics are computed across both spatial
- * dimensions and across the different examples in the batch.
- *
- * By default, during training time, the network is computing global mean/
- * variance statistics via a running average, which is then used at test
- * time to allow deterministic outputs for each input.  You can manually
- * toggle whether the network is accumulating or using the statistics via the
- * use_global_stats option.  IMPORTANT: for this feature to work, you MUST
- * set the learning rate to zero for all three parameter blobs, i.e.,
- * param {lr_mult: 0} three times in the layer definition.
- *
- * Note that the original paper also included a per-channel learned bias and
- * scaling factor.  It is possible (though a bit cumbersome) to implement
- * this in caffe using a single-channel DummyDataLayer filled with zeros,
- * followed by a Convolution layer with output the same size as the current.
- * This produces a channel-specific value that can be added or multiplied by
- * the BatchNorm layer's output.
-=======
  * This layer computes Batch Normalization as described in [1]. For each channel
  * in the data (i.e. axis 1), it subtracts the mean and divides by the variance,
  * where both statistics are computed across both spatial dimensions and across
@@ -50,7 +29,6 @@ namespace caffe {
  * scaling factor. To implement this in Caffe, define a `ScaleLayer` configured
  * with `bias_term: true` after each `BatchNormLayer` to handle both the bias
  * and scaling factor.
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
  *
  * [1] S. Ioffe and C. Szegedy, "Batch Normalization: Accelerating Deep Network
  *     Training by Reducing Internal Covariate Shift." arXiv preprint

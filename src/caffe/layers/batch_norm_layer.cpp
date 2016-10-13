@@ -34,8 +34,6 @@ void BatchNormLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
                 this->blobs_[i]->mutable_cpu_data());
     }
   }
-<<<<<<< HEAD
-=======
   // Mask statistics from optimization by setting local learning rates
   // for mean, variance, and the bias correction to zero.
   for (int i = 0; i < this->blobs_.size(); ++i) {
@@ -48,7 +46,6 @@ void BatchNormLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
           << "parameters.";
     }
   }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 template <typename Dtype>

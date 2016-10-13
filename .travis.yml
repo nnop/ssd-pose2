@@ -1,42 +1,3 @@
-<<<<<<< HEAD
-# Use a build matrix to do two builds in parallel:
-# one using CMake, and one using make.
-env:
-  matrix:
-    - WITH_CUDA=false WITH_CMAKE=false WITH_IO=true
-    - WITH_CUDA=false WITH_CMAKE=true WITH_IO=true PYTHON_VERSION=3
-    - WITH_CUDA=true WITH_CMAKE=false WITH_IO=true
-    - WITH_CUDA=true WITH_CMAKE=true WITH_IO=true
-    - WITH_CUDA=false WITH_CMAKE=false WITH_IO=false
-    - WITH_CUDA=false WITH_CMAKE=true WITH_IO=false PYTHON_VERSION=3
-
-language: cpp
-
-# Cache Ubuntu apt packages.
-cache:
-  apt: true
-  directories:
-  - /home/travis/miniconda
-  - /home/travis/miniconda2
-  - /home/travis/miniconda3
-
-compiler: gcc
-
-before_install:
-  - export NUM_THREADS=4
-  - export SCRIPTS=./scripts/travis
-  - export CONDA_DIR="/home/travis/miniconda$PYTHON_VERSION"
-
-install:
-  - sudo -E $SCRIPTS/travis_install.sh
-
-before_script:
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/usr/local/cuda/lib64:$CONDA_DIR/lib
-  - export PATH=$CONDA_DIR/bin:$PATH
-  - if ! $WITH_CMAKE; then $SCRIPTS/travis_setup_makefile_config.sh; fi
-
-script: $SCRIPTS/travis_build_and_test.sh
-=======
 dist: trusty
 sudo: required
 
@@ -86,7 +47,6 @@ before_script:
 script:
   - ./scripts/travis/build.sh
   - ./scripts/travis/test.sh
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 notifications:
 # Emails are sent to the committer's git-configured email address by default,

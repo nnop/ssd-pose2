@@ -73,11 +73,7 @@ class DataReader {
   const shared_ptr<QueuePair> queue_pair_;
   shared_ptr<Body> body_;
 
-<<<<<<< HEAD
-  static map<const string, boost::weak_ptr<DataReader::Body> > bodies_;
-=======
   static map<const string, boost::weak_ptr<Body> > bodies_;
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 DISABLE_COPY_AND_ASSIGN(DataReader);
 };

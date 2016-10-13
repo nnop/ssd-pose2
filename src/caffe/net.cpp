@@ -28,13 +28,6 @@ Net<Dtype>::Net(const NetParameter& param, const Net* root_net)
 }
 
 template <typename Dtype>
-<<<<<<< HEAD
-Net<Dtype>::Net(const string& param_file, Phase phase, const Net* root_net)
-    : root_net_(root_net) {
-  NetParameter param;
-  ReadNetParamsFromTextFileOrDie(param_file, &param);
-  param.mutable_state()->set_phase(phase);
-=======
 Net<Dtype>::Net(const string& param_file, Phase phase,
     const int level, const vector<string>* stages,
     const Net* root_net)
@@ -49,7 +42,6 @@ Net<Dtype>::Net(const string& param_file, Phase phase,
     }
   }
   param.mutable_state()->set_level(level);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   Init(param);
 }
 

@@ -79,10 +79,7 @@ class Classifier(caffe.Net):
                 -self.crop_dims / 2.0,
                 self.crop_dims / 2.0
             ])
-<<<<<<< HEAD
-=======
             crop = crop.astype(int)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
             input_ = input_[:, crop[0]:crop[2], crop[1]:crop[3], :]
 
         # Classify

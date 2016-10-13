@@ -56,11 +56,7 @@ void ScaleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     bias_bottom_vec_.resize(1);
     bias_bottom_vec_[0] = bottom[0];
     bias_layer_->SetUp(bias_bottom_vec_, top);
-<<<<<<< HEAD
-    bias_param_id_ = this->blobs_.size();
-    this->blobs_.resize(bias_param_id_ + 1);
-    this->blobs_[bias_param_id_] = bias_layer_->blobs()[0];
-=======
+    
     if (this->blobs_.size() + bottom.size() < 3) {
       // case: blobs.size == 1 && bottom.size == 1
       // or blobs.size == 0 && bottom.size == 2
@@ -72,7 +68,6 @@ void ScaleLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       bias_param_id_ = this->blobs_.size() - 1;
       bias_layer_->blobs()[0] = this->blobs_[bias_param_id_];
     }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     bias_propagate_down_.resize(1, false);
   }
   this->param_propagate_down_.resize(this->blobs_.size(), true);

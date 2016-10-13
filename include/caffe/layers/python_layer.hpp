@@ -26,10 +26,7 @@ class PythonLayer : public Layer<Dtype> {
     }
     self_.attr("param_str") = bp::str(
         this->layer_param_.python_param().param_str());
-<<<<<<< HEAD
-=======
     self_.attr("phase") = static_cast<int>(this->phase_);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     self_.attr("setup")(bottom, top);
   }
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,

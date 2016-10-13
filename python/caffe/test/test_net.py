@@ -3,10 +3,7 @@ import tempfile
 import os
 import numpy as np
 import six
-<<<<<<< HEAD
-=======
 from collections import OrderedDict
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 import caffe
 
@@ -67,8 +64,6 @@ class TestNet(unittest.TestCase):
         self.net.forward()
         self.net.backward()
 
-<<<<<<< HEAD
-=======
     def test_clear_param_diffs(self):
         # Run a forward/backward step to have non-zero diffs
         self.net.forward()
@@ -80,13 +75,10 @@ class TestNet(unittest.TestCase):
         # Check that the diffs are now 0
         self.assertTrue((diff == 0).all())
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     def test_inputs_outputs(self):
         self.assertEqual(self.net.inputs, [])
         self.assertEqual(self.net.outputs, ['loss'])
 
-<<<<<<< HEAD
-=======
     def test_top_bottom_names(self):
         self.assertEqual(self.net.top_names,
                          OrderedDict([('data', ['data', 'label']),
@@ -99,15 +91,11 @@ class TestNet(unittest.TestCase):
                                       ('ip', ['conv']),
                                       ('loss', ['ip', 'label'])]))
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     def test_save_and_read(self):
         f = tempfile.NamedTemporaryFile(mode='w+', delete=False)
         f.close()
         self.net.save(f.name)
         net_file = simple_net_file(self.num_output)
-<<<<<<< HEAD
-        net2 = caffe.Net(net_file, f.name, caffe.TRAIN)
-=======
         # Test legacy constructor
         #   should print deprecation warning
         caffe.Net(net_file, f.name, caffe.TRAIN)
@@ -127,15 +115,12 @@ class TestNet(unittest.TestCase):
         net_file = simple_net_file(self.num_output)
         net2 = caffe.Net(net_file, caffe.TRAIN)
         net2.load_hdf5(f.name)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
         os.remove(net_file)
         os.remove(f.name)
         for name in self.net.params:
             for i in range(len(self.net.params[name])):
                 self.assertEqual(abs(self.net.params[name][i].data
                     - net2.params[name][i].data).sum(), 0)
-<<<<<<< HEAD
-=======
 
 class TestLevels(unittest.TestCase):
 
@@ -358,4 +343,3 @@ layer {
         net = caffe.Net(self.f.name, caffe.TEST, stages=['deploy'])
         self.check_net(net, ['pred'])
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be

@@ -73,12 +73,6 @@ int main(int argc, char** argv) {
 
   std::ifstream infile(argv[2]);
   std::vector<std::pair<std::string, int> > lines;
-<<<<<<< HEAD
-  std::string filename;
-  int label;
-  while (infile >> filename >> label) {
-    lines.push_back(std::make_pair(filename, label));
-=======
   std::string line;
   size_t pos;
   int label;
@@ -86,7 +80,6 @@ int main(int argc, char** argv) {
     pos = line.find_last_of(' ');
     label = atoi(line.substr(pos + 1).c_str());
     lines.push_back(std::make_pair(line.substr(0, pos), label));
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   }
   if (FLAGS_shuffle) {
     // randomly shuffle data

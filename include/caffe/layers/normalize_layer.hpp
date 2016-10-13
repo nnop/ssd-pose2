@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-#ifndef CAFFE_MVN_LAYER_HPP_
-#define CAFFE_MVN_LAYER_HPP_
-=======
 #ifndef CAFFE_NORMALIZE_LAYER_HPP_
 #define CAFFE_NORMALIZE_LAYER_HPP_
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 #include <vector>
 

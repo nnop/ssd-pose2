@@ -15,11 +15,7 @@
  * and its type is its C++ class name, but without the "Solver" at the end
  * ("MyAwesomeSolver" -> "MyAwesome").
  *
-<<<<<<< HEAD
- * If the solver is going to be created simply by its constructor, in your c++
-=======
  * If the solver is going to be created simply by its constructor, in your C++
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
  * file, add the following line:
  *
  *    REGISTER_SOLVER_CLASS(MyAwesome);

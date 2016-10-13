@@ -4853,16 +4853,7 @@ def ParseArguments(args):
 def main():
   filenames = ParseArguments(sys.argv[1:])
 
-<<<<<<< HEAD
-  remove_filenames = [
-      'include/caffe/3rdparty/hungarian.h',
-      'src/caffe/3rdparty/hungarian.cpp']
-  for remove_filename in remove_filenames:
-    if remove_filename in filenames:
-      filenames.remove(remove_filename)
 
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   # Change stderr to write with replacement characters so we don't die
   # if we try to print something containing non-ASCII characters.
   sys.stderr = codecs.StreamReaderWriter(sys.stderr,

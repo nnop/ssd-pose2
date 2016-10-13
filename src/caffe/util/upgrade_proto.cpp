@@ -14,12 +14,8 @@ namespace caffe {
 
 bool NetNeedsUpgrade(const NetParameter& net_param) {
   return NetNeedsV0ToV1Upgrade(net_param) || NetNeedsV1ToV2Upgrade(net_param)
-<<<<<<< HEAD
-      || NetNeedsDataUpgrade(net_param) || NetNeedsInputUpgrade(net_param);
-=======
       || NetNeedsDataUpgrade(net_param) || NetNeedsInputUpgrade(net_param)
       || NetNeedsBatchNormUpgrade(net_param);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 }
 
 bool UpgradeNetAsNeeded(const string& param_file, NetParameter* param) {
@@ -76,8 +72,6 @@ bool UpgradeNetAsNeeded(const string& param_file, NetParameter* param) {
     LOG(WARNING) << "Note that future Caffe releases will only support "
                  << "input layers and not input fields.";
   }
-<<<<<<< HEAD
-=======
   // NetParameter uses old style batch norm layers; try to upgrade it.
   if (NetNeedsBatchNormUpgrade(*param)) {
     LOG(INFO) << "Attempting to upgrade batch norm layers using deprecated "
@@ -86,7 +80,6 @@ bool UpgradeNetAsNeeded(const string& param_file, NetParameter* param) {
     LOG(INFO) << "Successfully upgraded batch norm layers using deprecated "
               << "params.";
   }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   return success;
 }
 
@@ -1007,8 +1000,6 @@ void UpgradeNetInput(NetParameter* net_param) {
   net_param->clear_input_dim();
 }
 
-<<<<<<< HEAD
-=======
 bool NetNeedsBatchNormUpgrade(const NetParameter& net_param) {
   for (int i = 0; i < net_param.layer_size(); ++i) {
     // Check if BatchNorm layers declare three parameters, as required by
@@ -1032,7 +1023,6 @@ void UpgradeNetBatchNorm(NetParameter* net_param) {
   }
 }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // Return true iff the solver contains any old solver_type specified as enums
 bool SolverNeedsTypeUpgrade(const SolverParameter& solver_param) {
   if (solver_param.has_solver_type()) {

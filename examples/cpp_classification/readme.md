@@ -10,11 +10,7 @@ priority: 10
 
 Caffe, at its core, is written in C++. It is possible to use the C++
 API of Caffe to implement an image classification application similar
-<<<<<<< HEAD
-to the Python code presented in one of the Notebook example. To look
-=======
 to the Python code presented in one of the Notebook examples. To look
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 at a more general-purpose example of the Caffe C++ API, you should
 study the source code of the command line tool `caffe` in `tools/caffe.cpp`.
 
@@ -23,11 +19,7 @@ study the source code of the command line tool `caffe` in `tools/caffe.cpp`.
 A simple C++ code is proposed in
 `examples/cpp_classification/classification.cpp`. For the sake of
 simplicity, this example does not support oversampling of a single
-<<<<<<< HEAD
-sample nor batching of multiple independant samples. This example is
-=======
 sample nor batching of multiple independent samples. This example is
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 not trying to reach the maximum possible classification throughput on
 a system, but special care was given to avoid unnecessary
 pessimization while keeping the code readable.

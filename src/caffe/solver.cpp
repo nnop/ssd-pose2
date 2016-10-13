@@ -467,14 +467,11 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
           float score = result_vec[k * 5 + 2];
           int tp = static_cast<int>(result_vec[k * 5 + 3]);
           int fp = static_cast<int>(result_vec[k * 5 + 4]);
-<<<<<<< HEAD
-=======
           if (tp == 0 && fp == 0) {
             // Ignore such case. It happens when a detection bbox is matched to
             // a difficult gt bbox and we don't evaluate on difficult gt bbox.
             continue;
           }
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
           all_true_pos[j][label].push_back(std::make_pair(score, tp));
           all_false_pos[j][label].push_back(std::make_pair(score, fp));
         }
@@ -527,10 +524,7 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
       ComputeAP(label_true_pos, label_num_pos, label_false_pos,
                 param_.ap_version(), &prec, &rec, &(APs[label]));
       mAP += APs[label];
-<<<<<<< HEAD
       LOG(INFO) << "AP for label " << label << " " << APs[label];
-=======
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     }
     mAP /= num_pos.size();
     const int output_blob_index = test_net->output_blob_indices()[i];

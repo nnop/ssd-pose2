@@ -51,11 +51,8 @@ const int NPY_DTYPE = NPY_FLOAT32;
 void set_mode_cpu() { Caffe::set_mode(Caffe::CPU); }
 void set_mode_gpu() { Caffe::set_mode(Caffe::GPU); }
 
-<<<<<<< HEAD
-=======
 void set_random_seed(unsigned int seed) { Caffe::set_random_seed(seed); }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 // For convenience, check that input files can be opened, and raise an
 // exception that boost will send to Python if not (caffe could still crash
 // later if the input files are disturbed before they are actually used, but
@@ -91,21 +88,6 @@ void CheckContiguousArray(PyArrayObject* arr, string name,
   }
 }
 
-<<<<<<< HEAD
-// Net constructor for passing phase as int
-shared_ptr<Net<Dtype> > Net_Init(
-    string param_file, int phase) {
-  CheckFile(param_file);
-
-  shared_ptr<Net<Dtype> > net(new Net<Dtype>(param_file,
-      static_cast<Phase>(phase)));
-  return net;
-}
-
-// Net construct-and-load convenience constructor
-shared_ptr<Net<Dtype> > Net_Init_Load(
-    string param_file, string pretrained_param_file, int phase) {
-=======
 // Net constructor
 shared_ptr<Net<Dtype> > Net_Init(string network_file, int phase,
     const int level, const bp::object& stages,
@@ -142,7 +124,6 @@ shared_ptr<Net<Dtype> > Net_Init_Load(
     << " parameter):";
   LOG(WARNING) << "Net('" << param_file << "', " << phase
     << ", weights='" << pretrained_param_file << "')";
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   CheckFile(param_file);
   CheckFile(pretrained_param_file);
 
@@ -158,8 +139,6 @@ void Net_Save(const Net<Dtype>& net, string filename) {
   WriteProtoToBinaryFile(net_param, filename.c_str());
 }
 
-<<<<<<< HEAD
-=======
 void Net_SaveHDF5(const Net<Dtype>& net, string filename) {
   net.ToHDF5(filename);
 }
@@ -168,7 +147,6 @@ void Net_LoadHDF5(Net<Dtype>* net, string filename) {
   net->CopyTrainedLayersFromHDF5(filename.c_str());
 }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 void Net_SetInputArrays(Net<Dtype>* net, bp::object data_obj,
     bp::object labels_obj) {
   // check that this network has an input MemoryDataLayer
@@ -275,8 +253,6 @@ bp::object BlobVec_add_blob(bp::tuple args, bp::dict kwargs) {
   return bp::object();
 }
 
-<<<<<<< HEAD
-=======
 template<typename Dtype>
 class PythonCallback: public Solver<Dtype>::Callback {
  protected:
@@ -298,7 +274,6 @@ void Solver_add_callback(Solver<Dtype> * solver, bp::object on_start,
   solver->add_callback(new PythonCallback<Dtype>(on_start, on_gradients_ready));
 }
 
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SolveOverloads, Solve, 0, 1);
 
 BOOST_PYTHON_MODULE(_caffe) {
@@ -310,34 +285,24 @@ BOOST_PYTHON_MODULE(_caffe) {
   // Caffe utility functions
   bp::def("set_mode_cpu", &set_mode_cpu);
   bp::def("set_mode_gpu", &set_mode_gpu);
-<<<<<<< HEAD
-=======
   bp::def("set_random_seed", &set_random_seed);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   bp::def("set_device", &Caffe::SetDevice);
 
   bp::def("layer_type_list", &LayerRegistry<Dtype>::LayerTypeList);
 
   bp::class_<Net<Dtype>, shared_ptr<Net<Dtype> >, boost::noncopyable >("Net",
     bp::no_init)
-<<<<<<< HEAD
-    .def("__init__", bp::make_constructor(&Net_Init))
-=======
     // Constructor
     .def("__init__", bp::make_constructor(&Net_Init,
           bp::default_call_policies(), (bp::arg("network_file"), "phase",
             bp::arg("level")=0, bp::arg("stages")=bp::object(),
             bp::arg("weights")=bp::object())))
     // Legacy constructor
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     .def("__init__", bp::make_constructor(&Net_Init_Load))
     .def("_forward", &Net<Dtype>::ForwardFromTo)
     .def("_backward", &Net<Dtype>::BackwardFromTo)
     .def("reshape", &Net<Dtype>::Reshape)
-<<<<<<< HEAD
-=======
     .def("clear_param_diffs", &Net<Dtype>::ClearParamDiffs)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     // The cast is to select a particular overload.
     .def("copy_from", static_cast<void (Net<Dtype>::*)(const string)>(
         &Net<Dtype>::CopyTrainedLayersFrom))
@@ -363,13 +328,9 @@ BOOST_PYTHON_MODULE(_caffe) {
         bp::return_value_policy<bp::copy_const_reference>()))
     .def("_set_input_arrays", &Net_SetInputArrays,
         bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >())
-<<<<<<< HEAD
-    .def("save", &Net_Save);
-=======
     .def("save", &Net_Save)
     .def("save_hdf5", &Net_SaveHDF5)
     .def("load_hdf5", &Net_LoadHDF5);
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Net<Dtype>);
 
   bp::class_<Blob<Dtype>, shared_ptr<Blob<Dtype> >, boost::noncopyable>(
@@ -409,10 +370,7 @@ BOOST_PYTHON_MODULE(_caffe) {
     .add_property("test_nets", bp::make_function(&Solver<Dtype>::test_nets,
           bp::return_internal_reference<>()))
     .add_property("iter", &Solver<Dtype>::iter)
-<<<<<<< HEAD
-=======
     .def("add_callback", &Solver_add_callback<Dtype>)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
     .def("solve", static_cast<void (Solver<Dtype>::*)(const char*)>(
           &Solver<Dtype>::Solve), SolveOverloads())
     .def("step", &Solver<Dtype>::Step)

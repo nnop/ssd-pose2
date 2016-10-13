@@ -2,11 +2,7 @@
 set(Caffe_LINKER_LIBS "")
 
 # ---[ Boost
-<<<<<<< HEAD
-find_package(Boost 1.46 REQUIRED COMPONENTS system thread filesystem)
-=======
 find_package(Boost 1.46 REQUIRED COMPONENTS system thread filesystem regex)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 list(APPEND Caffe_LINKER_LIBS ${Boost_LIBRARIES})
 
@@ -30,11 +26,7 @@ include(cmake/ProtoBuf.cmake)
 # ---[ HDF5
 find_package(HDF5 COMPONENTS HL REQUIRED)
 include_directories(SYSTEM ${HDF5_INCLUDE_DIRS} ${HDF5_HL_INCLUDE_DIR})
-<<<<<<< HEAD
-list(APPEND Caffe_LINKER_LIBS ${HDF5_LIBRARIES})
-=======
 list(APPEND Caffe_LINKER_LIBS ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 # ---[ LMDB
 if(USE_LMDB)
@@ -77,11 +69,7 @@ endif()
 
 # ---[ OpenCV
 if(USE_OPENCV)
-<<<<<<< HEAD
-  find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs)
-=======
   find_package(OpenCV QUIET COMPONENTS core highgui imgproc imgcodecs videoio)
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
   if(NOT OpenCV_FOUND) # if not OpenCV 3.x, then imgcodecs are not found
     find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc)
   endif()
@@ -114,15 +102,12 @@ elseif(APPLE)
   find_package(vecLib REQUIRED)
   include_directories(SYSTEM ${vecLib_INCLUDE_DIR})
   list(APPEND Caffe_LINKER_LIBS ${vecLib_LINKER_LIBS})
-<<<<<<< HEAD
-=======
 
   if(VECLIB_FOUND)
     if(NOT vecLib_INCLUDE_DIR MATCHES "^/System/Library/Frameworks/vecLib.framework.*")
       add_definitions(-DUSE_ACCELERATE)
     endif()
   endif()
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 endif()
 
 # ---[ Python

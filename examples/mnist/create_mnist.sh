@@ -1,10 +1,7 @@
 #!/usr/bin/env sh
 # This script converts the mnist data into lmdb/leveldb format,
 # depending on the value assigned to $BACKEND.
-<<<<<<< HEAD
-=======
 set -e
->>>>>>> 38a20293b36d973eb72e4d1d4737d43aa8a9e0be
 
 EXAMPLE=examples/mnist
 DATA=data/mnist
