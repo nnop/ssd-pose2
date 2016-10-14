@@ -23,6 +23,7 @@ class Options:
 		'base_lr':0.00004,\
 		'size':300,\
 		'scene':-1,\
+		'ang_norm': True,\
 		'resume':True\
 		}
 
@@ -66,7 +67,7 @@ class Options:
 		return out
 
 	def get_objnet_db_stem(self, split):
-		out = '%s_bins=%d' % (split, self.get_opts('num_bins'))
+		out = '%s_bins=%d_angNorm=%r' % (split, self.get_opts('num_bins'), self.get_opts('ang_norm'))
 		return out
 
 
