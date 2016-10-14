@@ -79,7 +79,7 @@ class MakeAnns:
             output = getImPath(ann) + ' ' + annLoc + '\n'
 
 
-            binAngles(ann, bins, ang_norm)
+            #binAngles(ann, bins, ang_norm)
 
             json.dump(ann, open(annLoc, 'w'))
 
@@ -152,7 +152,8 @@ def getAnnPath(ann, train_dir, val_dir, tes_dir):
 
 
 def binAngles(ann, bins, ang_norm):
-    
+    pass
+
 
 
 def binAngles(data):
