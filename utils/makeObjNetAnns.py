@@ -67,6 +67,8 @@ class MakeAnns:
             test = True
 
         bins = self.opt.get_opts('num_bins')
+        ang_norm = self.opt.get_opts('ang_norm')
+
         if bins != 36:
             print 'currently only support 36 bins :('
             sys.exit()
@@ -77,7 +79,7 @@ class MakeAnns:
             output = getImPath(ann) + ' ' + annLoc + '\n'
 
 
-            #binAngles(ann, bins, rot)
+            binAngles(ann, bins, ang_norm)
 
             json.dump(ann, open(annLoc, 'w'))
 
@@ -147,6 +149,10 @@ def getAnnPath(ann, train_dir, val_dir, tes_dir):
         path = osp.join('data/ObjectNet3D/cache', tes_dir)
 
     return path
+
+
+def binAngles(ann, bins, ang_norm):
+    
 
 
 def binAngles(data):
