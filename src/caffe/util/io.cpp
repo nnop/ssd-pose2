@@ -425,8 +425,8 @@ bool ReadJSONToAnnotatedDatum(const string& labelfile, const int img_height,
     CHECK_EQ(bbox_items.size(), 4);
     float xmin = bbox_items[0];
     float ymin = bbox_items[1];
-    float xmax = bbox_items[0] + bbox_items[2];
-    float ymax = bbox_items[1] + bbox_items[3];
+    float xmax = bbox_items[0] + bbox_items[2] - 1;
+    float ymax = bbox_items[1] + bbox_items[3] - 1;
     CHECK_NOTNULL(anno);
     LOG_IF(WARNING, xmin > width) << labelfile <<
         " bounding box exceeds image boundary.";
